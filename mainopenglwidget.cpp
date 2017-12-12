@@ -17,8 +17,6 @@ MainOpenglWidget::~MainOpenglWidget()
     ef->glDeleteVertexArrays(1, &VAO);
     f->glDeleteBuffers(1, &VBO);
     f->glDeleteBuffers(1, &EBO);
-
-    ShaderProgram.release();
 }
 
 void MainOpenglWidget::initializeGL()
@@ -39,7 +37,7 @@ void MainOpenglWidget::initializeGL()
     #ifdef QT_NO_DEBUG
         success = vertexShader->compileSourceFile("defaultvertexshader.vert");
     #else
-        success = vertexShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/MaricaProjectCarGen2/MaricaProjectCarGen2/defaultvertexshader.vert");
+        success = vertexShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/ProjectMaricaCarGenerator/ProjectMaricaCarGenerator/defaultvertexshader.vert");
     #endif
 
     if(!success)
@@ -52,7 +50,7 @@ void MainOpenglWidget::initializeGL()
     #ifdef QT_NO_DEBUG
         success = fragmentShader->compileSourceFile("defaultfragmentshader.frag");
     #else
-        success = fragmentShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/MaricaProjectCarGen2/MaricaProjectCarGen2/defaultfragmentshader.frag");
+        success = fragmentShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/ProjectMaricaCarGenerator/ProjectMaricaCarGenerator/defaultfragmentshader.frag");
     #endif
 
     if(!success)
@@ -70,59 +68,7 @@ void MainOpenglWidget::initializeGL()
 
     ShaderProgram->bind();
 
-
-    QMatrix4x4 transMat(1, 0, 0, 0,
-                         0, 1, 0, 0,
-                         0, 0, 1, 0,
-                         0, 0, 0, 1);
-    //QQuaternion rotation = QQuaternion::fromAxisAndAngle(0, 0, 1, 5);
-
-    //transMat.rotate(rotation);
-
-
-
-    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("qt_ModelViewProjectionMatrix"), transMat);
-/*
-    GLfloat vertices[] = {
-         0.5f,  0.5f, 0.0f,  // Top Right
-         0.5f, -0.5f, 0.0f,  // Bottom Right
-        -0.5f, -0.5f, 0.0f,  // Bottom Left
-        -0.5f,  0.5f, 0.0f  // Top Left
-    };
-
-    GLuint indices[] = {  // Note that we start from 0!
-        0, 1, 3,  // First Triangle
-        1, 2, 3   // Second Triangle
-    };
-
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
-
-    ef->glGenVertexArrays(1, &VAO);
-    f->glGenBuffers(1, &VBO);
-    f->glGenBuffers(1, &EBO);
-    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
-    ef->glBindVertexArray(VAO);
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    f->glEnableVertexAttribArray(0);
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
-
-    ef->glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
-*/
-
     scene = Scene();
-
-    vertexShader.release();
-    fragmentShader.release();
-
-    //setMouseTracking(true);
 }
 
 void MainOpenglWidget::paintGL()
@@ -131,40 +77,28 @@ void MainOpenglWidget::paintGL()
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
-    //ShaderProgram->bind();
-    /*
-    QMatrix4x4 transMat(1, 0, 0, 0,
-                         0, 1, 0, 0,
-                         0, 0, 1, 0,
-                         0, 0, 0, 1);
-
-    rotation = QQuaternion::fromAxisAndAngle(0, 0, 1, 5) * rotation;
-
-    transMat.rotate(rotation);
-
-    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("qt_ModelViewProjectionMatrix"), transMat);
-    */
 
     QMatrix4x4 transMat(1, 0, 0, 0,
                          0, 1, 0, 0,
                          0, 0, 1, 0,
                          0, 0, 0, 1);
 
-   // QMatrix4x4 transMat;
-    transMat.translate(scene.getCameraLocation());
 
+    QMatrix4x4 view;
+    QMatrix4x4 model;
+    QVector3D z = scene.getCameraLocation();
+    z.setY(0);
+    z.setX(0);
+    view.translate(z);
     QQuaternion rotation = QQuaternion::fromEulerAngles(scene.getCameraRotation());
+    view.rotate(rotation);
+    QVector3D xy = scene.getCameraLocation();
+    xy.setZ(0);
+    view.translate(xy);
 
-    transMat.rotate(rotation);
-
-    transMat.scale(scene.getCameraScale());
-
-    //qDebug() << transMat;
-
-    //transMat.perspective(360.0, 800.0 / 600.0, 1.0, 100.0);
-    //transMat.viewport(100.0, 100.0, 100.0, 100.0);
-
-    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("qt_ModelViewProjectionMatrix"), transMat);
+    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
+    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("view"), view);
+    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("projection"), projection);
 
     f->glUseProgram(ShaderProgram->programId());
 
@@ -172,8 +106,6 @@ void MainOpenglWidget::paintGL()
     {
         ef->glBindVertexArray(scene.getBodyModel()->VAO);
         f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        //qDebug() << "draw";
     }
 
     ef->glBindVertexArray(0);
@@ -181,8 +113,19 @@ void MainOpenglWidget::paintGL()
     update();
 }
 
-void MainOpenglWidget::resizeGL(int width, int height)
+void MainOpenglWidget::resizeGL(int w, int h)
 {
+    // Calculate aspect ratio
+    qreal aspect = qreal(w) / qreal(h ? h : 1);
+
+    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
+    const qreal zNear = 1.0, zFar = 100.0, fov = 45.0;
+
+    // Reset projection
+    projection.setToIdentity();
+
+    // Set perspective projection
+    projection.perspective(fov, aspect, zNear, zFar);
 }
 
 
@@ -194,10 +137,8 @@ void MainOpenglWidget::setBodyModel(std::unique_ptr<Model> model)
 void MainOpenglWidget::wheelEvent(QWheelEvent *event)
 {
     QVector3D now_camera_location = scene.getCameraLocation();
-    scene.setCameraScale(std::max(scene.getCameraScale()+event->delta()/1000.0, 0.1));
-    //now_camera_location.setX(now_camera_location.x() + event->delta()/1000.0);
-    //qDebug() << now_camera_location;
-    //scene.setCameraLocation(now_camera_location);
+    now_camera_location.setZ(now_camera_location.z() + event->delta()/1000.0);
+    scene.setCameraLocation(now_camera_location);
 }
 
 void MainOpenglWidget::mousePressEvent(QMouseEvent *event)

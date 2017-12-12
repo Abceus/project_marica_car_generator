@@ -118,14 +118,7 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
 
     ef->glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
 
-/*
-    vertices.relese();
-    indices.relese();
-    PointsData.relese();
-    WedgesData.relese();
-    FacesData.relese();
-    MaterialsData.relese();
-*/
+
     file.close();
 }
 

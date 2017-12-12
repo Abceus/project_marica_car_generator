@@ -13,6 +13,7 @@
 #include <QOpenGLShader>
 #include <QString>
 #include <QWheelEvent>
+#include <QMatrix4x4>
 
 #include <vector>
 #include <memory>
@@ -46,6 +47,8 @@ private:
 
     QPoint rightClickPos;
     bool rightPressed;
+
+    QMatrix4x4 projection;
 
 protected:
     void initializeGL();
