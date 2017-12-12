@@ -1,14 +1,28 @@
 #include "scene.h"
 
-void Scene::setBodyModel(std::unique_ptr<Model> model)
+Scene::Scene()
 {
-    body = std::move(model);
+
+}
+
+Scene::~Scene()
+{
+    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    ef->glDeleteVertexArrays(1, &(this->body->getModel()->VAO));
+    f->glDeleteBuffers(1, &(this->body->getModel()->VBO));
+    f->glDeleteBuffers(1, &(this->body->getModel()->EBO));
+}
+
+void Scene::setBodyObject(Object *body)
+{
+    this->body = std::unique_ptr<Object>(body);
     camera_location = QVector3D(0,0,0);
     camera_rotation = QVector3D(0,0,0);
     camera_scale = 1;
 }
 
-Model* Scene::getBodyModel()
+Object* Scene::getBodyObject()
 {
     return body.get();
 }

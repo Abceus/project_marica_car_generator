@@ -32,13 +32,15 @@ SOURCES += main.cpp\
     mainopenglwidget.cpp \
     model.cpp \
     scene.cpp \
-    unanimation.cpp
+    unanimation.cpp \
+    object.cpp
 
 HEADERS  += mainwindow.h \
     mainopenglwidget.h \
     scene.h \
     model.h \
-    unanimation.h
+    unanimation.h \
+    object.h
 
 FORMS    += mainwindow.ui
 

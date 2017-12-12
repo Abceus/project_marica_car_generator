@@ -20,6 +20,7 @@
 
 #include "model.h"
 #include "scene.h"
+#include "object.h"
 
 class MainOpenglWidget :public QOpenGLWidget
 {
@@ -37,11 +38,11 @@ public:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
 
-    void setBodyModel(std::unique_ptr<Model> model);
+    void setBodyObject(Object *object);
     std::unique_ptr<Model> getModel(QString filename);
 
 private:
-    Scene scene;
+    std::unique_ptr<Scene> scene;
     QPoint leftClickPos;
     bool leftPressed;
 

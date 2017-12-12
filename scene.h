@@ -1,15 +1,18 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "model.h"
-
 #include <memory>
+
+#include "model.h"
+#include "object.h"
 
 class Scene
 {
 public:
-    void setBodyModel(std::unique_ptr<Model> model);
-    Model* getBodyModel();
+    Scene();
+    ~Scene();
+    void setBodyObject(Object *object);
+    Object* getBodyObject();
     QVector3D getCameraLocation();
     void setCameraLocation(QVector3D value);
 
@@ -23,10 +26,10 @@ private:
     QVector3D camera_location;
     QVector3D camera_rotation;
     float camera_scale;
-    Model wheels;
-    std::unique_ptr<Model> body;
+    std::unique_ptr<Object> wheels;
+    std::unique_ptr<Object> body;
     //Model body;
-    Model car;
+    //Object car;
 };
 
 #endif // SCENE_H

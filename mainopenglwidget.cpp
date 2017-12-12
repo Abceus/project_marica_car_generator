@@ -12,11 +12,6 @@ MainOpenglWidget::MainOpenglWidget(QWidget *parent)
 
 MainOpenglWidget::~MainOpenglWidget()
 {
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    ef->glDeleteVertexArrays(1, &VAO);
-    f->glDeleteBuffers(1, &VBO);
-    f->glDeleteBuffers(1, &EBO);
 }
 
 void MainOpenglWidget::initializeGL()
@@ -42,7 +37,7 @@ void MainOpenglWidget::initializeGL()
 
     if(!success)
     {
-        qDebug() << "Вершинный шейдер не скомпилировался";
+        qDebug() << "The vertex shader wasn't compiled";
     }
 
     std::unique_ptr<QOpenGLShader> fragmentShader (new QOpenGLShader(QOpenGLShader::Fragment));
@@ -51,11 +46,11 @@ void MainOpenglWidget::initializeGL()
         success = fragmentShader->compileSourceFile("./defaultfragmentshader.frag");
     #else
         success = fragmentShader->compileSourceFile("./../ProjectMaricaCarGenerator/defaultfragmentshader.frag");
-#endif
+    #endif
 
     if(!success)
     {
-        qDebug() << "Фрагментный шейдер не скомпилировался";
+        qDebug() << "The fragment shader wasn't compiled";
     }
 
     ShaderProgram = std::unique_ptr<QOpenGLShaderProgram>(new QOpenGLShaderProgram());
@@ -63,12 +58,12 @@ void MainOpenglWidget::initializeGL()
     ShaderProgram->addShader(fragmentShader.get());
     if(!ShaderProgram->link())
     {
-        qDebug() << "Программа не линканулась";
+        qDebug() << "The shader program wasn't linked";
     }
 
     ShaderProgram->bind();
 
-    scene = Scene();
+    scene = std::unique_ptr<Scene>(new Scene());
 }
 
 void MainOpenglWidget::paintGL()
@@ -77,34 +72,23 @@ void MainOpenglWidget::paintGL()
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
-
-    QMatrix4x4 transMat(1, 0, 0, 0,
-                         0, 1, 0, 0,
-                         0, 0, 1, 0,
-                         0, 0, 0, 1);
-
+    f->glUseProgram(ShaderProgram->programId());
 
     QMatrix4x4 view;
-    QMatrix4x4 model;
-    QVector3D z = scene.getCameraLocation();
-    z.setY(0);
-    z.setX(0);
-    view.translate(z);
-    QQuaternion rotation = QQuaternion::fromEulerAngles(scene.getCameraRotation());
+    QQuaternion rotation = QQuaternion::fromEulerAngles(scene->getCameraRotation());
     view.rotate(rotation);
-    QVector3D xy = scene.getCameraLocation();
-    xy.setZ(0);
-    view.translate(xy);
+    view.translate(scene->getCameraLocation());
 
-    ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
     ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("view"), view);
     ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("projection"), projection);
 
-    f->glUseProgram(ShaderProgram->programId());
-
-    if(scene.getBodyModel() != nullptr)
+    if(scene->getBodyObject() != nullptr)
     {
-        ef->glBindVertexArray(scene.getBodyModel()->VAO);
+        Object *object = scene->getBodyObject();
+        QMatrix4x4 model;
+        model.translate(object->getX(), object->getY(), object->getZ());
+        ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
+        ef->glBindVertexArray(scene->getBodyObject()->getModel()->VAO);
         f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
@@ -118,8 +102,7 @@ void MainOpenglWidget::resizeGL(int w, int h)
     // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 100.0, fov = 45.0;
+    const qreal zNear = 1.0, zFar = 100.0, fov = 90.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -129,16 +112,16 @@ void MainOpenglWidget::resizeGL(int w, int h)
 }
 
 
-void MainOpenglWidget::setBodyModel(std::unique_ptr<Model> model)
+void MainOpenglWidget::setBodyObject(Object *object)
 {
-    scene.setBodyModel(std::move(model));
+    scene->setBodyObject(object);
 }
 
 void MainOpenglWidget::wheelEvent(QWheelEvent *event)
 {
-    QVector3D now_camera_location = scene.getCameraLocation();
+    QVector3D now_camera_location = scene->getCameraLocation();
     now_camera_location.setZ(now_camera_location.z() + event->delta()/1000.0);
-    scene.setCameraLocation(now_camera_location);
+    scene->setCameraLocation(now_camera_location);
 }
 
 void MainOpenglWidget::mousePressEvent(QMouseEvent *event)
@@ -171,19 +154,19 @@ void MainOpenglWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if(leftPressed)
     {
-        QVector3D camera_rotation_now = scene.getCameraRotation();
+        QVector3D camera_rotation_now = scene->getCameraRotation();
         camera_rotation_now.setY(camera_rotation_now.y() + (leftClickPos.x() - event->x()));
         camera_rotation_now.setX(camera_rotation_now.x() + (leftClickPos.y() - event->y()));
         leftClickPos = event->pos();
-        scene.setCameraRotation(camera_rotation_now);
+        scene->setCameraRotation(camera_rotation_now);
     }
     else if(rightPressed)
     {
-        QVector3D camera_location_now = scene.getCameraLocation();
+        QVector3D camera_location_now = scene->getCameraLocation();
         camera_location_now.setY(camera_location_now.y() + (rightClickPos.y() - event->y())/100.0);
         camera_location_now.setX(camera_location_now.x() - (rightClickPos.x() - event->x())/100.0);
         rightClickPos = event->pos();
-        scene.setCameraLocation(camera_location_now);
+        scene->setCameraLocation(camera_location_now);
     }
 }
 
