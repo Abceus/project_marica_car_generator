@@ -35,9 +35,9 @@ void MainOpenglWidget::initializeGL()
     bool success = false;
 
     #ifdef QT_NO_DEBUG
-        success = vertexShader->compileSourceFile("defaultvertexshader.vert");
+        success = vertexShader->compileSourceFile("./defaultvertexshader.vert");
     #else
-        success = vertexShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/ProjectMaricaCarGenerator/ProjectMaricaCarGenerator/defaultvertexshader.vert");
+        success = vertexShader->compileSourceFile("./../ProjectMaricaCarGenerator/defaultvertexshader.vert");
     #endif
 
     if(!success)
@@ -48,10 +48,10 @@ void MainOpenglWidget::initializeGL()
     std::unique_ptr<QOpenGLShader> fragmentShader (new QOpenGLShader(QOpenGLShader::Fragment));
 
     #ifdef QT_NO_DEBUG
-        success = fragmentShader->compileSourceFile("defaultfragmentshader.frag");
+        success = fragmentShader->compileSourceFile("./defaultfragmentshader.frag");
     #else
-        success = fragmentShader->compileSourceFile("C:/Users/Admin/Documents/ProgProjects/ProjectMaricaCarGenerator/ProjectMaricaCarGenerator/defaultfragmentshader.frag");
-    #endif
+        success = fragmentShader->compileSourceFile("./../ProjectMaricaCarGenerator/defaultfragmentshader.frag");
+#endif
 
     if(!success)
     {
