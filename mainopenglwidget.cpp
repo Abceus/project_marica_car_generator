@@ -88,6 +88,10 @@ void MainOpenglWidget::paintGL()
         QMatrix4x4 model;
         model.translate(object->getX(), object->getY(), object->getZ());
         ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
+
+        object->getModel()->getTexture()->bind();
+        ShaderProgram->setUniformValue("texture", 0);
+
         ef->glBindVertexArray(scene->getBodyObject()->getModel()->VAO);
         f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
@@ -102,7 +106,7 @@ void MainOpenglWidget::resizeGL(int w, int h)
     // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-    const qreal zNear = 1.0, zFar = 100.0, fov = 90.0;
+    const qreal zNear = 1.0, zFar = 10000.0, fov = 90.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -115,6 +119,16 @@ void MainOpenglWidget::resizeGL(int w, int h)
 void MainOpenglWidget::setBodyObject(Object *object)
 {
     scene->setBodyObject(object);
+}
+
+Object* MainOpenglWidget::getBodyObject()
+{
+    return scene->getBodyObject();
+}
+
+void MainOpenglWidget::setBodyTexture(QString filename)
+{
+    scene->getBodyObject()->getModel()->setTexture(filename);
 }
 
 void MainOpenglWidget::wheelEvent(QWheelEvent *event)

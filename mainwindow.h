@@ -18,6 +18,8 @@ public:
 private slots:
     void on_meshOpenButton_clicked();
 
+    void on_skinOpenButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

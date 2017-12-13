@@ -33,3 +33,19 @@ void MainWindow::on_meshOpenButton_clicked()
         ui->meshOpenButton->setText(fileName);
     }
 }
+
+void MainWindow::on_skinOpenButton_clicked()
+{
+    if(ui->mainOpenGLWidget->getBodyObject() != nullptr)
+    {
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                        QDir::currentPath(),
+                                                        tr("Image (*.png *.xpm *.jpg *.tga)"));
+
+        if(fileName != "")
+        {
+            ui->mainOpenGLWidget->setBodyTexture(fileName);
+            ui->skinOpenButton->setText(fileName);
+        }
+    }
+}
