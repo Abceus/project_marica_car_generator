@@ -26,12 +26,14 @@ public:
     GLuint VBO, VAO, EBO;
     QOpenGLTexture* getTexture();
     void setTexture(QString filename);
+    int getVAOsize();
 private:
     //GLuint VBO, VAO, EBO;
     //QVector<QOpenGLTexture> textures;
     QVector4D location;
     QQuaternion rotation;
     std::unique_ptr<QOpenGLTexture> texture;
+    int VAOsize;
 };
 
 #endif // MODEL_H

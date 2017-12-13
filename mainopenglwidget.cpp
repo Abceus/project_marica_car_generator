@@ -23,7 +23,7 @@ void MainOpenglWidget::initializeGL()
     f->glEnable(GL_DEPTH_TEST);
 
     // Enable back face culling
-    //f->glEnable(GL_CULL_FACE);
+    f->glEnable(GL_CULL_FACE);
 
     std::unique_ptr<QOpenGLShader> vertexShader(new QOpenGLShader(QOpenGLShader::Vertex));
 
@@ -93,7 +93,7 @@ void MainOpenglWidget::paintGL()
         ShaderProgram->setUniformValue("texture", 0);
 
         ef->glBindVertexArray(scene->getBodyObject()->getModel()->VAO);
-        f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
     }
 
     ef->glBindVertexArray(0);

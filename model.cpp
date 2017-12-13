@@ -81,11 +81,11 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
 
     for(int i=0; i<WedgesHeader.DataCount; i++)
     {
-        vertices[i*3] = PointsData[WedgesData[i].PointIndex].X;
-        vertices[i*3+1] = PointsData[WedgesData[i].PointIndex].Y;
-        vertices[i*3+2] = PointsData[WedgesData[i].PointIndex].Z;
-        vertices[i*3+3] = WedgesData[i].U;
-        vertices[i*3+4] = WedgesData[i].V;
+        vertices[i*5] = PointsData[WedgesData[i].PointIndex].X;
+        vertices[i*5+1] = PointsData[WedgesData[i].PointIndex].Y;
+        vertices[i*5+2] = PointsData[WedgesData[i].PointIndex].Z;
+        vertices[i*5+3] = WedgesData[i].U;
+        vertices[i*5+4] = WedgesData[i].V;
     }
 
     std::unique_ptr<GLuint[]> indices(new GLuint[FacesHeader.DataCount*3]);
@@ -102,16 +102,13 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     ef->glGenVertexArrays(1, &VAO);
     f->glGenBuffers(1, &VBO);
     f->glGenBuffers(1, &EBO);
-    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
     ef->glBindVertexArray(VAO);
 
     f->glBindBuffer(GL_ARRAY_BUFFER, VBO);
     f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices.get())*WedgesHeader.DataCount*5, vertices.get(), GL_STATIC_DRAW);
-    //f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices.get())*FacesHeader.DataCount*3, indices.get(), GL_STATIC_DRAW);
-    //f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
     f->glEnableVertexAttribArray(0);
@@ -126,11 +123,17 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     file.close();
 
     this->setTexture(MaterialsData[0].MaterialName);
+    this->VAOsize = WedgesHeader.DataCount;
 }
 
 GLuint Model::getVAO()
 {
     return VAO;
+}
+
+int Model::getVAOsize()
+{
+    return this->VAOsize;
 }
 
 QOpenGLTexture* Model::getTexture()
