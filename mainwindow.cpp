@@ -24,12 +24,16 @@ void MainWindow::on_meshOpenButton_clicked()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                     QDir::currentPath(),
                                                     tr("PSK (*.psk)"));
-    //Model test(fileName);
+
     if(fileName != "")
     {
         std::unique_ptr<Model> test = ui->mainOpenGLWidget->getModel(fileName);
         ui->mainOpenGLWidget->setBodyObject(new Object(std::move(test), 0, 0, 0));
-        //ui->mainOpenGLWidget->setBodyModel(std::move(test));
+
+        if(fileName.size() > 50)
+        {
+            fileName = "..." + fileName.right(47);
+        }
         ui->meshOpenButton->setText(fileName);
     }
 }
@@ -40,7 +44,7 @@ void MainWindow::on_skinOpenButton_clicked()
     {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                         QDir::currentPath(),
-                                                        tr("Image (*.png *.xpm *.jpg *.tga)"));
+                                                        tr("Image (*.png *.xpm *.jpg)"));
 
         if(fileName != "")
         {

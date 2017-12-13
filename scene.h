@@ -12,7 +12,7 @@ public:
     Scene();
     ~Scene();
     void setBodyObject(Object *object);
-    Object* getBodyObject();
+    Object* getBodyObject() const;
     QVector3D getCameraLocation();
     void setCameraLocation(QVector3D value);
 

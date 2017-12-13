@@ -23,7 +23,7 @@ void MainOpenglWidget::initializeGL()
     f->glEnable(GL_DEPTH_TEST);
 
     // Enable back face culling
-    f->glEnable(GL_CULL_FACE);
+    //f->glEnable(GL_CULL_FACE);
 
     std::unique_ptr<QOpenGLShader> vertexShader(new QOpenGLShader(QOpenGLShader::Vertex));
 
@@ -72,12 +72,12 @@ void MainOpenglWidget::paintGL()
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
-    f->glUseProgram(ShaderProgram->programId());
+    ShaderProgram->bind();
 
     QMatrix4x4 view;
     QQuaternion rotation = QQuaternion::fromEulerAngles(scene->getCameraRotation());
-    view.rotate(rotation);
     view.translate(scene->getCameraLocation());
+    view.rotate(rotation);
 
     ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("view"), view);
     ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("projection"), projection);
@@ -92,11 +92,10 @@ void MainOpenglWidget::paintGL()
         object->getModel()->getTexture()->bind();
         ShaderProgram->setUniformValue("texture", 0);
 
-        ef->glBindVertexArray(scene->getBodyObject()->getModel()->VAO);
+        scene->getBodyObject()->getModel()->getVAO()->bind();
         f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+        scene->getBodyObject()->getModel()->getVAO()->release();
     }
-
-    ef->glBindVertexArray(0);
 
     update();
 }
@@ -121,7 +120,7 @@ void MainOpenglWidget::setBodyObject(Object *object)
     scene->setBodyObject(object);
 }
 
-Object* MainOpenglWidget::getBodyObject()
+Object* MainOpenglWidget::getBodyObject() const
 {
     return scene->getBodyObject();
 }

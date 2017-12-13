@@ -11,6 +11,8 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 #include <GL/glu.h>
 #include <GL/gl.h>
@@ -22,14 +24,19 @@ class Model
 public:
     Model(){}
     Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef);
-    GLuint getVAO();
-    GLuint VBO, VAO, EBO;
-    QOpenGLTexture* getTexture();
+    QOpenGLVertexArrayObject* getVAO() const;
+    QOpenGLBuffer* getVBO() const;
+    QOpenGLBuffer* getEBO() const;
+    /*
+    std::unique_ptr<QOpenGLVertexArrayObject> VAO;
+    std::unique_ptr<QOpenGLBuffer> VBO, EBO;
+*/
+    QOpenGLTexture* getTexture() const;
     void setTexture(QString filename);
     int getVAOsize();
 private:
-    //GLuint VBO, VAO, EBO;
-    //QVector<QOpenGLTexture> textures;
+    std::unique_ptr<QOpenGLVertexArrayObject> VAO;
+    std::unique_ptr<QOpenGLBuffer> VBO, EBO;
     QVector4D location;
     QQuaternion rotation;
     std::unique_ptr<QOpenGLTexture> texture;

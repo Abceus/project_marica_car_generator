@@ -13,7 +13,7 @@ private:
 public:
     Object(std::unique_ptr<Model> model, float x, float y, float z);
     ~Object();
-    Model* getModel();
+    Model* getModel() const;
     float getX();
     float getY();
     float getZ();

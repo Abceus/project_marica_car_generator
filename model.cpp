@@ -98,26 +98,30 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
         }
     }
 
+    this->VAO = std::unique_ptr<QOpenGLVertexArrayObject>(new QOpenGLVertexArrayObject());
+    this->VAO->create();
+    this->VBO = std::unique_ptr<QOpenGLBuffer>(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer));
+    this->VBO->create();
+    this->VBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    this->EBO = std::unique_ptr<QOpenGLBuffer>(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer));
+    this->EBO->create();
+    this->EBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
-    ef->glGenVertexArrays(1, &VAO);
-    f->glGenBuffers(1, &VBO);
-    f->glGenBuffers(1, &EBO);
-    ef->glBindVertexArray(VAO);
+    this->VAO->bind();
 
-    f->glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices.get())*WedgesHeader.DataCount*5, vertices.get(), GL_STATIC_DRAW);
+    this->VBO->bind();
+    this->VBO->allocate(vertices.get(), sizeof(vertices.get())*WedgesHeader.DataCount*5);
 
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices.get())*FacesHeader.DataCount*3, indices.get(), GL_STATIC_DRAW);
+    this->EBO->bind();
+    this->EBO->allocate(indices.get(), sizeof(indices.get())*FacesHeader.DataCount*3);
 
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     f->glEnableVertexAttribArray(1);
 
-    f->glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
+    this->VAO->release();
 
-    ef->glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
 
 
     file.close();
@@ -125,10 +129,26 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     this->setTexture(MaterialsData[0].MaterialName);
     this->VAOsize = WedgesHeader.DataCount;
 }
-
+/*
 GLuint Model::getVAO()
 {
     return VAO;
+}
+*/
+
+QOpenGLVertexArrayObject* Model::getVAO() const
+{
+    return VAO.get();
+}
+
+QOpenGLBuffer* Model::getVBO() const
+{
+    return VBO.get();
+}
+
+QOpenGLBuffer* Model::getEBO() const
+{
+    return EBO.get();
 }
 
 int Model::getVAOsize()
@@ -136,7 +156,7 @@ int Model::getVAOsize()
     return this->VAOsize;
 }
 
-QOpenGLTexture* Model::getTexture()
+QOpenGLTexture* Model::getTexture() const
 {
     return this->texture.get();
 }

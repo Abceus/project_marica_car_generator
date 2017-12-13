@@ -10,7 +10,7 @@ Object::~Object()
 
 }
 
-Model* Object::getModel()
+Model* Object::getModel() const
 {
     return this->model.get();
 }

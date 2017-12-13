@@ -9,9 +9,9 @@ Scene::~Scene()
 {
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    ef->glDeleteVertexArrays(1, &(this->body->getModel()->VAO));
-    f->glDeleteBuffers(1, &(this->body->getModel()->VBO));
-    f->glDeleteBuffers(1, &(this->body->getModel()->EBO));
+    this->body->getModel()->getVAO()->destroy();
+    this->body->getModel()->getVBO()->destroy();
+    this->body->getModel()->getEBO()->destroy();
 }
 
 void Scene::setBodyObject(Object *body)
@@ -22,7 +22,7 @@ void Scene::setBodyObject(Object *body)
     camera_scale = 1;
 }
 
-Object* Scene::getBodyObject()
+Object* Scene::getBodyObject() const
 {
     return body.get();
 }

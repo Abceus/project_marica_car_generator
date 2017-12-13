@@ -40,7 +40,7 @@ public:
 
     void setBodyObject(Object *object);
     std::unique_ptr<Model> getModel(QString filename);
-    Object* getBodyObject();
+    Object* getBodyObject() const;
     void setBodyTexture(QString filename);
 
 private:
