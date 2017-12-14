@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>ProjectMarica Car Generator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="enabled">
@@ -23,12 +23,9 @@
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
-      </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="3,1">
       <item>
        <widget class="MainOpenglWidget" name="mainOpenGLWidget" native="true">
         <property name="sizePolicy">
@@ -37,13 +34,36 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <zorder>scrollArea</zorder>
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="widget" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>204</width>
+           <height>832</height>
+          </rect>
+         </property>
+         <widget class="QWidget" name="">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>411</width>
+            <height>831</height>
+           </rect>
+          </property>
           <layout class="QFormLayout" name="formLayout">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetFixedSize</enum>
+           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
@@ -53,6 +73,12 @@
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="meshOpenButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>None</string>
              </property>
@@ -148,37 +174,10 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>bCarIsFTWD</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QCheckBox" name="checkBox">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-             <property name="tristate">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
            <item row="8" column="0">
             <widget class="QLabel" name="label_9">
              <property name="text">
               <string>ChassisMass</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-             <property name="value">
-              <double>5.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -223,13 +222,6 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
-             <property name="value">
-              <double>3.000000000000000</double>
-             </property>
-            </widget>
-           </item>
            <item row="12" column="0">
             <widget class="QLabel" name="label_13">
              <property name="text">
@@ -248,20 +240,6 @@
             <widget class="QLabel" name="label_14">
              <property name="text">
               <string>MaxBrakeTorque</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
-             <property name="value">
-              <double>45.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="0">
-            <widget class="QLabel" name="label_15">
-             <property name="text">
-              <string>WheelRadius</string>
              </property>
             </widget>
            </item>
@@ -334,13 +312,6 @@
            <item row="19" column="1">
             <widget class="QComboBox" name="comboBox"/>
            </item>
-           <item row="20" column="0">
-            <widget class="QLabel" name="label_22">
-             <property name="text">
-              <string>ExitPosPassenger</string>
-             </property>
-            </widget>
-           </item>
            <item row="20" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
@@ -364,13 +335,6 @@
               </widget>
              </item>
             </layout>
-           </item>
-           <item row="21" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="text">
-              <string>ExitPos</string>
-             </property>
-            </widget>
            </item>
            <item row="21" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -540,13 +504,6 @@
              </property>
             </widget>
            </item>
-           <item row="26" column="1">
-            <widget class="QPushButton" name="skinOpenButton">
-             <property name="text">
-              <string>None</string>
-             </property>
-            </widget>
-           </item>
            <item row="27" column="1">
             <widget class="QPushButton" name="pushButton_3">
              <property name="text">
@@ -554,9 +511,165 @@
              </property>
             </widget>
            </item>
+           <item row="7" column="1">
+            <widget class="QCheckBox" name="checkBox">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="tristate">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_12">
+             <property name="value">
+              <double>45.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
+             <property name="value">
+              <double>3.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>bCarIsFTWD</string>
+             </property>
+            </widget>
+           </item>
+           <item row="21" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>ExitPos</string>
+             </property>
+            </widget>
+           </item>
+           <item row="20" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>ExitPosPassenger</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+             <property name="value">
+              <double>5.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0">
+            <widget class="QLabel" name="label_15">
+             <property name="text">
+              <string>WheelRadius</string>
+             </property>
+            </widget>
+           </item>
+           <item row="26" column="1">
+            <widget class="QWidget" name="widget" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
+              <property name="spacing">
+               <number>50</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="skinButtonArrayLayout" stretch="0">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetDefaultConstraint</enum>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="emptySkinOpenButton">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>None</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
           </layout>
-         </item>
-        </layout>
+         </widget>
+         <zorder></zorder>
+         <zorder>label_15</zorder>
+         <zorder>doubleSpinBox_7</zorder>
+         <zorder>label_22</zorder>
+         <zorder>label_21</zorder>
+         <zorder>label_8</zorder>
+         <zorder>doubleSpinBox_10</zorder>
+         <zorder>doubleSpinBox_12</zorder>
+         <zorder>checkBox</zorder>
+         <zorder>label_2</zorder>
+         <zorder>doubleSpinBox_16</zorder>
+         <zorder>label_7</zorder>
+         <zorder>comboBox</zorder>
+         <zorder>label_24</zorder>
+         <zorder>doubleSpinBox_3</zorder>
+         <zorder></zorder>
+         <zorder>pushButton_3</zorder>
+         <zorder>label_3</zorder>
+         <zorder>label_26</zorder>
+         <zorder>label_11</zorder>
+         <zorder>label_6</zorder>
+         <zorder></zorder>
+         <zorder></zorder>
+         <zorder>doubleSpinBox_15</zorder>
+         <zorder>doubleSpinBox_9</zorder>
+         <zorder>label_14</zorder>
+         <zorder>label_16</zorder>
+         <zorder>doubleSpinBox_2</zorder>
+         <zorder>label_20</zorder>
+         <zorder>label_9</zorder>
+         <zorder>doubleSpinBox_14</zorder>
+         <zorder>doubleSpinBox_17</zorder>
+         <zorder>label_10</zorder>
+         <zorder>doubleSpinBox_6</zorder>
+         <zorder>label_23</zorder>
+         <zorder>label_19</zorder>
+         <zorder>meshOpenButton</zorder>
+         <zorder>label_17</zorder>
+         <zorder>doubleSpinBox</zorder>
+         <zorder></zorder>
+         <zorder></zorder>
+         <zorder>lineEdit</zorder>
+         <zorder>label_25</zorder>
+         <zorder>doubleSpinBox_8</zorder>
+         <zorder>doubleSpinBox_4</zorder>
+         <zorder>label_13</zorder>
+         <zorder>label_12</zorder>
+         <zorder>label_18</zorder>
+         <zorder>label_5</zorder>
+         <zorder>doubleSpinBox_5</zorder>
+         <zorder>label_4</zorder>
+         <zorder>label</zorder>
+         <zorder>label_27</zorder>
+         <zorder>doubleSpinBox_11</zorder>
+         <zorder>doubleSpinBox_13</zorder>
+         <zorder>skinButtonArrayWidget</zorder>
+        </widget>
        </widget>
       </item>
      </layout>

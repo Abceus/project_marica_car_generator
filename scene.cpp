@@ -9,9 +9,6 @@ Scene::~Scene()
 {
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    this->body->getModel()->getVAO()->destroy();
-    this->body->getModel()->getVBO()->destroy();
-    this->body->getModel()->getEBO()->destroy();
 }
 
 void Scene::setBodyObject(Object *body)

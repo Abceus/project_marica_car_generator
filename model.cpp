@@ -62,6 +62,7 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     {
         file.read((char*)&FacesData[i], FacesHeader.DataSize);
         //qDebug() << FacesData[i].WedgeIndex[0] << " " << FacesData[i].WedgeIndex[1] << " " << FacesData[i].WedgeIndex[2];
+        //qDebug() << FacesData[i].MatIndex << " " << GLfloat(FacesData[i].MatIndex) << " " << int(FacesData[i].MatIndex);
     }
 
     file.read((char*)&MaterialsHeader, sizeof(VChunkHeader));
@@ -76,16 +77,19 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
         //qDebug() << MaterialsData[i].MaterialName << " " << MaterialsData[i].TextureIndex;
     }
 
+    file.close();
 
-    std::unique_ptr<GLfloat[]> vertices(new GLfloat[WedgesHeader.DataCount*5]);
+
+    std::unique_ptr<GLfloat[]> vertices(new GLfloat[WedgesHeader.DataCount*6]);
 
     for(int i=0; i<WedgesHeader.DataCount; i++)
     {
-        vertices[i*5] = PointsData[WedgesData[i].PointIndex].X;
-        vertices[i*5+1] = PointsData[WedgesData[i].PointIndex].Y;
-        vertices[i*5+2] = PointsData[WedgesData[i].PointIndex].Z;
-        vertices[i*5+3] = WedgesData[i].U;
-        vertices[i*5+4] = WedgesData[i].V;
+        vertices[i*6] = PointsData[WedgesData[i].PointIndex].X;
+        vertices[i*6+1] = PointsData[WedgesData[i].PointIndex].Y;
+        vertices[i*6+2] = PointsData[WedgesData[i].PointIndex].Z;
+        vertices[i*6+3] = WedgesData[i].U;
+        vertices[i*6+4] = WedgesData[i].V;
+        vertices[i*6+5] = GLfloat(WedgesData[i].MatIndex);
     }
 
     std::unique_ptr<GLuint[]> indices(new GLuint[FacesHeader.DataCount*3]);
@@ -110,37 +114,40 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     this->VAO->bind();
 
     this->VBO->bind();
-    this->VBO->allocate(vertices.get(), sizeof(vertices.get())*WedgesHeader.DataCount*5);
+    this->VBO->allocate(vertices.get(), sizeof(vertices.get())*WedgesHeader.DataCount*6);
 
     this->EBO->bind();
     this->EBO->allocate(indices.get(), sizeof(indices.get())*FacesHeader.DataCount*3);
 
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
     f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     f->glEnableVertexAttribArray(1);
+    f->glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+    f->glEnableVertexAttribArray(2);
 
     this->VAO->release();
 
+    this->VAOsize = FacesHeader.DataCount*3;
 
-
-    file.close();
-
-    this->setTexture(MaterialsData[0].MaterialName);
-    this->VAOsize = WedgesHeader.DataCount;
+    for(int i=0; i<MaterialsHeader.DataCount; i++)
+    {
+        this->addTexture(QString("./") + QString(MaterialsData[i].MaterialName));
+    }
 }
-/*
-GLuint Model::getVAO()
+
+Model::~Model()
 {
-    return VAO;
+    VAO->destroy();
+    VBO->destroy();
+    EBO->destroy();
 }
-*/
 
 QOpenGLVertexArrayObject* Model::getVAO() const
 {
     return VAO.get();
 }
-
+/*
 QOpenGLBuffer* Model::getVBO() const
 {
     return VBO.get();
@@ -150,27 +157,46 @@ QOpenGLBuffer* Model::getEBO() const
 {
     return EBO.get();
 }
-
+*/
 int Model::getVAOsize()
 {
     return this->VAOsize;
 }
 
-QOpenGLTexture* Model::getTexture() const
+QOpenGLTexture* Model::getTexture(int index) const
 {
-    return this->texture.get();
+    return this->textures.at(index).get();
 }
 
-void Model::setTexture(QString filename)
+int Model::getTexturesSize()
+{
+    return this->textures.size();
+}
+
+void Model::setTexture(QString filename, int index)
 {
     QImage image = QImage(filename);
     if(!image.isNull())
     {
-        this->texture = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
+        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
     }
     else
     {
         //TODO: Load default image from texture manager
-        this->texture = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(QImage("./../ProjectMaricaCarGenerator/test.jpg")));
+        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(QImage("./../ProjectMaricaCarGenerator/test.jpg")));
+    }
+}
+
+void Model::addTexture(QString filename)
+{
+    QImage image = QImage(filename);
+    if(!image.isNull())
+    {
+        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image)));
+    }
+    else
+    {
+        //TODO: Load default image from texture manager
+        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(QImage("./../ProjectMaricaCarGenerator/test.jpg"))));
     }
 }

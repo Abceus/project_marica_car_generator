@@ -22,8 +22,8 @@ void MainOpenglWidget::initializeGL()
     // Enable depth buffer
     f->glEnable(GL_DEPTH_TEST);
 
-    // Enable back face culling
-    //f->glEnable(GL_CULL_FACE);
+    f->glEnable(GL_BLEND);
+    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     std::unique_ptr<QOpenGLShader> vertexShader(new QOpenGLShader(QOpenGLShader::Vertex));
 
@@ -72,6 +72,7 @@ void MainOpenglWidget::paintGL()
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
+
     ShaderProgram->bind();
 
     QMatrix4x4 view;
@@ -89,12 +90,22 @@ void MainOpenglWidget::paintGL()
         model.translate(object->getX(), object->getY(), object->getZ());
         ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
 
-        object->getModel()->getTexture()->bind();
-        ShaderProgram->setUniformValue("texture", 0);
-
         scene->getBodyObject()->getModel()->getVAO()->bind();
-        f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+        for(int i=0; i<object->getModel()->getTexturesSize(); i++)
+        {
+            object->getModel()->getTexture(i)->bind();
+            ShaderProgram->setUniformValue("texture", 0);
+            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), i);
+            f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+        }
         scene->getBodyObject()->getModel()->getVAO()->release();
+
+        //object->getModel()->getTexture(0)->bind();
+        //ShaderProgram->setUniformValue("texture", 0);
+
+        //scene->getBodyObject()->getModel()->getVAO()->bind();
+        //f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+        //scene->getBodyObject()->getModel()->getVAO()->release();
     }
 
     update();
@@ -125,15 +136,15 @@ Object* MainOpenglWidget::getBodyObject() const
     return scene->getBodyObject();
 }
 
-void MainOpenglWidget::setBodyTexture(QString filename)
+void MainOpenglWidget::setBodyTexture(QString filename, int index)
 {
-    scene->getBodyObject()->getModel()->setTexture(filename);
+    scene->getBodyObject()->getModel()->setTexture(filename, index);
 }
 
 void MainOpenglWidget::wheelEvent(QWheelEvent *event)
 {
     QVector3D now_camera_location = scene->getCameraLocation();
-    now_camera_location.setZ(now_camera_location.z() + event->delta()/1000.0);
+    now_camera_location.setZ(now_camera_location.z() + event->delta()/100.0);
     scene->setCameraLocation(now_camera_location);
 }
 
@@ -176,8 +187,8 @@ void MainOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     else if(rightPressed)
     {
         QVector3D camera_location_now = scene->getCameraLocation();
-        camera_location_now.setY(camera_location_now.y() + (rightClickPos.y() - event->y())/100.0);
-        camera_location_now.setX(camera_location_now.x() - (rightClickPos.x() - event->x())/100.0);
+        camera_location_now.setY(camera_location_now.y() + (rightClickPos.y() - event->y())/10.0);
+        camera_location_now.setX(camera_location_now.x() - (rightClickPos.x() - event->x())/10.0);
         rightClickPos = event->pos();
         scene->setCameraLocation(camera_location_now);
     }

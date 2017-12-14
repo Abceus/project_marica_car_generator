@@ -14,11 +14,14 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void clearSkinArrayLayout();
+
+    void addButtonToArrayLayout();
 
 private slots:
     void on_meshOpenButton_clicked();
 
-    void on_skinOpenButton_clicked();
+    void on_skinOpenButton_clicked(int i);
 
 private:
     Ui::MainWindow *ui;
