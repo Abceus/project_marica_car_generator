@@ -93,9 +93,10 @@ void MainOpenglWidget::paintGL()
         scene->getBodyObject()->getModel()->getVAO()->bind();
         for(int i=0; i<object->getModel()->getTexturesSize(); i++)
         {
-            object->getModel()->getTexture(i)->bind();
+            int index = object->getModel()->getTextureQueue(i);
+            object->getModel()->getTexture(index)->bind();
             ShaderProgram->setUniformValue("texture", 0);
-            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), i);
+            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), index);
             f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
         }
         scene->getBodyObject()->getModel()->getVAO()->release();

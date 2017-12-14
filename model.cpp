@@ -178,13 +178,17 @@ void Model::setTexture(QString filename, int index)
     QImage image = QImage(filename);
     if(!image.isNull())
     {
+        this->setTextureQueue(index, this->averageAlpha(image));
         this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
     }
     else
     {
         //TODO: Load default image from texture manager
-        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(QImage("./../ProjectMaricaCarGenerator/test.jpg")));
+        image = QImage("./../ProjectMaricaCarGenerator/test.jpg");
+        this->setTextureQueue(index, this->averageAlpha(image));
+        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
     }
+    this->sortTextures();
 }
 
 void Model::addTexture(QString filename)
@@ -192,11 +196,52 @@ void Model::addTexture(QString filename)
     QImage image = QImage(filename);
     if(!image.isNull())
     {
+        this->textureQueue.push_back(std::pair<int, float>(this->textures.size(), this->averageAlpha(image)));
         this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image)));
     }
     else
     {
         //TODO: Load default image from texture manager
-        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(QImage("./../ProjectMaricaCarGenerator/test.jpg"))));
+        image = QImage("./../ProjectMaricaCarGenerator/test.jpg");
+        this->textureQueue.push_back(std::pair<int, float>(this->textures.size(), this->averageAlpha(image)));
+        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image)));
+    }
+    this->sortTextures();
+}
+
+void Model::sortTextures()
+{
+    std::sort(this->textureQueue.begin(), this->textureQueue.end(),
+              [](const std::pair<int, float>& lhs,
+              const std::pair<int, float>& rhs){ return lhs.second > rhs.second; });
+}
+
+int Model::getTextureQueue(int index)
+{
+    return this->textureQueue.at(index).first;
+}
+
+float Model::averageAlpha(QImage image)
+{
+    float sum = 0;
+    for(int i=0; i<image.height(); i++)
+    {
+        for(int j=0; j<image.width(); j++)
+        {
+            sum += image.pixelColor(j, i).alpha();
+        }
+    }
+    return sum/(image.height()*image.width());
+}
+
+void Model::setTextureQueue(int index, float average)
+{
+    for(int i=0; i<this->textureQueue.size(); i++)
+    {
+        if(this->textureQueue.at(i).first == index)
+        {
+            this->textureQueue[i].second = average;
+            return;
+        }
     }
 }
