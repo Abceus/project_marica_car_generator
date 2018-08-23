@@ -11,7 +11,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
 
-LIBS += -lglu32 -lopengl32
+win32 {
+    LIBS += -lglu32 -lopengl32
+}
+
+unix {
+    LIBS += -lGLU
+}
 
 CONFIG += c++11
 
