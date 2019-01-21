@@ -28,7 +28,7 @@ void MainWindow::on_meshOpenButton_clicked()
     if(fileName != "")
     {
         std::unique_ptr<Model> newModel = ui->mainOpenGLWidget->getModel(fileName);
-        int textureSize = newModel->getTexturesSize();
+        size_t textureSize = newModel->getTexturesSize();
         ui->mainOpenGLWidget->setBodyObject(new Object(std::move(newModel), 0, 0, 0));
 
         if(fileName.size() > 50)

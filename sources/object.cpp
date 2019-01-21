@@ -5,11 +5,6 @@ Object::Object(std::unique_ptr<Model> model, float x, float y, float z) : model(
 
 }
 
-Object::~Object()
-{
-
-}
-
 Model* Object::getModel() const
 {
     return this->model.get();

@@ -12,7 +12,7 @@ private:
     std::unique_ptr<Model> model;
 public:
     Object(std::unique_ptr<Model> model, float x, float y, float z);
-    ~Object();
+    ~Object() = default;
     Model* getModel() const;
     float getX();
     float getY();

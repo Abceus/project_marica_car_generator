@@ -26,22 +26,20 @@ class MainOpenglWidget :public QOpenGLWidget
 {
   Q_OBJECT
 public:
-    MainOpenglWidget(QWidget *parent = 0);
-    ~MainOpenglWidget();
+    explicit MainOpenglWidget(QWidget *parent = nullptr);
+    ~MainOpenglWidget() override = default;
 
     std::unique_ptr<QOpenGLShaderProgram> ShaderProgram;
-    GLuint VBO, VAO, EBO;
-    QQuaternion rotation;
 
-    void wheelEvent(QWheelEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
     void setBodyObject(Object *object);
-    std::unique_ptr<Model> getModel(QString filename);
+    std::unique_ptr<Model> getModel( const QString &filename );
     Object* getBodyObject() const;
-    void setBodyTexture(QString filename, int index);
+    void setBodyTexture( const QString &filename, size_t index );
 
 private:
     std::unique_ptr<Scene> scene;
@@ -54,9 +52,9 @@ private:
     QMatrix4x4 projection;
 
 protected:
-    void initializeGL();
-    void resizeGL(int w, int h);
-    void paintGL();
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
 };
 
 #endif // MAINOPENGLWIDGET_H

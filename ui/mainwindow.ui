@@ -34,7 +34,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <zorder>scrollArea</zorder>
        </widget>
       </item>
       <item>
@@ -47,17 +46,17 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>204</width>
-           <height>832</height>
+           <width>203</width>
+           <height>822</height>
           </rect>
          </property>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
             <width>411</width>
-            <height>831</height>
+            <height>1066</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayout">
@@ -574,7 +573,7 @@
             </widget>
            </item>
            <item row="26" column="1">
-            <widget class="QWidget" name="widget" native="true">
+            <widget class="QWidget" name="widget1" native="true">
              <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
               <property name="spacing">
                <number>50</number>
@@ -613,62 +612,6 @@
            </item>
           </layout>
          </widget>
-         <zorder></zorder>
-         <zorder>label_15</zorder>
-         <zorder>doubleSpinBox_7</zorder>
-         <zorder>label_22</zorder>
-         <zorder>label_21</zorder>
-         <zorder>label_8</zorder>
-         <zorder>doubleSpinBox_10</zorder>
-         <zorder>doubleSpinBox_12</zorder>
-         <zorder>checkBox</zorder>
-         <zorder>label_2</zorder>
-         <zorder>doubleSpinBox_16</zorder>
-         <zorder>label_7</zorder>
-         <zorder>comboBox</zorder>
-         <zorder>label_24</zorder>
-         <zorder>doubleSpinBox_3</zorder>
-         <zorder></zorder>
-         <zorder>pushButton_3</zorder>
-         <zorder>label_3</zorder>
-         <zorder>label_26</zorder>
-         <zorder>label_11</zorder>
-         <zorder>label_6</zorder>
-         <zorder></zorder>
-         <zorder></zorder>
-         <zorder>doubleSpinBox_15</zorder>
-         <zorder>doubleSpinBox_9</zorder>
-         <zorder>label_14</zorder>
-         <zorder>label_16</zorder>
-         <zorder>doubleSpinBox_2</zorder>
-         <zorder>label_20</zorder>
-         <zorder>label_9</zorder>
-         <zorder>doubleSpinBox_14</zorder>
-         <zorder>doubleSpinBox_17</zorder>
-         <zorder>label_10</zorder>
-         <zorder>doubleSpinBox_6</zorder>
-         <zorder>label_23</zorder>
-         <zorder>label_19</zorder>
-         <zorder>meshOpenButton</zorder>
-         <zorder>label_17</zorder>
-         <zorder>doubleSpinBox</zorder>
-         <zorder></zorder>
-         <zorder></zorder>
-         <zorder>lineEdit</zorder>
-         <zorder>label_25</zorder>
-         <zorder>doubleSpinBox_8</zorder>
-         <zorder>doubleSpinBox_4</zorder>
-         <zorder>label_13</zorder>
-         <zorder>label_12</zorder>
-         <zorder>label_18</zorder>
-         <zorder>label_5</zorder>
-         <zorder>doubleSpinBox_5</zorder>
-         <zorder>label_4</zorder>
-         <zorder>label</zorder>
-         <zorder>label_27</zorder>
-         <zorder>doubleSpinBox_11</zorder>
-         <zorder>doubleSpinBox_13</zorder>
-         <zorder>skinButtonArrayWidget</zorder>
         </widget>
        </widget>
       </item>
@@ -682,7 +625,7 @@
      <x>0</x>
      <y>0</y>
      <width>850</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>

@@ -36,7 +36,7 @@ VJointPos VJointPos::operator += (VJointPos op2)
     return *this;
 }
 
-VJointPos VJointPos::operator = (VJointPos op2)
+VJointPos& VJointPos::operator = (VJointPos op2)
 {
     Orientation = op2.Orientation;
     Position = op2.Position;

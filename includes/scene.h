@@ -10,7 +10,7 @@ class Scene
 {
 public:
     Scene();
-    ~Scene();
+    ~Scene() = default;
     void setBodyObject(Object *object);
     Object* getBodyObject() const;
     QVector3D getCameraLocation();
@@ -26,7 +26,6 @@ private:
     QVector3D camera_location;
     QVector3D camera_rotation;
     float camera_scale;
-    std::unique_ptr<Object> wheels;
     std::unique_ptr<Object> body;
     //Model body;
     //Object car;

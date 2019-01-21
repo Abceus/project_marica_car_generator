@@ -3,17 +3,22 @@
 #include <QFile>
 #include <memory>
 
-Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
+Model::Model()
+    : VAOsize(0)
+{
+}
+
+Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* /*ef*/)
 {
 
-    VChunkHeader GeneralHeader;
-    VChunkHeader PointsHeader;
+    VChunkHeader GeneralHeader{};
+    VChunkHeader PointsHeader{};
     std::unique_ptr<VPoint[]> PointsData;
-    VChunkHeader WedgesHeader;
+    VChunkHeader WedgesHeader{};
     std::unique_ptr<VVertex[]> WedgesData;
-    VChunkHeader FacesHeader;
+    VChunkHeader FacesHeader{};
     std::unique_ptr<VTriangle[]> FacesData;
-    VChunkHeader MaterialsHeader;
+    VChunkHeader MaterialsHeader{};
     std::unique_ptr<VMaterial[]> MaterialsData;
 
     QFile file(filename);
@@ -102,12 +107,12 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
         }
     }
 
-    this->VAO = std::unique_ptr<QOpenGLVertexArrayObject>(new QOpenGLVertexArrayObject());
+    this->VAO = std::make_unique<QOpenGLVertexArrayObject>();
     this->VAO->create();
-    this->VBO = std::unique_ptr<QOpenGLBuffer>(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer));
+    this->VBO = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
     this->VBO->create();
     this->VBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    this->EBO = std::unique_ptr<QOpenGLBuffer>(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer));
+    this->EBO = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::IndexBuffer);
     this->EBO->create();
     this->EBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
@@ -119,7 +124,7 @@ Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
     this->EBO->bind();
     this->EBO->allocate(indices.get(), sizeof(indices.get())*FacesHeader.DataCount*3);
 
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     f->glEnableVertexAttribArray(1);
@@ -163,30 +168,30 @@ int Model::getVAOsize()
     return this->VAOsize;
 }
 
-QOpenGLTexture* Model::getTexture(int index) const
+QOpenGLTexture* Model::getTexture( size_t index ) const
 {
     return this->textures.at(index).get();
 }
 
-int Model::getTexturesSize()
+size_t Model::getTexturesSize()
 {
     return this->textures.size();
 }
 
-void Model::setTexture(QString filename, int index)
+void Model::setTexture( QString filename, size_t index )
 {
     QImage image = QImage(filename);
     if(!image.isNull())
     {
         this->setTextureQueue(index, this->averageAlpha(image));
-        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
+        this->textures[index] = std::make_unique<QOpenGLTexture>(image);
     }
     else
     {
         //TODO: Load default image from texture manager
-        image = QImage("./../ProjectMaricaCarGenerator/test.jpg");
+        image = QImage("./resources/textures/test.jpg");
         this->setTextureQueue(index, this->averageAlpha(image));
-        this->textures[index] = std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image));
+        this->textures[index] = std::make_unique<QOpenGLTexture>(image);
     }
     this->sortTextures();
 }
@@ -196,15 +201,15 @@ void Model::addTexture(QString filename)
     QImage image = QImage(filename);
     if(!image.isNull())
     {
-        this->textureQueue.push_back(std::pair<int, float>(this->textures.size(), this->averageAlpha(image)));
-        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image)));
+        this->textureQueue.emplace_back(this->textures.size(), this->averageAlpha(image));
+        this->textures.emplace_back(std::make_unique<QOpenGLTexture>(image));
     }
     else
     {
         //TODO: Load default image from texture manager
-        image = QImage("./../ProjectMaricaCarGenerator/test.jpg");
-        this->textureQueue.push_back(std::pair<int, float>(this->textures.size(), this->averageAlpha(image)));
-        this->textures.push_back(std::unique_ptr<QOpenGLTexture>(new QOpenGLTexture(image)));
+        image = QImage("./resources/textures/test.jpg");
+        this->textureQueue.emplace_back(this->textures.size(), this->averageAlpha(image));
+        this->textures.emplace_back(std::make_unique<QOpenGLTexture>(image));
     }
     this->sortTextures();
 }
@@ -216,7 +221,7 @@ void Model::sortTextures()
               const std::pair<int, float>& rhs){ return lhs.second > rhs.second; });
 }
 
-int Model::getTextureQueue(int index)
+size_t Model::getTextureQueue( size_t index )
 {
     return this->textureQueue.at(index).first;
 }
@@ -234,13 +239,13 @@ float Model::averageAlpha(QImage image)
     return sum/(image.height()*image.width());
 }
 
-void Model::setTextureQueue(int index, float average)
+void Model::setTextureQueue( size_t index, float average )
 {
-    for(int i=0; i<this->textureQueue.size(); i++)
+    for(auto& texture: textureQueue)
     {
-        if(this->textureQueue.at(i).first == index)
+        if(texture.first == index)
         {
-            this->textureQueue[i].second = average;
+            texture.second = average;
             return;
         }
     }

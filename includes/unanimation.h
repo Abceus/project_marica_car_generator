@@ -27,8 +27,7 @@ struct VPoint
     VPoint operator-(VPoint op2);
     VPoint operator+=(VPoint op2);
     friend ostream &operator<<(ostream &stream, VPoint o);
-    VPoint(){}
-    VPoint(float vX, float vY, float vZ)
+    VPoint(float vX=0.f, float vY=0.f, float vZ=0.f)
     {
         X = vX;
         Y = vY;
@@ -86,8 +85,7 @@ struct VQuat
     VQuat operator-(VQuat op2);
     VQuat operator+=(VQuat op2);
     friend ostream &operator<<(ostream &stream, VQuat o);
-    VQuat(){}
-    VQuat(float vX, float vY, float vZ, float vW)
+    VQuat(float vX=0.f, float vY=0.f, float vZ=0.f, float vW=0.f)
     {
         X = vX;
         Y = vY;
@@ -110,7 +108,7 @@ struct VJointPos
     VJointPos operator+(VJointPos op2);
     VJointPos operator-(VJointPos op2);
     VJointPos operator+=(VJointPos op2);
-    VJointPos operator=(VJointPos op2);
+    VJointPos& operator=(VJointPos op2);
     friend ostream &operator<<(ostream &stream, VJointPos o);
 };
 

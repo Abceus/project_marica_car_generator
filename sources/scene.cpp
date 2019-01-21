@@ -1,14 +1,12 @@
+
+#include <includes/scene.h>
+
 #include "scene.h"
 
 Scene::Scene()
+    : camera_scale(1.f)
 {
 
-}
-
-Scene::~Scene()
-{
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 }
 
 void Scene::setBodyObject(Object *body)

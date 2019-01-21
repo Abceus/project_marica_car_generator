@@ -10,10 +10,6 @@ MainOpenglWidget::MainOpenglWidget(QWidget *parent)
     rightPressed = false;
 }
 
-MainOpenglWidget::~MainOpenglWidget()
-{
-}
-
 void MainOpenglWidget::initializeGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -27,13 +23,7 @@ void MainOpenglWidget::initializeGL()
 
     std::unique_ptr<QOpenGLShader> vertexShader(new QOpenGLShader(QOpenGLShader::Vertex));
 
-    bool success = false;
-
-    #ifdef QT_NO_DEBUG
-        success = vertexShader->compileSourceFile("./defaultvertexshader.vert");
-    #else
-        success = vertexShader->compileSourceFile("./../ProjectMaricaCarGenerator/defaultvertexshader.vert");
-    #endif
+    bool success = vertexShader->compileSourceFile("resources/shaders/defaultvertexshader.vert");
 
     if(!success)
     {
@@ -41,19 +31,14 @@ void MainOpenglWidget::initializeGL()
     }
 
     std::unique_ptr<QOpenGLShader> fragmentShader (new QOpenGLShader(QOpenGLShader::Fragment));
-
-    #ifdef QT_NO_DEBUG
-        success = fragmentShader->compileSourceFile("./defaultfragmentshader.frag");
-    #else
-        success = fragmentShader->compileSourceFile("./../ProjectMaricaCarGenerator/defaultfragmentshader.frag");
-    #endif
+    success = fragmentShader->compileSourceFile("resources/shaders/defaultfragmentshader.frag");
 
     if(!success)
     {
         qDebug() << "The fragment shader wasn't compiled";
     }
 
-    ShaderProgram = std::unique_ptr<QOpenGLShaderProgram>(new QOpenGLShaderProgram());
+    ShaderProgram = std::make_unique<QOpenGLShaderProgram>();
     ShaderProgram->addShader(vertexShader.get());
     ShaderProgram->addShader(fragmentShader.get());
     if(!ShaderProgram->link())
@@ -63,13 +48,12 @@ void MainOpenglWidget::initializeGL()
 
     ShaderProgram->bind();
 
-    scene = std::unique_ptr<Scene>(new Scene());
+    scene = std::make_unique<Scene>();
 }
 
 void MainOpenglWidget::paintGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
 
@@ -91,13 +75,13 @@ void MainOpenglWidget::paintGL()
         ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
 
         scene->getBodyObject()->getModel()->getVAO()->bind();
-        for(int i=0; i<object->getModel()->getTexturesSize(); i++)
+        for(size_t i=0; i<object->getModel()->getTexturesSize(); i++)
         {
-            int index = object->getModel()->getTextureQueue(i);
+            size_t index = object->getModel()->getTextureQueue(i);
             object->getModel()->getTexture(index)->bind();
             ShaderProgram->setUniformValue("texture", 0);
-            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), index);
-            f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), static_cast<GLuint>(index));
+            f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr);
         }
         scene->getBodyObject()->getModel()->getVAO()->release();
 
@@ -115,9 +99,8 @@ void MainOpenglWidget::paintGL()
 void MainOpenglWidget::resizeGL(int w, int h)
 {
     // Calculate aspect ratio
-    qreal aspect = qreal(w) / qreal(h ? h : 1);
-
-    const qreal zNear = 1.0, zFar = 10000.0, fov = 90.0;
+    const float aspect = static_cast<float>(w) / static_cast<float>(h ? h : 1);
+    const float zNear = 1.f, zFar = 10000.f, fov = 90.f;
 
     // Reset projection
     projection.setToIdentity();
@@ -137,7 +120,7 @@ Object* MainOpenglWidget::getBodyObject() const
     return scene->getBodyObject();
 }
 
-void MainOpenglWidget::setBodyTexture(QString filename, int index)
+void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
 {
     scene->getBodyObject()->getModel()->setTexture(filename, index);
 }
@@ -145,7 +128,7 @@ void MainOpenglWidget::setBodyTexture(QString filename, int index)
 void MainOpenglWidget::wheelEvent(QWheelEvent *event)
 {
     QVector3D now_camera_location = scene->getCameraLocation();
-    now_camera_location.setZ(now_camera_location.z() + event->delta()/100.0);
+    now_camera_location.setZ(now_camera_location.z() + event->delta()/100.f);
     scene->setCameraLocation(now_camera_location);
 }
 
@@ -188,17 +171,17 @@ void MainOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     else if(rightPressed)
     {
         QVector3D camera_location_now = scene->getCameraLocation();
-        camera_location_now.setY(camera_location_now.y() + (rightClickPos.y() - event->y())/10.0);
-        camera_location_now.setX(camera_location_now.x() - (rightClickPos.x() - event->x())/10.0);
+        camera_location_now.setY(camera_location_now.y() + (rightClickPos.y() - event->y())/10.f);
+        camera_location_now.setX(camera_location_now.x() - (rightClickPos.x() - event->x())/10.f);
         rightClickPos = event->pos();
         scene->setCameraLocation(camera_location_now);
     }
 }
 
-std::unique_ptr<Model> MainOpenglWidget::getModel(QString filename)
+std::unique_ptr<Model> MainOpenglWidget::getModel( const QString &filename )
 {
     makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
-    return std::unique_ptr<Model>(new Model(filename, f, ef));
+    return std::make_unique<Model>(filename, f, ef);
 }
