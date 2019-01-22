@@ -85,12 +85,12 @@ void MainOpenglWidget::paintGL()
         }
         scene->getBodyObject()->getModel()->releaseVAO();
 
-        //object->getModel()->getTexture(0)->bind();
+        //object->makeModel()->getTexture(0)->bind();
         //ShaderProgram->setUniformValue("texture", 0);
 
-        //scene->getBodyObject()->getModel()->getVAO()->bind();
-        //f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
-        //scene->getBodyObject()->getModel()->getVAO()->release();
+        //scene->getBodyObject()->makeModel()->getVAO()->bind();
+        //f->glDrawElements(GL_TRIANGLES, object->makeModel()->getVAOsize(), GL_UNSIGNED_INT, 0);
+        //scene->getBodyObject()->makeModel()->getVAO()->release();
     }
 
     update();
@@ -178,7 +178,7 @@ void MainOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-std::unique_ptr<Model> MainOpenglWidget::getModel( const QString &filename )
+std::unique_ptr<Model> MainOpenglWidget::makeModel( const QString &filename )
 {
     makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();

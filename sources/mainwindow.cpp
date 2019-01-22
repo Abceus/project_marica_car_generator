@@ -27,7 +27,7 @@ void MainWindow::on_meshOpenButton_clicked()
 
     if(fileName != "")
     {
-        std::unique_ptr<Model> newModel = ui->mainOpenGLWidget->getModel(fileName);
+        std::unique_ptr<Model> newModel = ui->mainOpenGLWidget->makeModel( fileName );
         size_t textureSize = newModel->getTexturesSize();
         ui->mainOpenGLWidget->setBodyObject(new Object(std::move(newModel)));
 
