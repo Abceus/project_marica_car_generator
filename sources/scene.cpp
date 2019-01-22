@@ -1,6 +1,3 @@
-
-#include <includes/scene.h>
-
 #include "scene.h"
 
 Scene::Scene()

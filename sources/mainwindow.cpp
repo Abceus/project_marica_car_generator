@@ -29,7 +29,7 @@ void MainWindow::on_meshOpenButton_clicked()
     {
         std::unique_ptr<Model> newModel = ui->mainOpenGLWidget->getModel(fileName);
         size_t textureSize = newModel->getTexturesSize();
-        ui->mainOpenGLWidget->setBodyObject(new Object(std::move(newModel), 0, 0, 0));
+        ui->mainOpenGLWidget->setBodyObject(new Object(std::move(newModel)));
 
         if(fileName.size() > 50)
         {
@@ -48,7 +48,7 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_skinOpenButton_clicked(int i)
 {
-    if(ui->mainOpenGLWidget->getBodyObject() != nullptr)
+    if(!ui->mainOpenGLWidget->getBodyObject())
     {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                         QDir::currentPath(),

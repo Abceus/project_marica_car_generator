@@ -23,14 +23,15 @@ class Model
 {
 public:
     Model();
-    Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* ef);
+    Model(const QString& filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* ef);
     ~Model();
-    QOpenGLVertexArrayObject* getVAO() const;
-    QOpenGLTexture* getTexture( size_t index ) const;
+    void bindVAO();
+    void releaseVAO();
+    void bindTexture( size_t index );
     void setTexture( QString filename, size_t index );
     void addTexture(QString filename);
     size_t getTexturesSize();
-    int getVAOsize();
+    size_t getVAOsize();
     size_t getTextureQueue( size_t index );
     void setTextureQueue( size_t index, float average );
 private:
@@ -38,7 +39,7 @@ private:
     std::unique_ptr<QOpenGLBuffer> VBO, EBO;
     std::vector<std::unique_ptr<QOpenGLTexture>> textures;
     std::vector<std::pair<size_t, float>> textureQueue;
-    int VAOsize;
+    size_t VAOsize;
     void sortTextures();
     float averageAlpha(QImage image);
 };

@@ -8,15 +8,13 @@
 class Object
 {
 private:
-    float x, y, z;
+    QVector3D position;
     std::unique_ptr<Model> model;
 public:
-    Object(std::unique_ptr<Model> model, float x, float y, float z);
+    Object(std::unique_ptr<Model>&& model, float x = 0, float y = 0, float z = 0);
     ~Object() = default;
     Model* getModel() const;
-    float getX();
-    float getY();
-    float getZ();
+    QVector3D getPosition() const;
 };
 
 #endif // OBJECT_H

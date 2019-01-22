@@ -71,19 +71,19 @@ void MainOpenglWidget::paintGL()
     {
         Object *object = scene->getBodyObject();
         QMatrix4x4 model;
-        model.translate(object->getX(), object->getY(), object->getZ());
+        model.translate(object->getPosition());
         ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("model"), model);
 
-        scene->getBodyObject()->getModel()->getVAO()->bind();
+        scene->getBodyObject()->getModel()->bindVAO();
         for(size_t i=0; i<object->getModel()->getTexturesSize(); i++)
         {
             size_t index = object->getModel()->getTextureQueue(i);
-            object->getModel()->getTexture(index)->bind();
+            object->getModel()->bindTexture(i);
             ShaderProgram->setUniformValue("texture", 0);
             ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), static_cast<GLuint>(index));
             f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr);
         }
-        scene->getBodyObject()->getModel()->getVAO()->release();
+        scene->getBodyObject()->getModel()->releaseVAO();
 
         //object->getModel()->getTexture(0)->bind();
         //ShaderProgram->setUniformValue("texture", 0);

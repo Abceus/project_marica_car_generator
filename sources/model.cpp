@@ -2,13 +2,15 @@
 
 #include <QFile>
 #include <memory>
+#include <includes/model.h>
+
 
 Model::Model()
-    : VAOsize(0)
+    : VAOsize(0u)
 {
 }
 
-Model::Model(QString filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* /*ef*/)
+Model::Model(const QString& filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* /*ef*/)
 {
 
     VChunkHeader GeneralHeader{};
@@ -148,29 +150,9 @@ Model::~Model()
     EBO->destroy();
 }
 
-QOpenGLVertexArrayObject* Model::getVAO() const
-{
-    return VAO.get();
-}
-/*
-QOpenGLBuffer* Model::getVBO() const
-{
-    return VBO.get();
-}
-
-QOpenGLBuffer* Model::getEBO() const
-{
-    return EBO.get();
-}
-*/
-int Model::getVAOsize()
+size_t Model::getVAOsize()
 {
     return this->VAOsize;
-}
-
-QOpenGLTexture* Model::getTexture( size_t index ) const
-{
-    return this->textures.at(index).get();
 }
 
 size_t Model::getTexturesSize()
@@ -249,4 +231,19 @@ void Model::setTextureQueue( size_t index, float average )
             return;
         }
     }
+}
+
+void Model::bindVAO()
+{
+    VAO->bind();
+}
+
+void Model::releaseVAO()
+{
+    VAO->release();
+}
+
+void Model::bindTexture( size_t index )
+{
+    this->textures.at(index)->bind();
 }
