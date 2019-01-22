@@ -48,7 +48,7 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_skinOpenButton_clicked(int i)
 {
-    if(!ui->mainOpenGLWidget->getBodyObject())
+    if(ui->mainOpenGLWidget->getBodyObject() != nullptr)
     {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                         QDir::currentPath(),

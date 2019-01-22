@@ -64,7 +64,7 @@ unix {
 
 ProjectMaricaCarGenerator.path = $$DESTDIR
 
-docroot.path   = $$DESTDIR
-docroot.files  = resources
+resources.path   = $$DESTDIR
+resources.files  = resources
 
-INSTALLS       += docroot
+INSTALLS       += resources
