@@ -3,17 +3,17 @@
 
 #include <memory>
 
-#include "model.h"
+#include "mesh.h"
 
 class Object
 {
 private:
     QVector3D position;
-    std::unique_ptr<Model> model;
+    std::unique_ptr<Mesh> model;
 public:
-    Object(std::unique_ptr<Model>&& model, float x = 0, float y = 0, float z = 0);
+    Object(std::unique_ptr<Mesh>&& model, float x = 0, float y = 0, float z = 0);
     ~Object() = default;
-    Model* getModel() const;
+    Mesh* getModel() const;
     QVector3D getPosition() const;
 };
 

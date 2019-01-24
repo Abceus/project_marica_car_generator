@@ -1,14 +1,14 @@
 #version 330 core
 in vec2 TexCoord;
-in float TexIndex;
+flat in uint TexIndex;
 
 uniform sampler2D texture;
-uniform int nowTexture;
+uniform uint nowTexture;
 
 void main(void)
 {
     vec4 color = texture2D(texture, TexCoord);
-    if( int(TexIndex) != nowTexture )
+    if( TexIndex != nowTexture )
     {
         discard;
     }

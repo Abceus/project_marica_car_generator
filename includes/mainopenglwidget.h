@@ -40,7 +40,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event) override;
 
     void setBodyObject(Object *object);
-    std::unique_ptr<Model> makeModel( const QString &filename );
+    std::unique_ptr<Mesh> makeModel( const QString &filename );
     Object* getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
