@@ -23,6 +23,7 @@ add_executable( ProjectMaricaCarGenerator
         sources/unanimation.cpp
         sources/object.cpp
         sources/resource_manager.cpp
+        sources/mesh.cpp
         ${MOC_FOR_UI} )
 
 target_include_directories( ProjectMaricaCarGenerator

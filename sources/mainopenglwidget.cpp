@@ -49,13 +49,13 @@ void MainOpenglWidget::initializeGL()
     ShaderProgram->bind();
 
     scene = std::make_unique<Scene>();
+    makeCurrent();
 }
 
 void MainOpenglWidget::paintGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClear(GL_COLOR_BUFFER_BIT);
-
 
     ShaderProgram->bind();
 
@@ -80,7 +80,7 @@ void MainOpenglWidget::paintGL()
             size_t index = object->getModel()->getTextureQueue(i);
             object->getModel()->bindTexture(i);
             ShaderProgram->setUniformValue("texture", 0);
-            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), static_cast<GLuint>(index));
+            ShaderProgram->setUniformValue(ShaderProgram->uniformLocation("nowTexture"), static_cast<GLint>(index));
             f->glDrawElements(GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr);
         }
         scene->getBodyObject()->getModel()->releaseVAO();
@@ -178,10 +178,8 @@ void MainOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-std::unique_ptr<Model> MainOpenglWidget::makeModel( const QString &filename )
+std::unique_ptr<Mesh> MainOpenglWidget::makeModel( const QString &filename )
 {
     makeCurrent();
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
-    return std::make_unique<Model>(filename, f, ef);
+    return std::make_unique<Mesh>(Model::readPSK(filename));
 }

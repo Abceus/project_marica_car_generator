@@ -34,14 +34,16 @@ SOURCES += sources/main.cpp\
     sources/model.cpp \
     sources/scene.cpp \
     sources/unanimation.cpp \
-    sources/object.cpp
+    sources/object.cpp \
+    sources/mesh.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
     includes/scene.h \
     includes/model.h \
     includes/unanimation.h \
-    includes/object.h
+    includes/object.h \
+    includes/mesh.h
 
 FORMS    += ui/mainwindow.ui
 
