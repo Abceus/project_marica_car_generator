@@ -22,7 +22,8 @@ add_executable( ProjectMaricaCarGenerator
         sources/scene.cpp
         sources/unanimation.cpp
         sources/object.cpp
-        ${MOC_FOR_UI})
+        sources/resource_manager.cpp
+        ${MOC_FOR_UI} )
 
 target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes )
