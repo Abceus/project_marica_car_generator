@@ -12,100 +12,63 @@ Model::Model()
 
 Model::Model(const QString& filename, QOpenGLFunctions *f, QOpenGLExtraFunctions* /*ef*/)
 {
-
     VChunkHeader GeneralHeader{};
     VChunkHeader PointsHeader{};
-    std::unique_ptr<VPoint[]> PointsData;
+    std::vector<VPoint> PointsData;
     VChunkHeader WedgesHeader{};
-    std::unique_ptr<VVertex[]> WedgesData;
+    std::vector<VVertex> WedgesData;
     VChunkHeader FacesHeader{};
-    std::unique_ptr<VTriangle[]> FacesData;
+    std::vector<VTriangle> FacesData;
     VChunkHeader MaterialsHeader{};
-    std::unique_ptr<VMaterial[]> MaterialsData;
+    std::vector<VMaterial> MaterialsData;
 
     QFile file(filename);
-
     if (!file.open(QIODevice::ReadOnly))
         return;
 
-
-    file.read((char*)&GeneralHeader, sizeof(VChunkHeader));
-
+    file.read(reinterpret_cast<char*>(&GeneralHeader), sizeof(VChunkHeader));
     qDebug() << GeneralHeader.ChunkID << " " << GeneralHeader.DataCount << " " << GeneralHeader.DataSize << " " << GeneralHeader.TypeFlags;
-
-
-    file.read((char*)&PointsHeader, sizeof(VChunkHeader));
-
+    file.read(reinterpret_cast<char*>(&PointsHeader), sizeof(VChunkHeader));
     qDebug() << PointsHeader.ChunkID << " " << PointsHeader.DataCount << " " << PointsHeader.DataSize << " " << PointsHeader.TypeFlags;
+    PointsData.reserve(static_cast<size_t>(PointsHeader.DataCount));
+    file.read( reinterpret_cast<char*>(PointsData.data()), PointsHeader.DataSize * PointsHeader.DataCount );
 
-    PointsData = std::unique_ptr<VPoint[]>(new VPoint[PointsHeader.DataCount]);
-
-    for (int i = 0; i < PointsHeader.DataCount; i++)
-    {
-        file.read((char*)&PointsData[i], PointsHeader.DataSize);
-        //qDebug() << PointsData[i].X << " " << PointsData[i].Y << " " << PointsData[i].Z;
-    }
-
-
-    file.read((char*)&WedgesHeader, sizeof(VChunkHeader));
-
+    file.read(reinterpret_cast<char*>(&WedgesHeader), sizeof(VChunkHeader));
     qDebug() << WedgesHeader.ChunkID << " " << WedgesHeader.DataCount << " " << WedgesHeader.DataSize << " " << WedgesHeader.TypeFlags;
+    WedgesData.reserve(static_cast<size_t>(WedgesHeader.DataCount));
+    file.read(reinterpret_cast<char*>(WedgesData.data()), WedgesHeader.DataSize * WedgesHeader.DataCount);
 
-    WedgesData = std::unique_ptr<VVertex[]>(new VVertex[WedgesHeader.DataCount]);
-
-    for (int i = 0; i < WedgesHeader.DataCount; i++)
-    {
-        file.read((char*)&WedgesData[i], WedgesHeader.DataSize);
-        //qDebug() << WedgesData[i].PointIndex << " " << WedgesData[i].U << " " << WedgesData[i].V;
-    }
-
-    file.read((char*)&FacesHeader, sizeof(VChunkHeader));
-
+    file.read(reinterpret_cast<char*>(&FacesHeader), sizeof(VChunkHeader));
     qDebug() << FacesHeader.ChunkID << " " << FacesHeader.DataCount << " " << FacesHeader.DataSize << " " << FacesHeader.TypeFlags;
+    FacesData.reserve(static_cast<size_t>(FacesHeader.DataCount));
+    file.read(reinterpret_cast<char*>(FacesData.data()), FacesHeader.DataSize * FacesHeader.DataCount);
 
-    FacesData = std::unique_ptr<VTriangle[]>(new VTriangle[FacesHeader.DataCount]);
-
-    for (int i = 0; i < FacesHeader.DataCount; i++)
-    {
-        file.read((char*)&FacesData[i], FacesHeader.DataSize);
-        //qDebug() << FacesData[i].WedgeIndex[0] << " " << FacesData[i].WedgeIndex[1] << " " << FacesData[i].WedgeIndex[2];
-        //qDebug() << FacesData[i].MatIndex << " " << GLfloat(FacesData[i].MatIndex) << " " << int(FacesData[i].MatIndex);
-    }
-
-    file.read((char*)&MaterialsHeader, sizeof(VChunkHeader));
-
+    file.read(reinterpret_cast<char*>(&MaterialsHeader), sizeof(VChunkHeader));
     qDebug() << MaterialsHeader.ChunkID << " " << MaterialsHeader.DataCount << " " << MaterialsHeader.DataSize << " " << MaterialsHeader.TypeFlags;
-
-    MaterialsData = std::unique_ptr<VMaterial[]>(new VMaterial[MaterialsHeader.DataCount]);
-
-    for (int i = 0; i < MaterialsHeader.DataCount; i++)
-    {
-        file.read((char*)&MaterialsData[i], MaterialsHeader.DataSize);
-        //qDebug() << MaterialsData[i].MaterialName << " " << MaterialsData[i].TextureIndex;
-    }
+    MaterialsData.reserve(static_cast<size_t>(MaterialsHeader.DataCount));
+    file.read(reinterpret_cast<char*>(MaterialsData.data()), MaterialsHeader.DataSize * MaterialsHeader.DataCount);
 
     file.close();
 
+    std::vector<GLfloat> vertices(WedgesHeader.DataCount*6u);
 
-    std::unique_ptr<GLfloat[]> vertices(new GLfloat[WedgesHeader.DataCount*6]);
-
-    for(int i=0; i<WedgesHeader.DataCount; i++)
+    for(size_t i=0; i<WedgesHeader.DataCount; i++)
     {
-        vertices[i*6] = PointsData[WedgesData[i].PointIndex].X;
-        vertices[i*6+1] = PointsData[WedgesData[i].PointIndex].Y;
-        vertices[i*6+2] = PointsData[WedgesData[i].PointIndex].Z;
-        vertices[i*6+3] = WedgesData[i].U;
-        vertices[i*6+4] = WedgesData[i].V;
-        vertices[i*6+5] = GLfloat(WedgesData[i].MatIndex);
+        vertices[i*6u] = PointsData[WedgesData[i].PointIndex].X;
+        vertices[i*6u+1u] = PointsData[WedgesData[i].PointIndex].Y;
+        vertices[i*6u+2u] = PointsData[WedgesData[i].PointIndex].Z;
+        vertices[i*6u+3u] = WedgesData[i].U;
+        vertices[i*6u+4u] = WedgesData[i].V;
+        vertices[i*6u+5u] = GLfloat(WedgesData[i].MatIndex);
     }
 
-    std::unique_ptr<GLuint[]> indices(new GLuint[FacesHeader.DataCount*3]);
+    std::vector<GLuint> indices(FacesHeader.DataCount*3u);
 
-    for(int i=0; i<FacesHeader.DataCount; i++)
+    for(size_t i=0; i<FacesHeader.DataCount; i++)
     {
-        for(int j=0; j<3; j++)
+        for(size_t j=0; j<3; j++)
         {
-            indices[i*3+j] = FacesData[i].WedgeIndex[j];
+            indices[i*3u+j] = FacesData[i].WedgeIndex[j];
         }
     }
 
@@ -121,23 +84,23 @@ Model::Model(const QString& filename, QOpenGLFunctions *f, QOpenGLExtraFunctions
     this->VAO->bind();
 
     this->VBO->bind();
-    this->VBO->allocate(vertices.get(), sizeof(vertices.get())*WedgesHeader.DataCount*6);
+    this->VBO->allocate(vertices.data(), sizeof(VVertex)*WedgesHeader.DataCount*6u);
 
     this->EBO->bind();
-    this->EBO->allocate(indices.get(), sizeof(indices.get())*FacesHeader.DataCount*3);
+    this->EBO->allocate(indices.data(), sizeof(VTriangle)*FacesHeader.DataCount*3u);
 
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat)));
     f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid*>(5 * sizeof(GLfloat)));
     f->glEnableVertexAttribArray(2);
 
     this->VAO->release();
 
-    this->VAOsize = FacesHeader.DataCount*3;
+    this->VAOsize = FacesHeader.DataCount*3u;
 
-    for(int i=0; i<MaterialsHeader.DataCount; i++)
+    for(size_t i=0; i<MaterialsHeader.DataCount; i++)
     {
         this->addTexture(QString("./") + QString(MaterialsData[i].MaterialName));
     }
