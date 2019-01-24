@@ -1,9 +1,12 @@
 #ifndef MAINOPENGLWIDGET_H
 #define MAINOPENGLWIDGET_H
 
+#ifdef _WIN32
+    #include <Windows.h>
+#endif
 #include <GL/glu.h>
 #include <GL/gl.h>
-#include <GL/glext.h>
+//#include <GL/glext.h>
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
