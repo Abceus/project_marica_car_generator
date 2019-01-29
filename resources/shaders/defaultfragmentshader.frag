@@ -1,9 +1,9 @@
 #version 330 core
 in vec2 TexCoord;
-flat in uint TexIndex;
+flat in int TexIndex;
 
 uniform sampler2D texture;
-uniform uint nowTexture;
+uniform int nowTexture;
 
 void main(void)
 {

@@ -12,7 +12,7 @@ struct Vertex
 {
     GLfloat X, Y, Z;
     GLfloat U, V;
-    GLuint MaterialIndex;
+    GLint MaterialIndex;
 };
 
 struct Indice

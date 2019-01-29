@@ -59,7 +59,7 @@ Model Model::readPSK( const QString &filename )
         newModel.vertices[i].Z = PointsData[WedgesData[i].PointIndex].Z;
         newModel.vertices[i].U = WedgesData[i].U;
         newModel.vertices[i].V = WedgesData[i].V;
-        newModel.vertices[i].MaterialIndex = WedgesData[i].MatIndex;
+        newModel.vertices[i].MaterialIndex = static_cast<GLint>(WedgesData[i].MatIndex);
     }
 
     newModel.indices.resize(static_cast<size_t>(FacesHeader.DataCount));

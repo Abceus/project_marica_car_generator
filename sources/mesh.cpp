@@ -12,6 +12,7 @@ Mesh::Mesh()
 Mesh::Mesh(const Model& model)
 {
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions* fe = QOpenGLContext::currentContext()->extraFunctions();
     if(!f)
         return;
 
@@ -36,8 +37,8 @@ Mesh::Mesh(const Model& model)
     f->glEnableVertexAttribArray(0);
     f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, U)));
     f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(2, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, MaterialIndex)));
-    f->glEnableVertexAttribArray(2);
+    fe->glVertexAttribIPointer(2, 1, GL_INT, sizeof(Vertex), reinterpret_cast<GLvoid*>(offsetof(Vertex, MaterialIndex)));
+    fe->glEnableVertexAttribArray(2);
 
     this->VAO->release();
 
@@ -95,7 +96,7 @@ void Mesh::addTexture(QString filename)
     else
     {
         //TODO: Load default image from texture manager
-        image = QImage("./resources/textures/skin1.png");
+        image = QImage("./resources/textures/test.jpg");
         this->textureQueue.emplace_back(this->textures.size(), this->averageAlpha(image));
         this->textures.emplace_back(std::make_unique<QOpenGLTexture>(image));
     }
