@@ -35,7 +35,8 @@ SOURCES += sources/main.cpp\
     sources/scene.cpp \
     sources/unanimation.cpp \
     sources/object.cpp \
-    sources/mesh.cpp
+    sources/mesh.cpp \
+    sources/openglsimulationwidget.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -43,7 +44,8 @@ HEADERS  += includes/mainwindow.h \
     includes/model.h \
     includes/unanimation.h \
     includes/object.h \
-    includes/mesh.h
+    includes/mesh.h \
+    includes/openglsimulationwidget.h
 
 FORMS    += ui/mainwindow.ui
 
