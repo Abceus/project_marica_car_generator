@@ -3,6 +3,8 @@
 #include <QFile>
 #include <memory>
 
+#include "resource_manager.h"
+
 
 Mesh::Mesh()
         : VAOsize(0u)
@@ -69,7 +71,7 @@ size_t Mesh::getTexturesSize()
 
 void Mesh::setTexture( QString filename, size_t index )
 {
-    QImage image = QImage(filename);
+    QImage image = ResourceManager::Instance().get<QString, QImage>(filename);
     if(!image.isNull())
     {
         this->setTextureQueue(index, this->averageAlpha(image));
@@ -78,7 +80,7 @@ void Mesh::setTexture( QString filename, size_t index )
     else
     {
         //TODO: Load default image from texture manager
-        image = QImage("./resources/textures/test.jpg");
+        image = ResourceManager::Instance().get<QString, QImage>("./resources/textures/test.jpg");
         this->setTextureQueue(index, this->averageAlpha(image));
         this->textures[index] = std::make_unique<QOpenGLTexture>(image);
     }
@@ -87,7 +89,7 @@ void Mesh::setTexture( QString filename, size_t index )
 
 void Mesh::addTexture(QString filename)
 {
-    QImage image = QImage(filename);
+    QImage image = ResourceManager::Instance().get<QString, QImage>(filename);
     if(!image.isNull())
     {
         this->textureQueue.emplace_back(this->textures.size(), this->averageAlpha(image));
@@ -96,7 +98,7 @@ void Mesh::addTexture(QString filename)
     else
     {
         //TODO: Load default image from texture manager
-        image = QImage("./resources/textures/test.jpg");
+        image = ResourceManager::Instance().get<QString, QImage>("./resources/textures/test.jpg");
         this->textureQueue.emplace_back(this->textures.size(), this->averageAlpha(image));
         this->textures.emplace_back(std::make_unique<QOpenGLTexture>(image));
     }
