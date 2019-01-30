@@ -3,6 +3,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "openglsimulationwidget.h"
 
 #include "model.h"
 #include "object.h"
@@ -44,6 +45,12 @@ void MainWindow::on_meshOpenButton_clicked()
             this->addButtonToArrayLayout();
         }
     }
+}
+
+void MainWindow::on_startSimulationButton_clicked()
+{
+    OpenglSimulationWidget* w = new OpenglSimulationWidget();
+    w->show();
 }
 
 void MainWindow::on_skinOpenButton_clicked(int i)

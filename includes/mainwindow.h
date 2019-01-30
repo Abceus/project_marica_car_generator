@@ -20,6 +20,7 @@ public:
 
 private slots:
     void on_meshOpenButton_clicked();
+    void on_startSimulationButton_clicked();
 
     void on_skinOpenButton_clicked(int i);
 

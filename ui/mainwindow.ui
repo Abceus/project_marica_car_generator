@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
       <item>
-       <widget class="MainOpenglWidget" name="mainOpenGLWidget"/>
+       <widget class="MainOpenglWidget" name="mainOpenGLWidget" native="true"/>
       </item>
       <item>
        <widget class="QWidget" name="settingsWidget" native="true">
@@ -147,6 +147,13 @@
                  </layout>
                 </widget>
                </item>
+               <item row="5" column="1">
+                <widget class="QPushButton" name="startSimulationButton">
+                 <property name="text">
+                  <string>PushButton</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -172,6 +179,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MainOpenglWidget</class>
+   <extends>QWidget</extends>
+   <header>mainopenglwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

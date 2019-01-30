@@ -11,7 +11,8 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 qt5_wrap_cpp(MOC_FOR_UI
         includes/mainwindow.h
-        includes/mainopenglwidget.h)
+        includes/mainopenglwidget.h
+        includes/openglsimulationwidget.h)
 
 add_executable( ProjectMaricaCarGenerator
         ui/mainwindow.ui
@@ -24,6 +25,7 @@ add_executable( ProjectMaricaCarGenerator
         sources/object.cpp
         sources/resource_manager.cpp
         sources/mesh.cpp
+        sources/openglsimulationwidget.cpp
         ${MOC_FOR_UI} )
 
 target_include_directories( ProjectMaricaCarGenerator
