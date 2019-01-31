@@ -26,12 +26,17 @@ add_executable( ProjectMaricaCarGenerator
         sources/resource_manager.cpp
         sources/mesh.cpp
         sources/openglsimulationwidget.cpp
+        sources/physobject.cpp
+        sources/physicworld.cpp
         ${MOC_FOR_UI} )
 
 target_include_directories( ProjectMaricaCarGenerator
-        PRIVATE includes )
+        PRIVATE includes third_party/bullet )
 
-target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets)
+target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletDynamics/libBulletDynamics.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletCollision/libBulletCollision.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/LinearMath/libLinearMath.a)
 
 set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

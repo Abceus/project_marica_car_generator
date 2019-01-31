@@ -11,10 +11,8 @@ ostream& operator<<( ostream& stream, VJointPos o )
 VJointPos VJointPos::operator+( VJointPos op2 )
 {
     VJointPos temp;
-
     temp.Orientation = op2.Orientation + Orientation;
     temp.Position = op2.Position + Position;
-
     return temp;
 }
 

@@ -2,7 +2,67 @@
 
 OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
         : QOpenGLWidget( parent )
+        , scene( std::make_unique<Scene>() )
+        , prevTime( std::chrono::high_resolution_clock::now() )
 {
+}
+
+
+void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
+{
+    scene->setBodyObject( new Object( makeModel( filename ) ) );
+    scene->setTireCollision( new PhysObject( std::move( makeModel( filename ) ), 0.f, 0.f, -300.f ) );
+    // TODO: leak
+    btBoxShape* colShape = new btBoxShape(btVector3(10.0, 10.0, 10.0));
+
+    btTransform startTransform;
+    startTransform.setIdentity();
+    btScalar mass(100.f);
+    bool isDynamic = (mass != 0.f);
+
+    btVector3 localInertia(0, 0, 0);
+    if (isDynamic)
+        colShape->calculateLocalInertia(mass, localInertia);
+
+    startTransform.setOrigin(btVector3(
+            btScalar(0.2),
+            btScalar(2 + .2),
+            btScalar(0.2)));
+
+    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+
+    scene->getTireCollision()->setPhysic( physicWorld.addBody( rbInfo ) );
+
+
+    btBoxShape* colShapeGround = new btBoxShape(btVector3(1.f, 5.f, 20.f));
+
+    btTransform startTransformGround;
+    startTransformGround.setIdentity();
+    btScalar massGround(0.f);
+    bool isDynamicGround = (massGround != 0.f);
+
+    btVector3 localInertiaGround(0, 0, 0);
+    if (isDynamicGround)
+        colShapeGround->calculateLocalInertia(massGround, localInertiaGround);
+
+    startTransformGround.setOrigin(btVector3(
+            btScalar(5.0),
+            btScalar(-150.0),
+            btScalar(-300.0)));
+
+    btDefaultMotionState* myMotionStateGround = new btDefaultMotionState(startTransformGround);
+
+    btRigidBody::btRigidBodyConstructionInfo rbInfoGround(massGround, myMotionStateGround, colShapeGround, localInertiaGround);
+
+    physicWorld.addBody( rbInfoGround );
+}
+
+std::unique_ptr<Mesh> OpenglSimulationWidget::makeModel( const QString &filename )
+{
+    makeCurrent();
+    return std::make_unique<Mesh>( Model::readPSK( filename ) );
 }
 
 void OpenglSimulationWidget::initializeGL()
@@ -57,9 +117,34 @@ void OpenglSimulationWidget::paintGL()
 
     ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "view" ), view );
     ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "projection" ), projection );
+    auto now = std::chrono::high_resolution_clock::now();
+    float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
+    prevTime = now;
+    physicWorld.update( dt );
 
-    QMatrix4x4 model;
-    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
+    if( scene->getBodyObject() != nullptr )
+    {
+        Object *object = scene->getBodyObject();
+        PhysObject *physObject = scene->getTireCollision();
+        QMatrix4x4 model;
+        auto pos = physObject->getPosition();
+        model.translate( physObject->getPosition() );
+        model.rotate( physObject->getRotation() );
+        ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
+//        GLint current_vao;
+//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+        scene->getBodyObject()->getModel()->bindVAO();
+//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+        for( size_t i=0; i<object->getModel()->getTexturesSize(); i++ )
+        {
+            size_t index = object->getModel()->getTextureQueue( i );
+            object->getModel()->bindTexture( i );
+            ShaderProgram->setUniformValue( "texture", 0 );
+            ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
+            f->glDrawElements( GL_TRIANGLES, object->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr );
+        }
+        scene->getBodyObject()->getModel()->releaseVAO();
+    }
 
     if( keys[Qt::Key_Up] )
     {

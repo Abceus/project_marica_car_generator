@@ -48,7 +48,7 @@ void MainOpenglWidget::initializeGL()
 
     ShaderProgram->bind();
 
-    scene = std::make_unique<Scene>();
+    scene = std::make_shared<Scene>();
     makeCurrent();
 }
 
@@ -74,7 +74,10 @@ void MainOpenglWidget::paintGL()
         model.translate( object->getPosition() );
         ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
 
+//        GLint current_vao;
+//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
         scene->getBodyObject()->getModel()->bindVAO();
+//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
         for( size_t i=0; i<object->getModel()->getTexturesSize(); i++ )
         {
             size_t index = object->getModel()->getTextureQueue( i );
@@ -105,6 +108,11 @@ void MainOpenglWidget::setBodyObject( Object *object )
 {
     scene->setBodyObject( object );
 }
+
+//void MainOpenglWidget::setTireCollision( PhysObject *physObject )
+//{
+//    scene->setTireCollision( std::shared_ptr<PhysObject>( physObject ) );
+//}
 
 Object* MainOpenglWidget::getBodyObject() const
 {

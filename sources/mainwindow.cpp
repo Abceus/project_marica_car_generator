@@ -6,6 +6,7 @@
 #include "openglsimulationwidget.h"
 #include "model.h"
 #include "object.h"
+#include "physobject.h"
 
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
@@ -29,7 +30,7 @@ void MainWindow::on_meshOpenButton_clicked()
     {
         std::unique_ptr<Mesh> newModel = ui->mainOpenGLWidget->makeModel( fileName );
         size_t textureSize = newModel->getTexturesSize();
-        ui->mainOpenGLWidget->setBodyObject( new Object(std::move( newModel ) ) );
+        ui->mainOpenGLWidget->setBodyObject( new Object( std::move( newModel ) ) );
 
         if( fileName.size() > 50 )
         {
@@ -48,8 +49,15 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_startSimulationButton_clicked()
 {
+    // TODO: leak
     auto w = new OpenglSimulationWidget();
     w->show();
+    w->rewriteThisShit( QString( "/home/develop/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ) );
+}
+
+
+void MainWindow::on_tireColiisionOpenButton_clicked()
+{
 }
 
 void MainWindow::on_skinOpenButton_clicked(int i)

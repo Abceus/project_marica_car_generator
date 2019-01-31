@@ -30,17 +30,18 @@ public:
     explicit MainOpenglWidget( QWidget *parent = nullptr );
     ~MainOpenglWidget() override = default;
 
-    void wheelEvent(QWheelEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    void wheelEvent( QWheelEvent *event ) override;
+    void mousePressEvent( QMouseEvent *event ) override;
+    void mouseMoveEvent( QMouseEvent *event ) override;
+    void mouseReleaseEvent( QMouseEvent *event ) override;
 
-    void setBodyObject(Object *object);
+    void setBodyObject( Object *object );
+//    void setTireCollision( PhysObject *physObject );
     std::unique_ptr<Mesh> makeModel( const QString &filename );
     Object* getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 private:
-    std::unique_ptr<Scene> scene;
+    std::shared_ptr<Scene> scene;
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;

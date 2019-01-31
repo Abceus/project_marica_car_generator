@@ -18,6 +18,16 @@ Object* Scene::getBodyObject() const
     return body.get();
 }
 
+void Scene::setTireCollision( PhysObject* tireCollision )
+{
+    this->m_tireCollision = std::unique_ptr<PhysObject>( tireCollision );
+}
+
+PhysObject* Scene::getTireCollision()
+{
+    return m_tireCollision.get();
+}
+
 QVector3D Scene::getCameraLocation()
 {
     return camera_location;
