@@ -1,12 +1,11 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <vector>
 
-#include <QString>
-
 #include <GL/glu.h>
 #include <GL/gl.h>
+
+#include <QString>
 
 struct Vertex
 {
@@ -28,5 +27,3 @@ struct Model
     std::vector<QString> materials;
     unsigned VAOsize;
 };
-
-#endif // MODEL_H

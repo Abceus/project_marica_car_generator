@@ -1,9 +1,8 @@
-
-#include <includes/object.h>
-
 #include "object.h"
 
-Object::Object(std::unique_ptr<Mesh>&& model, float x, float y, float z) : model(std::move(model)), position(x, y, z)
+Object::Object( std::unique_ptr<Mesh>&& model, float x, float y, float z )
+        : model( std::move( model ) )
+        , position( x, y, z )
 {
 
 }

@@ -1,5 +1,4 @@
-#ifndef UNANIMATION_H
-#define UNANIMATION_H
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -16,29 +15,20 @@ struct VChunkHeader
 };
 
 //An Euclidian vector denoting a position in 3D space, corresponding to the UnrealScript struct type Vector. Length: 12 bytes.
-
 struct VPoint
 {
     float X;
     float Y;
     float Z;
 
-    VPoint operator+(VPoint op2);
-    VPoint operator-(VPoint op2);
-    VPoint operator+=(VPoint op2);
+    VPoint operator+( VPoint op2 );
+    VPoint operator-( VPoint op2 );
+    VPoint operator+=( VPoint op2 );
     friend ostream &operator<<(ostream &stream, VPoint o);
-    VPoint(float vX=0.f, float vY=0.f, float vZ=0.f)
-    {
-        X = vX;
-        Y = vY;
-        Z = vZ;
-    }
+    VPoint( float vX = 0.f, float vY = 0.f, float vZ = 0.f );
 };
 
-
 //Associates skeletal mesh points with a UV coordinate of a material.Length: 12 bytes.
-
-
 struct VVertex
 {
     unsigned short int 	PointIndex; 	//Index of the point in the points list.
@@ -48,8 +38,6 @@ struct VVertex
     unsigned char		Reserved; 		//Padding byte to get to a multiple of four bytes for the structure.
 };
 
-
-
 //Combined three vertices to a triangle face.Length: 12 bytes.
 struct VTriangle
 {
@@ -58,7 +46,6 @@ struct VTriangle
     unsigned char		AuxMatIndex; 		//Index of an additional material in the materials list. (seems unused)
     int					SmoothingGroups; 	//Bit field of smoothing groups this face belongs to. (Does the engine actually care about this for skeletal meshes ? )
 };
-
 
 //Specifies a surface material.Length: 88 bytes.
 struct VMaterial
@@ -72,7 +59,6 @@ struct VMaterial
     int		LodStyle;				//? ? ? (seems unused)
 };
 
-
 //A unit quaternion denoting an orientation or rotation in 3D space, corresponding to the UnrealScript struct type Quat.Length : 16 bytes.
 struct VQuat
 {
@@ -81,19 +67,12 @@ struct VQuat
     float	Z;
     float	W;
 
-    VQuat operator+(VQuat op2);
-    VQuat operator-(VQuat op2);
-    VQuat operator+=(VQuat op2);
-    friend ostream &operator<<(ostream &stream, VQuat o);
-    VQuat(float vX=0.f, float vY=0.f, float vZ=0.f, float vW=0.f)
-    {
-        X = vX;
-        Y = vY;
-        Z = vZ;
-        W = vW;
-    }
+    VQuat operator+( VQuat op2 );
+    VQuat operator-( VQuat op2 );
+    VQuat operator+=( VQuat op2 );
+    friend ostream& operator<<( ostream& stream, VQuat o );
+    VQuat( float vX = 0.f, float vY = 0.f, float vZ = 0.f, float vW = 0.f );
 };
-
 
 //A helper struct for storing the bone position.Length : 44 bytes.
 struct VJointPos
@@ -105,13 +84,12 @@ struct VJointPos
     float	YSize;			//? ? ? (seems unused)
     float	ZSize;			//? ? ? (seems unused)
 
-    VJointPos operator+(VJointPos op2);
-    VJointPos operator-(VJointPos op2);
-    VJointPos operator+=(VJointPos op2);
-    VJointPos& operator=(VJointPos op2);
-    friend ostream &operator<<(ostream &stream, VJointPos o);
+    VJointPos operator+( VJointPos op2 );
+    VJointPos operator-( VJointPos op2 );
+    VJointPos operator+=( VJointPos op2 );
+    VJointPos& operator=( VJointPos op2 );
+    friend ostream& operator<<( ostream& stream, VJointPos o );
 };
-
 
 //Specifies a node in the skeletal bone tree for both the skeletal mesh and its animations.Length: 120 bytes.
 struct VBone
@@ -123,7 +101,6 @@ struct VBone
     VJointPos 	BonePos; 		//Bone position information.
 };
 
-
 //Specifies the influence of a bone's movement (through animation or otherwise) on a skeletal mesh point's position.Length: 12 bytes.
 struct VRawBoneInfluence
 {
@@ -131,5 +108,3 @@ struct VRawBoneInfluence
     int		PointIndex; 	//Index of the affected point in the points list.
     int		BoneIndex; 		//Index of the affecting bone in the bones list.
 };
-
-#endif // UNANIMATION_H
