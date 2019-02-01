@@ -5,7 +5,9 @@ language:
 compiler:
   - gcc
 before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   - sudo apt-get update
+  - sudo apt-get install gcc-snapshot
   - sudo apt-get install qtbase5-dev gcc-7 g++-7 cmake
 script:
   # Link gcc-6 and g++-6 to their standard commands
