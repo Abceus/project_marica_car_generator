@@ -23,4 +23,5 @@ script:
   - gcc -v && g++ -v && cmake --version
   # Run your build commands next
   - mkdir build
+  - cmake ./build
   - cmake --build ./build --target install
