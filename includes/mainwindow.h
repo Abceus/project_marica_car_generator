@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include "openglsimulationwidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,4 +22,5 @@ private slots:
     void on_skinOpenButton_clicked(int i);
 private:
     Ui::MainWindow *ui;
+    OpenglSimulationWidget simulationWidget;
 };

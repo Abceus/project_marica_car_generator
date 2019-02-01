@@ -160,3 +160,8 @@ void Mesh::bindTexture( size_t index )
 {
     this->textures.at( index )->bind();
 }
+
+Model Mesh::getModel()
+{
+    return model;
+}

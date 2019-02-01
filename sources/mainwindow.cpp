@@ -3,7 +3,6 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "openglsimulationwidget.h"
 #include "model.h"
 #include "object.h"
 #include "physobject.h"
@@ -49,10 +48,12 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_startSimulationButton_clicked()
 {
-    // TODO: leak
-    auto w = new OpenglSimulationWidget();
-    w->show();
-    w->rewriteThisShit( QString( "/home/develop/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ) );
+    if( simulationWidget.isHidden() )
+    {
+        simulationWidget.show();
+        simulationWidget.rewriteThisShit( QString(
+                "/home/develop/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ));
+    }
 }
 
 

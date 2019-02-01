@@ -34,6 +34,7 @@ public:
     GLsizei getVAOsize();
     size_t getTextureQueue( size_t index );
     void setTextureQueue( size_t index, float average );
+    Model getModel();
 private:
     std::unique_ptr<QOpenGLVertexArrayObject> VAO;
     std::unique_ptr<QOpenGLBuffer> VBO, EBO;
@@ -42,4 +43,5 @@ private:
     GLsizei VAOsize;
     void sortTextures();
     float averageAlpha( QImage image );
+    Model model;
 };

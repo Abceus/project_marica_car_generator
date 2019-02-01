@@ -13,5 +13,5 @@ public:
     virtual QVector3D getPosition() const;
 protected:
     QVector3D position;
-    std::unique_ptr<Mesh> model;
+    std::unique_ptr<Mesh> m_model;
 };
