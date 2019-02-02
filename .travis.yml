@@ -23,16 +23,19 @@ matrix:
         - qmake --version
         - qtchooser -print-env
         - qtchooser -l
-        - cmake -DQt5Widgets_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/ ..
+        - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
         - cmake --build . --target install
     - script:
-        # Swup
+        # Setup
         - export CC=/usr/bin/gcc-7
         - export CXX=/usr/bin/g++-7
         - QT_SELECT=5
         # Run your build commands next
         - mkdir qmake_build
         - cd ./qmake_build
+        - qmake --version
+        - qtchooser -print-env
+        - qtchooser -l
         - qmake --version
         - qmake ..
         - make
