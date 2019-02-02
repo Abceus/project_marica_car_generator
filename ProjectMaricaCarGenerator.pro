@@ -8,14 +8,17 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+!defined(BULLET_INCLUDE_DIRECTORY, var)
+{
+    BULLET_INCLUDE_DIRECTORY = "/usr/include/bullet"
+}
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
-INCLUDEPATH += includes third_party/bullet
+INCLUDEPATH += includes $$BULLET_INCLUDE_DIRECTORY
 
-#LIBS += -lglu32 -lopengl32
-LIBS += $$PWD/third_party/bullet/libs/BulletDynamics/libBulletDynamics.a \
-        $$PWD/third_party/bullet/libs/BulletCollision/libBulletCollision.a \
-        $$PWD/third_party/bullet/libs/LinearMath/libLinearMath.a
+LIBS += -lBulletDynamics \
+        -lBulletCollision \
+        -lLinearMath
 
 CONFIG += c++14
 
