@@ -13,24 +13,26 @@ before_install:
 matrix:
   include:
     - script:
-      # Setup
-      - export CC=/usr/bin/gcc-7
-      - export CXX=/usr/bin/g++-7
-      - QT_SELECT=5
-      # Run your build commands next
-      - mkdir cmake_build
-      - cd ./cmake_build
-      - qmake --version
-      - cmake -DQt5Widgets_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/ ..
-      - cmake --build . --target install
+        # Setup
+        - export CC=/usr/bin/gcc-7
+        - export CXX=/usr/bin/g++-7
+        - export QT_SELECT="opt-qt511"
+        # Run your build commands next
+        - mkdir cmake_build
+        - cd ./cmake_build
+        - qmake --version
+        - qtchooser -print-env
+        - qtchooser -l
+        - cmake -DQt5Widgets_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/ ..
+        - cmake --build . --target install
     - script:
-      # Swup
-      - export CC=/usr/bin/gcc-7
-      - export CXX=/usr/bin/g++-7
-      - QT_SELECT=5
-      # Run your build commands next
-      - mkdir qmake_build
-      - cd ./qmake_build
-      - qmake --version
-      - qmake ..
-      - make
+        # Swup
+        - export CC=/usr/bin/gcc-7
+        - export CXX=/usr/bin/g++-7
+        - QT_SELECT=5
+        # Run your build commands next
+        - mkdir qmake_build
+        - cd ./qmake_build
+        - qmake --version
+        - qmake ..
+        - make
