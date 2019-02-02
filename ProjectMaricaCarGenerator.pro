@@ -10,9 +10,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
-INCLUDEPATH += includes
+INCLUDEPATH += includes third_party/bullet
 
 #LIBS += -lglu32 -lopengl32
+LIBS += $$PWD/third_party/bullet/libs/BulletDynamics/libBulletDynamics.a \
+        $$PWD/third_party/bullet/libs/BulletCollision/libBulletCollision.a \
+        $$PWD/third_party/bullet/libs/LinearMath/libLinearMath.a
 
 CONFIG += c++14
 
@@ -35,8 +38,11 @@ SOURCES += sources/main.cpp\
     sources/scene.cpp \
     sources/unanimation.cpp \
     sources/object.cpp \
+    sources/resource_manager.cpp \
     sources/mesh.cpp \
-    sources/openglsimulationwidget.cpp
+    sources/openglsimulationwidget.cpp \
+    sources/physobject.cpp \
+    sources/physicworld.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -44,8 +50,11 @@ HEADERS  += includes/mainwindow.h \
     includes/model.h \
     includes/unanimation.h \
     includes/object.h \
+    includes/resource_manager.h \
     includes/mesh.h \
-    includes/openglsimulationwidget.h
+    includes/openglsimulationwidget.h \
+    includes/physobject.h \
+    includes/physicworld.h
 
 FORMS    += ui/mainwindow.ui
 
