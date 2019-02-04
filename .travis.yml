@@ -2,10 +2,10 @@ language: c++
 matrix:
   include:
     - os: linux
-    - dist: xenial
-    - sudo: required
-    - env: QT_SELECT="opt-qt511"
-    - addons:
+      dist: xenial
+      sudo: required
+      env: QT_SELECT="opt-qt511"
+      addons:
         apt:
           sources:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
@@ -15,22 +15,22 @@ matrix:
             - qtbase5-dev
             - qt511-meta-full
             - libbullet-dev
-    - compiler:
-      - gcc
-      - clang
-    - matrix:
-      include:
-        - name: "cmake"
-          script:
-            - export QT_SELECT="opt-qt511"
-            - mkdir build
-            - cd ./build
-            - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
-            - cmake --build . --target install
-        - name: "qmake"
-          script:
-            - mkdir qmake_build
-            - cd ./qmake_build
-            - qmake ..
-            - make
-            - make install
+      compiler:
+        - gcc
+        - clang
+      matrix:
+        include:
+          - name: "cmake"
+            script:
+              - export QT_SELECT="opt-qt511"
+              - mkdir build
+              - cd ./build
+              - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
+              - cmake --build . --target install
+          - name: "qmake"
+            script:
+              - mkdir qmake_build
+              - cd ./qmake_build
+              - qmake ..
+              - make
+              - make install
