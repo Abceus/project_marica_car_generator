@@ -14,6 +14,10 @@ qt5_wrap_cpp(MOC_FOR_UI
         includes/mainopenglwidget.h
         includes/openglsimulationwidget.h)
 
+if(DEFINED BULLET_LIBRARY_DIRECTORY)
+    link_directories(${BULLET_LIBRARY_DIRECTORY})
+endif()
+
 add_executable( ProjectMaricaCarGenerator
         ui/mainwindow.ui
         sources/main.cpp

@@ -61,7 +61,7 @@ void MainWindow::on_tireColiisionOpenButton_clicked()
 {
 }
 
-void MainWindow::on_skinOpenButton_clicked(int i)
+void MainWindow::skinOpenButton_clicked(int i)
 {
     if( ui->mainOpenGLWidget->getBodyObject() != nullptr )
     {
@@ -103,7 +103,7 @@ void MainWindow::addButtonToArrayLayout()
     newButton->setMinimumSize( 289, 23 );
     newButton->setGeometry( 1, 1, 289, 23 );
 
-    connect( newButton, &QPushButton::released, [=]{ this->on_skinOpenButton_clicked( count ); } );
+    connect( newButton, &QPushButton::released, [=]{ this->skinOpenButton_clicked( count ); } );
     this->ui->skinButtonArrayLayout->addWidget( newButton );
     newButton->show();
     this->ui->skinButtonArrayLayout->update();

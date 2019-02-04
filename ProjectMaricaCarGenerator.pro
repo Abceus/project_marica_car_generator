@@ -8,13 +8,16 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-!defined(BULLET_INCLUDE_DIRECTORY, var)
-{
+!defined(BULLET_INCLUDE_DIRECTORY, var) {
     BULLET_INCLUDE_DIRECTORY = "/usr/include/bullet"
 }
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
 INCLUDEPATH += includes $$BULLET_INCLUDE_DIRECTORY
+
+defined(BULLET_LIBRARY_DIRECTORY, var) {
+    LIBS += -L$$BULLET_LIBRARY_DIRECTORY
+}
 
 LIBS += -lBulletDynamics \
         -lBulletCollision \

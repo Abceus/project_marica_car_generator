@@ -19,7 +19,7 @@ private slots:
     void on_meshOpenButton_clicked();
     void on_startSimulationButton_clicked();
     void on_tireColiisionOpenButton_clicked();
-    void on_skinOpenButton_clicked(int i);
+    void skinOpenButton_clicked(int i);
 private:
     Ui::MainWindow *ui;
     OpenglSimulationWidget simulationWidget;
