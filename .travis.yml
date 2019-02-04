@@ -1,8 +1,10 @@
 language: c++
 matrix:
   include:
-    - os: linux
+    - name: "linux cmake gcc"
+      os: linux
       dist: xenial
+      compiler: gcc
       sudo: required
       env: QT_SELECT="opt-qt511"
       addons:
@@ -15,22 +17,76 @@ matrix:
             - qtbase5-dev
             - qt511-meta-full
             - libbullet-dev
-      compiler:
-        - gcc
-        - clang
-      matrix:
-        include:
-          - name: "cmake"
-            script:
-              - export QT_SELECT="opt-qt511"
-              - mkdir build
-              - cd ./build
-              - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
-              - cmake --build . --target install
-          - name: "qmake"
-            script:
-              - mkdir qmake_build
-              - cd ./qmake_build
-              - qmake ..
-              - make
-              - make install
+      script:
+        - mkdir build
+        - cd ./build
+        - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
+        - cmake --build . --target install
+
+    - name: "linux qmake gcc"
+      os: linux
+      dist: xenial
+      compiler: gcc
+      sudo: required
+      env: QT_SELECT="opt-qt511"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: "ppa:beineri/opt-qt-5.11.1-xenial"
+          update: true
+          packages:
+            - qtbase5-dev
+            - qt511-meta-full
+            - libbullet-dev
+      script:
+        - mkdir build
+        - cd ./build
+        - qmake ..
+        - make
+        - make install
+
+    - name: "linux cmake clang"
+      os: linux
+      dist: xenial
+      compiler: clang
+      sudo: required
+      env: QT_SELECT="opt-qt511"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: "ppa:beineri/opt-qt-5.11.1-xenial"
+          update: true
+          packages:
+            - qtbase5-dev
+            - qt511-meta-full
+            - libbullet-dev
+      script:
+        - mkdir build
+        - cd ./build
+        - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
+        - cmake --build . --target install
+
+    - name: "linux qmake clang"
+      os: linux
+      dist: xenial
+      compiler: clang
+      sudo: required
+      env: QT_SELECT="opt-qt511"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: "ppa:beineri/opt-qt-5.11.1-xenial"
+          update: true
+          packages:
+            - qtbase5-dev
+            - qt511-meta-full
+            - libbullet-dev
+      script:
+        - mkdir build
+        - cd ./build
+        - qmake ..
+        - make
+        - make install
