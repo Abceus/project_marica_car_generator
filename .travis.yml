@@ -4,11 +4,13 @@ language:
   - c++
 addons:
   apt:
-    - sourceline "ppa:ubuntu-toolchain-r/test"
-    - sourceline "ppa:beineri/opt-qt-5.11.1-xenial"
-  package:
-    - qt511-meta-full
-    - libbullet-dev
+    sources:
+      - sourceline "ppa:ubuntu-toolchain-r/test"
+      - sourceline "ppa:beineri/opt-qt-5.11.1-xenial"
+    update: true
+    packages:
+      - qt511-meta-full
+      - libbullet-dev
 matrix:
   include:
     - os: linux
