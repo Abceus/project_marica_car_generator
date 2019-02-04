@@ -2,32 +2,48 @@ dist: xenial
 sudo: required
 language:
   - c++
-compiler:
-  - gcc
-before_install:
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo add-apt-repository -y ppa:beineri/opt-qt-5.11.1-xenial
-  - sudo apt-get update
-  - sudo apt-get install gcc-snapshot
-  - sudo apt-get install qtbase5-dev gcc-7 g++-7 cmake qt511-meta-full libbullet-dev
+addons:
+  apt:
+    - sourceline "ppa:ubuntu-toolchain-r/test"
+    - sourceline "ppa:beineri/opt-qt-5.11.1-xenial"
+  package:
+    - qt511-meta-full
+    - libbullet-dev
 matrix:
   include:
-    - script:
-        # Setup
-        - export CC=/usr/bin/gcc-7
-        - export CXX=/usr/bin/g++-7
+    - os: linux
+      compiler: gcc
+      env: build_name=gcc_cmake
+      script:
         - export QT_SELECT="opt-qt511"
-        # Run your build commands next
-        - mkdir cmake_build
-        - cd ./cmake_build
+        - mkdir build
+        - cd ./build
         - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
         - cmake --build . --target install
-    - script:
-        # Setup
-        - export CC=/usr/bin/gcc-7
-        - export CXX=/usr/bin/g++-7
+    - os: linux
+      compiler: gcc
+      env: build_name=gcc_qmake
+      script:
         - export QT_SELECT="opt-qt511"
-        # Run your build commands next
+        - mkdir qmake_build
+        - cd ./qmake_build
+        - qmake ..
+        - make
+        - make install
+    - os: linux
+      compiler: clang
+      env: build_name=clang_cmake
+      script:
+        - export QT_SELECT="opt-qt511"
+        - mkdir build
+        - cd ./build
+        - cmake -DQt5Widgets_DIR=/opt/qt511/lib/cmake/Qt5Widgets/ ..
+        - cmake --build . --target install
+    - os: linux
+      compiler: clang
+      env: build_name=clang_qmake
+      script:
+        - export QT_SELECT="opt-qt511"
         - mkdir qmake_build
         - cd ./qmake_build
         - qmake ..
