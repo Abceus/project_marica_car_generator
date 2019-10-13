@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <QtMath>
 
 #include "mainopenglwidget.h"
 
@@ -8,12 +9,13 @@ MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     setMouseTracking( true );
     leftPressed = false;
     rightPressed = false;
+    setCursor( Qt::CrossCursor );
 }
 
 void MainOpenglWidget::initializeGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
+    f->glClearColor( 0.25f, 0.25f, 0.25f, 1.0f );
 
     // Enable depth buffer
     f->glEnable( GL_DEPTH_TEST );
@@ -61,8 +63,8 @@ void MainOpenglWidget::paintGL()
 
     QMatrix4x4 view;
     QQuaternion rotation = QQuaternion::fromEulerAngles( scene->getCameraRotation() );
-    view.translate( scene->getCameraLocation() );
     view.rotate( rotation );
+    view.translate( scene->getCameraLocation() );
 
     ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "view" ), view );
     ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "projection" ), projection );
@@ -124,24 +126,19 @@ void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
     scene->getBodyObject()->getModel()->setTexture( filename, index );
 }
 
-void MainOpenglWidget::wheelEvent( QWheelEvent *event )
-{
-    QVector3D now_camera_location = scene->getCameraLocation();
-    now_camera_location.setZ( now_camera_location.z() + event->delta()/100.f );
-    scene->setCameraLocation( now_camera_location );
-}
-
 void MainOpenglWidget::mousePressEvent( QMouseEvent *event )
 {
     if( event->button() == Qt::LeftButton )
     {
         leftClickPos = event->pos();
         leftPressed = true;
+        setCursor(Qt::BlankCursor);
     }
     else if( event->button() == Qt::RightButton )
     {
         rightClickPos = event->pos();
         rightPressed = true;
+        setCursor(Qt::BlankCursor);
     }
 }
 
@@ -150,30 +147,54 @@ void MainOpenglWidget::mouseReleaseEvent( QMouseEvent *event )
     if( event->button() == Qt::LeftButton )
     {
         leftPressed = false;
+        if( !rightPressed )
+        {
+            setCursor(Qt::CrossCursor);
+        }
     }
     else if( event->button() == Qt::RightButton )
     {
         rightPressed = false;
+        if( !leftPressed )
+        {
+            setCursor(Qt::CrossCursor);
+        }
     }
 }
 
 void MainOpenglWidget::mouseMoveEvent( QMouseEvent *event )
 {
-    if( leftPressed )
+    if( leftPressed && rightPressed )
+    {
+        QVector3D currentCameraLocation = scene->getCameraLocation();
+        currentCameraLocation.setY( currentCameraLocation.y() - ( leftClickPos.y() - event->y() ) * 10 );
+        auto c = cursor();
+        c.setPos( mapToGlobal( leftClickPos ) );
+        setCursor(c);
+        scene->setCameraLocation( currentCameraLocation );
+    }
+    else if( leftPressed )
     {
         QVector3D camera_rotation_now = scene->getCameraRotation();
-        camera_rotation_now.setY( camera_rotation_now.y() + ( leftClickPos.x() - event->x() ) );
-        camera_rotation_now.setX( camera_rotation_now.x() + ( leftClickPos.y() - event->y() ) ) ;
-        leftClickPos = event->pos();
+        camera_rotation_now.setY( camera_rotation_now.y() - ( leftClickPos.x() - event->x() ) / 5 );
+        auto cameraLocationNow = scene->getCameraLocation();
+        cameraLocationNow.setZ( cameraLocationNow.z() + qCos( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
+        cameraLocationNow.setX( cameraLocationNow.x() - qSin( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
+        auto c = cursor();
+        c.setPos( mapToGlobal( leftClickPos ) );
+        setCursor(c);
         scene->setCameraRotation( camera_rotation_now );
+        scene->setCameraLocation( cameraLocationNow );
     }
     else if( rightPressed )
     {
-        QVector3D camera_location_now = scene->getCameraLocation();
-        camera_location_now.setY( camera_location_now.y() + ( rightClickPos.y() - event->y() ) / 10.f );
-        camera_location_now.setX( camera_location_now.x() - ( rightClickPos.x() - event->x() ) / 10.f );
-        rightClickPos = event->pos();
-        scene->setCameraLocation( camera_location_now );
+        QVector3D camera_rotation_now = scene->getCameraRotation();
+        camera_rotation_now.setY( camera_rotation_now.y() - ( rightClickPos.x() - event->x() ) / 5 );
+        camera_rotation_now.setX( camera_rotation_now.x() - ( rightClickPos.y() - event->y() ) / 5 );
+        auto c = cursor();
+        c.setPos( mapToGlobal( rightClickPos ) );
+        setCursor(c);
+        scene->setCameraRotation( camera_rotation_now );
     }
 }
 

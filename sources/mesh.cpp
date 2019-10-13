@@ -51,7 +51,14 @@ Mesh::Mesh( const Model& model )
     {
         addTexture( material );
     }
+
+    this->model = model;
 }
+
+//Mesh::Mesh(Model &&model)
+//{
+
+//}
 
 Mesh::~Mesh()
 {

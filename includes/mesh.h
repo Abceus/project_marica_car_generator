@@ -24,6 +24,7 @@ class Mesh
 public:
     Mesh();
     Mesh( const Model& model );
+//    Mesh( Model&& model );
     ~Mesh();
     void bindVAO();
     void releaseVAO();

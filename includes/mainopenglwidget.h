@@ -30,7 +30,6 @@ public:
     explicit MainOpenglWidget( QWidget *parent = nullptr );
     ~MainOpenglWidget() override = default;
 
-    void wheelEvent( QWheelEvent *event ) override;
     void mousePressEvent( QMouseEvent *event ) override;
     void mouseMoveEvent( QMouseEvent *event ) override;
     void mouseReleaseEvent( QMouseEvent *event ) override;

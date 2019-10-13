@@ -52,7 +52,7 @@ void MainWindow::on_startSimulationButton_clicked()
     {
         simulationWidget.show();
         simulationWidget.rewriteThisShit( QString(
-                "/home/develop/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ));
+                "/home/jamil/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ));
     }
 }
 

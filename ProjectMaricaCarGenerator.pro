@@ -48,7 +48,8 @@ SOURCES += sources/main.cpp\
     sources/mesh.cpp \
     sources/openglsimulationwidget.cpp \
     sources/physobject.cpp \
-    sources/physicworld.cpp
+    sources/physicworld.cpp \
+    sources/grid.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -60,13 +61,14 @@ HEADERS  += includes/mainwindow.h \
     includes/mesh.h \
     includes/openglsimulationwidget.h \
     includes/physobject.h \
-    includes/physicworld.h
+    includes/physicworld.h \
+    includes/grid.h
 
 FORMS    += ui/mainwindow.ui
 
 DISTFILES += \
-    resources/defaultfragmentshader.frag \
-    resources/defaultvertexshader.vert
+    resources/shaders/defaultfragmentshader.frag \
+    resources/shaders/defaultvertexshader.vert
 
 win32 {
     build_pass: CONFIG(debug, debug|release) {
@@ -83,7 +85,7 @@ unix {
 
 ProjectMaricaCarGenerator.path = $$DESTDIR
 
-resources.path   = $$DESTDIR
 resources.files  = resources
+resources.path   = $$DESTDIR
 
 INSTALLS       += resources
