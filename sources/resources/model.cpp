@@ -4,8 +4,8 @@
 #include <QOpenGLContext>
 #include <QDebug>
 
-#include "model.h"
-#include "unanimation.h"
+#include "resources/model.h"
+#include "resources/unanimation.h"
 
 Model Model::readPSK( const QString &filename )
 {

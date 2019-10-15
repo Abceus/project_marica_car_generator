@@ -3,9 +3,9 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "model.h"
+#include "resources/model.h"
 #include "object.h"
-#include "physobject.h"
+#include "physics/physobject.h"
 
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
@@ -27,9 +27,10 @@ void MainWindow::on_meshOpenButton_clicked()
 
     if( fileName != "" )
     {
-        std::unique_ptr<Mesh> newModel = ui->mainOpenGLWidget->makeModel( fileName );
-        size_t textureSize = newModel->getTexturesSize();
-        ui->mainOpenGLWidget->setBodyObject( new Object( std::move( newModel ) ) );
+//        Mesh newModel = ui->mainOpenGLWidget->makeModel( fileName );
+//        size_t textureSize = newModel->getTexturesSize();
+//        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( std::move( newModel ) ) );
+        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( Model::readPSK( fileName ) ) ) );
 
         if( fileName.size() > 50 )
         {
@@ -39,10 +40,10 @@ void MainWindow::on_meshOpenButton_clicked()
 
         this->clearSkinArrayLayout();
 
-        for( int i = 0; i < textureSize; i++ )
-        {
-            this->addButtonToArrayLayout();
-        }
+//        for( int i = 0; i < textureSize; i++ )
+//        {
+//            this->addButtonToArrayLayout();
+//        }
     }
 }
 

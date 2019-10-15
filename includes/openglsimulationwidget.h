@@ -19,8 +19,8 @@
 #include <QWheelEvent>
 #include <QMatrix4x4>
 
-#include "physicworld.h"
-#include "scene.h"
+#include "physics/physicworld.h"
+#include "render_system/scene.h"
 
 class OpenglSimulationWidget :public QOpenGLWidget
 {
@@ -30,14 +30,13 @@ public:
     ~OpenglSimulationWidget() override = default;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
-    std::unique_ptr<QOpenGLShaderProgram> ShaderProgram;
     void rewriteThisShit( const QString &filename );
     std::unique_ptr<Mesh> makeModel( const QString &filename );
 private:
     QMatrix4x4 projection;
     QMap<int, bool> keys;
     PhysicWorld physicWorld;
-    std::shared_ptr<Scene> scene;
+    Scene scene;
     std::chrono::time_point<std::chrono::high_resolution_clock> prevTime;
 protected:
     void initializeGL() override;

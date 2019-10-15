@@ -13,14 +13,13 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QDebug>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLShader>
 #include <QString>
 #include <QWheelEvent>
 #include <QMatrix4x4>
+#include <QSharedPointer>
 
-#include "model.h"
-#include "scene.h"
+#include "resources/model.h"
+#include "render_system/scene.h"
 #include "object.h"
 
 class MainOpenglWidget :public QOpenGLWidget
@@ -34,19 +33,18 @@ public:
     void mouseMoveEvent( QMouseEvent *event ) override;
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
-    void setBodyObject( Object *object );
+    void setBodyObject( QSharedPointer<Object> object );
 //    void setTireCollision( PhysObject *physObject );
     std::unique_ptr<Mesh> makeModel( const QString &filename );
     Object* getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 private:
-    std::shared_ptr<Scene> scene;
+    Scene scene;
+    QSharedPointer<Object> m_body;
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;
     bool rightPressed;
-    QMatrix4x4 projection;
-    std::unique_ptr<QOpenGLShaderProgram> ShaderProgram;
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

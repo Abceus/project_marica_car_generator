@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "unanimation.h"
+#include "resources/unanimation.h"
 
 ostream& operator<<( ostream& stream, VJointPos o )
 {

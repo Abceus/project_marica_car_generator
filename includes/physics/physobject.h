@@ -9,7 +9,7 @@
 class PhysObject : public Object
 {
 public:
-    PhysObject( std::unique_ptr<Mesh>&& model, float x=0.f, float y=0.f, float z=0.f, float maxx=0.f,
+    PhysObject( Model model, float x=0.f, float y=0.f, float z=0.f, float maxx=0.f,
             QVector3D size=QVector3D( 0.f, 0.f, 0.f ) );
     void update( float dt );
     void setPhysic( btRigidBody* newBody );

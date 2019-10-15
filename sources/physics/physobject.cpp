@@ -1,13 +1,12 @@
-#include "physobject.h"
+#include "physics/physobject.h"
 
-PhysObject::PhysObject( std::unique_ptr<Mesh>&& model, float x, float y, float z, float mass, QVector3D size )
-    : Object( std::move( model ), x, y, z )
+PhysObject::PhysObject( Model model, float x, float y, float z, float mass, QVector3D size )
+    : Object( model, x, y, z )
 {
     colShape = std::make_unique<btBoxShape>( btVector3( size.x(), size.y(), size.z() ) );
     colShape = std::make_unique<btConvexHullShape>();
 
-    auto mod = m_model->getModel();
-    auto verts = mod.vertices;
+    auto verts = model.vertices;
     for( auto& vert: verts )
     {
         static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );

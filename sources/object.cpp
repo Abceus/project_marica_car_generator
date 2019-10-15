@@ -1,15 +1,15 @@
 #include "object.h"
 
-Object::Object( std::unique_ptr<Mesh>&& model, float x, float y, float z )
-        : m_model( std::move( model ) )
+Object::Object( Model model, float x, float y, float z )
+        : m_model( model )
         , position( x, y, z )
 {
 
 }
 
-Mesh* Object::getModel() const
+Mesh &Object::getModel()
 {
-    return this->m_model.get();
+    return m_model;
 }
 
 QVector3D Object::getPosition() const

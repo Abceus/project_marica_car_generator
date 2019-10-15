@@ -2,8 +2,8 @@
 
 #include <QFile>
 
-#include "resource_manager.h"
-#include "mesh.h"
+#include "resources/resource_manager.h"
+#include "render_system/mesh.h"
 
 Mesh::Mesh()
         : VAOsize( 0u )
@@ -17,22 +17,21 @@ Mesh::Mesh( const Model& model )
     if(!f || !fe)
         return;
 
-    this->VAO = std::make_unique<QOpenGLVertexArrayObject>();
-    this->VAO->create();
-    this->VBO = std::make_unique<QOpenGLBuffer>( QOpenGLBuffer::VertexBuffer );
-    this->VBO->create();
-    this->VBO->setUsagePattern( QOpenGLBuffer::StaticDraw );
-    this->EBO = std::make_unique<QOpenGLBuffer>( QOpenGLBuffer::IndexBuffer );
-    this->EBO->create();
-    this->EBO->setUsagePattern( QOpenGLBuffer::StaticDraw );
+    VAO.create();
+    VBO = QOpenGLBuffer( QOpenGLBuffer::VertexBuffer );
+    VBO.create();
+    VBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    EBO = QOpenGLBuffer( QOpenGLBuffer::IndexBuffer );
+    EBO.create();
+    EBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
 
-    this->VAO->bind();
+    VAO.bind();
 
-    this->VBO->bind();
-    this->VBO->allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
+    VBO.bind();
+    VBO.allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
 
-    this->EBO->bind();
-    this->EBO->allocate( model.indices.data(), sizeof( Indice )*model.indices.size() );
+    EBO.bind();
+    EBO.allocate( model.indices.data(), sizeof( Indice )*model.indices.size() );
 
     f->glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), nullptr );
     f->glEnableVertexAttribArray( 0 );
@@ -43,28 +42,23 @@ Mesh::Mesh( const Model& model )
             reinterpret_cast<GLvoid*>( offsetof( Vertex, MaterialIndex ) ) );
     fe->glEnableVertexAttribArray( 2 );
 
-    this->VAO->release();
+    VAO.release();
 
-    this->VAOsize = model.VAOsize;
+    VAOsize = model.VAOsize;
 
     for( auto& material: model.materials )
     {
         addTexture( material );
     }
 
-    this->model = model;
+    m_model = model;
 }
-
-//Mesh::Mesh(Model &&model)
-//{
-
-//}
 
 Mesh::~Mesh()
 {
-    VAO->destroy();
-    VBO->destroy();
-    EBO->destroy();
+    VAO.destroy();
+    VBO.destroy();
+    EBO.destroy();
 }
 
 GLsizei Mesh::getVAOsize()
@@ -83,14 +77,14 @@ void Mesh::setTexture( QString filename, size_t index )
     if( !image.isNull() )
     {
         this->setTextureQueue( index, this->averageAlpha( image ) );
-        this->textures[index] = std::make_unique<QOpenGLTexture>( image );
+        this->textures[index]->setData( image );
     }
     else
     {
         //TODO: Load default image from texture manager
         image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
         this->setTextureQueue( index, this->averageAlpha( image ) );
-        this->textures[index] = std::make_unique<QOpenGLTexture>( image );
+        this->textures[index]->setData( image );
     }
     this->sortTextures();
 }
@@ -101,14 +95,14 @@ void Mesh::addTexture( QString filename )
     if( !image.isNull() )
     {
         this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-        this->textures.emplace_back( std::make_unique<QOpenGLTexture>( image ) );
+//        this->textures.emplace_back( QOpenGLTexture( image ) );
     }
     else
     {
         //TODO: Load default image from texture manager
         image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
         this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-        this->textures.emplace_back( std::make_unique<QOpenGLTexture>( image ) );
+        this->textures.append( QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) ) );
     }
     this->sortTextures();
 }
@@ -155,12 +149,12 @@ void Mesh::setTextureQueue( size_t index, float average )
 
 void Mesh::bindVAO()
 {
-    VAO->bind();
+    VAO.bind();
 }
 
 void Mesh::releaseVAO()
 {
-    VAO->release();
+    VAO.release();
 }
 
 void Mesh::bindTexture( size_t index )
@@ -170,5 +164,5 @@ void Mesh::bindTexture( size_t index )
 
 Model Mesh::getModel()
 {
-    return model;
+    return m_model;
 }

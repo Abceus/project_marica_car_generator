@@ -15,16 +15,16 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#include <QSharedPointer>
 
-#include "unanimation.h"
-#include "model.h"
+#include "resources/unanimation.h"
+#include "resources/model.h"
 
 class Mesh
 {
 public:
     Mesh();
     Mesh( const Model& model );
-//    Mesh( Model&& model );
     ~Mesh();
     void bindVAO();
     void releaseVAO();
@@ -37,12 +37,12 @@ public:
     void setTextureQueue( size_t index, float average );
     Model getModel();
 private:
-    std::unique_ptr<QOpenGLVertexArrayObject> VAO;
-    std::unique_ptr<QOpenGLBuffer> VBO, EBO;
-    std::vector<std::unique_ptr<QOpenGLTexture>> textures;
+    QOpenGLVertexArrayObject VAO;
+    QOpenGLBuffer VBO, EBO;
+    QVector<QSharedPointer<QOpenGLTexture>> textures;
     std::vector<std::pair<size_t, float>> textureQueue;
     GLsizei VAOsize;
     void sortTextures();
     float averageAlpha( QImage image );
-    Model model;
+    Model m_model;
 };

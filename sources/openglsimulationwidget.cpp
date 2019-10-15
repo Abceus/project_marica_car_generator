@@ -2,7 +2,7 @@
 
 OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
         : QOpenGLWidget( parent )
-        , scene( std::make_unique<Scene>() )
+        , scene()
         , prevTime( std::chrono::high_resolution_clock::now() )
 {
 }
@@ -11,33 +11,33 @@ OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
 void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
 {
 //    scene->setBodyObject( new Object( makeModel( filename ) ) );
-    scene->setTireCollision( new PhysObject( std::move( makeModel( filename ) ), 0.f, 0.f, -300.f, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
+//    scene.setTireCollision( new PhysObject( std::move( makeModel( filename ) ), 0.f, 0.f, -300.f, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
 
-    scene->getTireCollision()->setPhysic( physicWorld.addBody( scene->getTireCollision()->getConstructionInfo() ) );
+//    scene.getTireCollision()->setPhysic( physicWorld.addBody( scene.getTireCollision()->getConstructionInfo() ) );
 
-    btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
+//    btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
 
-    btTransform startTransformGround;
-    startTransformGround.setIdentity();
-    btScalar massGround( 0.f );
-    bool isDynamicGround = ( massGround != 0.f );
+//    btTransform startTransformGround;
+//    startTransformGround.setIdentity();
+//    btScalar massGround( 0.f );
+//    bool isDynamicGround = ( massGround != 0.f );
 
-    btVector3 localInertiaGround(0, 0, 0);
-    if ( isDynamicGround )
-    {
-        colShapeGround->calculateLocalInertia( massGround, localInertiaGround );
-    }
+//    btVector3 localInertiaGround(0, 0, 0);
+//    if ( isDynamicGround )
+//    {
+//        colShapeGround->calculateLocalInertia( massGround, localInertiaGround );
+//    }
 
-    startTransformGround.setOrigin(btVector3(
-            btScalar( 5.0 ),
-            btScalar( -150.0 ),
-            btScalar( -300.0 ) ) );
+//    startTransformGround.setOrigin(btVector3(
+//            btScalar( 5.0 ),
+//            btScalar( -150.0 ),
+//            btScalar( -300.0 ) ) );
 
-    auto myMotionStateGround = new btDefaultMotionState( startTransformGround );
+//    auto myMotionStateGround = new btDefaultMotionState( startTransformGround );
 
-    btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
+//    btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
 
-    physicWorld.addBody( rbInfoGround );
+//    physicWorld.addBody( rbInfoGround );
 }
 
 std::unique_ptr<Mesh> OpenglSimulationWidget::makeModel( const QString &filename )
@@ -57,32 +57,7 @@ void OpenglSimulationWidget::initializeGL()
     f->glEnable( GL_BLEND );
     f->glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    std::unique_ptr<QOpenGLShader> vertexShader( new QOpenGLShader( QOpenGLShader::Vertex ) );
-
-    bool success = vertexShader->compileSourceFile( "resources/shaders/defaultvertexshader.vert" );
-
-    if( !success )
-    {
-        qDebug() << "The vertex shader wasn't compiled";
-    }
-
-    std::unique_ptr<QOpenGLShader> fragmentShader( new QOpenGLShader( QOpenGLShader::Fragment ) );
-    success = fragmentShader->compileSourceFile( "resources/shaders/defaultfragmentshader.frag" );
-
-    if( !success )
-    {
-        qDebug() << "The fragment shader wasn't compiled";
-    }
-
-    ShaderProgram = std::make_unique<QOpenGLShaderProgram>();
-    ShaderProgram->addShader( vertexShader.get() );
-    ShaderProgram->addShader( fragmentShader.get() );
-    if( !ShaderProgram->link() )
-    {
-        qDebug() << "The shader program wasn't linked";
-    }
-
-    ShaderProgram->bind();
+    scene.init();
 
     makeCurrent();
 }
@@ -92,40 +67,40 @@ void OpenglSimulationWidget::paintGL()
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClear( GL_COLOR_BUFFER_BIT );
 
-    ShaderProgram->bind();
+//    ShaderProgram->bind();
 
-    QMatrix4x4 view;
+//    QMatrix4x4 view;
 
-    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "view" ), view );
-    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "projection" ), projection );
-    auto now = std::chrono::high_resolution_clock::now();
-    float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
-    prevTime = now;
-    physicWorld.update( dt );
+//    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "view" ), view );
+//    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "projection" ), projection );
+//    auto now = std::chrono::high_resolution_clock::now();
+//    float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
+//    prevTime = now;
+//    physicWorld.update( dt );
 
-    if( scene->getTireCollision() != nullptr )
-    {
-//        Object *object = scene->getBodyObject();
-        PhysObject *physObject = scene->getTireCollision();
-        QMatrix4x4 model;
-        auto pos = physObject->getPosition();
-        model.translate( physObject->getPosition() );
-        model.rotate( physObject->getRotation() );
-        ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
-//        GLint current_vao;
-//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-        physObject->getModel()->bindVAO();
-//        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-        for( size_t i=0; i<physObject->getModel()->getTexturesSize(); i++ )
-        {
-            size_t index = physObject->getModel()->getTextureQueue( i );
-            physObject->getModel()->bindTexture( i );
-            ShaderProgram->setUniformValue( "texture", 0 );
-            ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
-            f->glDrawElements( GL_TRIANGLES, physObject->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr );
-        }
-        physObject->getModel()->releaseVAO();
-    }
+//    if( scene->getTireCollision() != nullptr )
+//    {
+////        Object *object = scene->getBodyObject();
+//        PhysObject *physObject = scene->getTireCollision();
+//        QMatrix4x4 model;
+//        auto pos = physObject->getPosition();
+//        model.translate( physObject->getPosition() );
+//        model.rotate( physObject->getRotation() );
+//        ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
+////        GLint current_vao;
+////        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+//        physObject->getModel()->bindVAO();
+////        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+//        for( size_t i=0; i<physObject->getModel()->getTexturesSize(); i++ )
+//        {
+//            size_t index = physObject->getModel()->getTextureQueue( i );
+//            physObject->getModel()->bindTexture( i );
+//            ShaderProgram->setUniformValue( "texture", 0 );
+//            ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
+//            f->glDrawElements( GL_TRIANGLES, physObject->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr );
+//        }
+//        physObject->getModel()->releaseVAO();
+//    }
 
     if( keys[Qt::Key_Up] )
     {

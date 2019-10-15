@@ -40,28 +40,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += sources/main.cpp\
     sources/mainwindow.cpp \
     sources/mainopenglwidget.cpp \
-    sources/model.cpp \
-    sources/scene.cpp \
-    sources/unanimation.cpp \
+    sources/resources/model.cpp \
+    sources/render_system/scene.cpp \
+    sources/resources/unanimation.cpp \
     sources/object.cpp \
-    sources/resource_manager.cpp \
-    sources/mesh.cpp \
+    sources/resources/resource_manager.cpp \
+    sources/render_system/mesh.cpp \
     sources/openglsimulationwidget.cpp \
-    sources/physobject.cpp \
-    sources/physicworld.cpp \
+    sources/physics/physobject.cpp \
+    sources/physics/physicworld.cpp \
     sources/grid.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
     includes/scene.h \
-    includes/model.h \
-    includes/unanimation.h \
+    includes/resources/model.h \
+    includes/resources/unanimation.h \
     includes/object.h \
     includes/resource_manager.h \
-    includes/mesh.h \
+    includes/render_system/mesh.h \
     includes/openglsimulationwidget.h \
-    includes/physobject.h \
-    includes/physicworld.h \
+    includes/physics/physobject.h \
+    includes/physics/physicworld.h \
     includes/grid.h
 
 FORMS    += ui/mainwindow.ui

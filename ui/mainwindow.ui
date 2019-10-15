@@ -34,7 +34,7 @@
               <x>0</x>
               <y>0</y>
               <width>374</width>
-              <height>517</height>
+              <height>521</height>
              </rect>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>28</height>
     </rect>
    </property>
   </widget>
