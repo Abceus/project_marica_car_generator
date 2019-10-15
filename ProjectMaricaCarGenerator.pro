@@ -53,11 +53,11 @@ SOURCES += sources/main.cpp\
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
-    includes/scene.h \
+    includes/render_system/scene.h \
     includes/resources/model.h \
     includes/resources/unanimation.h \
     includes/object.h \
-    includes/resource_manager.h \
+    includes/resources/resource_manager.h \
     includes/render_system/mesh.h \
     includes/openglsimulationwidget.h \
     includes/physics/physobject.h \
