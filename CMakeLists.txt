@@ -23,15 +23,15 @@ add_executable( ProjectMaricaCarGenerator
         sources/main.cpp
         sources/mainwindow.cpp
         sources/mainopenglwidget.cpp
-        sources/model.cpp
-        sources/scene.cpp
-        sources/unanimation.cpp
+        sources/resources/model.cpp
+        sources/render_system/scene.cpp
+        sources/resources/unanimation.cpp
         sources/object.cpp
-        sources/resource_manager.cpp
-        sources/mesh.cpp
+        sources/resources/resource_manager.cpp
+        sources/render_system/mesh.cpp
         sources/openglsimulationwidget.cpp
-        sources/physobject.cpp
-        sources/physicworld.cpp
+        sources/physics/physobject.cpp
+        sources/physics/physicworld.cpp
         ${MOC_FOR_UI})
 
 if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)
