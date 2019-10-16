@@ -129,20 +129,21 @@ QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
 
 void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
 {
-    if( node->isEmpty() )
+    QMatrix4x4 model;
+    model.translate( node->getLocation() );
+    model.rotate( QQuaternion::fromEulerAngles( node->getRotation() ) );
+    model.scale( node->getScale() );
+
+    m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "model" ), model );
+
+    for( auto i = node->drawableBegin(); i != node->drawableEnd(); i++ )
     {
-        return;
+        (*i)->draw({f, ef, &m_shaderProgram});
     }
 
     for( const auto& childNode: *node )
     {
-        QMatrix4x4 model;
-        model.translate( childNode->getLocation() );
-        m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "model" ), model );
-
-        for( auto i = childNode->drawableBegin(); i != childNode->drawableEnd(); i++ )
-        {
-            (*i)->draw({f, ef, &m_shaderProgram});
-        }
+        //        drawNode( childNode, parentMatrix, f, ef );
+        drawNode( childNode, f, ef );
     }
 }

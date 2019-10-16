@@ -29,11 +29,8 @@ void MainWindow::on_meshOpenButton_clicked()
 
     if( fileName != "" )
     {
-//        Mesh newModel = ui->mainOpenGLWidget->makeModel( fileName );
-//        size_t textureSize = newModel->getTexturesSize();
-//        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( std::move( newModel ) ) );
-
-//        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( Model::readPSK( fileName ) ) ) );
+        auto model = Model::readPSK( fileName );
+        size_t textureSize = model.materials.size();
 
         auto node = ui->mainOpenGLWidget->getScene().addNode( QSharedPointer<SceneNode>( new SceneNode ) );
         auto drawable = node->addDrawable( QSharedPointer<Drawable>( new Mesh( Model::readPSK( fileName ) ) ) );
@@ -48,10 +45,10 @@ void MainWindow::on_meshOpenButton_clicked()
 
         this->clearSkinArrayLayout();
 
-//        for( int i = 0; i < textureSize; i++ )
-//        {
-//            this->addButtonToArrayLayout();
-//        }
+        for( int i = 0; i < textureSize; i++ )
+        {
+            this->addButtonToArrayLayout();
+        }
     }
 }
 
