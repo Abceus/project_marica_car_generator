@@ -4,6 +4,7 @@
 Scene::Scene()
     : camera_scale( 1.f )
     , m_shaderProgram()
+    , m_rootNode( QSharedPointer<SceneNode>( new SceneNode ) )
 {
 }
 
@@ -78,19 +79,19 @@ void Scene::setCameraScale( float value )
     camera_scale = value;
 }
 
-QSharedPointer<Object> Scene::addObject(QSharedPointer<Object> newObject)
-{
-    if( m_objects.indexOf(newObject) == -1 )
-    {
-        m_objects.append( newObject );
-    }
-    return newObject;
-}
+//QSharedPointer<Object> Scene::addObject(QSharedPointer<Object> newObject)
+//{
+//    if( m_objects.indexOf(newObject) == -1 )
+//    {
+//        m_objects.append( newObject );
+//    }
+//    return newObject;
+//}
 
-void Scene::removeObject(QSharedPointer<Object> removeObject)
-{
-    m_objects.removeOne( removeObject );
-}
+//void Scene::removeObject(QSharedPointer<Object> removeObject)
+//{
+//    m_objects.removeOne( removeObject );
+//}
 
 void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
 {
@@ -104,22 +105,7 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
     m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "view" ), view );
     m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "projection" ), m_projection );
 
-    for( const auto& object: m_objects )
-    {
-        QMatrix4x4 model;
-        model.translate( object->getPosition() );
-        m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "model" ), model );
-        object->getModel().bindVAO();
-        for( size_t i=0; i<object->getModel().getTexturesSize(); i++ )
-        {
-            size_t index = object->getModel().getTextureQueue( i );
-            object->getModel().bindTexture( i );
-            m_shaderProgram.setUniformValue( "texture", 0 );
-            m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
-            f->glDrawElements( GL_TRIANGLES, object->getModel().getVAOsize(), GL_UNSIGNED_INT, nullptr );
-        }
-        object->getModel().releaseVAO();
-    }
+    drawNode( m_rootNode, f, ef );
 }
 
 void Scene::resizeScreen(int w, int h)
@@ -133,4 +119,30 @@ void Scene::resizeScreen(int w, int h)
 
     // Set perspective projection
     m_projection.perspective( fov, aspect, zNear, zFar );
+}
+
+QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
+{
+    m_rootNode->addChild( newNode );
+    return newNode;
+}
+
+void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
+{
+    if( node->isEmpty() )
+    {
+        return;
+    }
+
+    for( const auto& childNode: *node )
+    {
+        QMatrix4x4 model;
+        model.translate( childNode->getLocation() );
+        m_shaderProgram.setUniformValue( m_shaderProgram.uniformLocation( "model" ), model );
+
+        for( auto i = childNode->drawableBegin(); i != childNode->drawableEnd(); i++ )
+        {
+            (*i)->draw({f, ef, &m_shaderProgram});
+        }
+    }
 }

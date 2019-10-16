@@ -1,10 +1,12 @@
 #include <QFileDialog>
 #include <QDir>
+#include <QSharedPointer>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "resources/model.h"
 #include "object.h"
+#include "render_system/scene_node.h"
 #include "physics/physobject.h"
 
 MainWindow::MainWindow( QWidget *parent )
@@ -30,7 +32,13 @@ void MainWindow::on_meshOpenButton_clicked()
 //        Mesh newModel = ui->mainOpenGLWidget->makeModel( fileName );
 //        size_t textureSize = newModel->getTexturesSize();
 //        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( std::move( newModel ) ) );
-        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( Model::readPSK( fileName ) ) ) );
+
+//        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( Model::readPSK( fileName ) ) ) );
+
+        auto node = ui->mainOpenGLWidget->getScene().addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+        auto drawable = node->addDrawable( QSharedPointer<Drawable>( new Mesh( Model::readPSK( fileName ) ) ) );
+
+        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( drawable.staticCast<Mesh>(), node ) ) );
 
         if( fileName.size() > 50 )
         {

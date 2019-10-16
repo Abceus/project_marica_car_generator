@@ -6,7 +6,8 @@
 #include "render_system/mesh.h"
 
 Mesh::Mesh()
-        : VAOsize( 0u )
+        : Drawable()
+        , VAOsize( 0u )
 {
 }
 
@@ -165,4 +166,18 @@ void Mesh::bindTexture( size_t index )
 Model Mesh::getModel()
 {
     return m_model;
+}
+
+void Mesh::draw( const RenderInfo& renderInfo )
+{
+    bindVAO();
+    for( size_t i=0; i<getTexturesSize(); i++ )
+    {
+        size_t index = getTextureQueue( i );
+        bindTexture( i );
+        renderInfo.shader->setUniformValue( "texture", 0 );
+        renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
+        renderInfo.f->glDrawElements( GL_TRIANGLES, getVAOsize(), GL_UNSIGNED_INT, nullptr );
+    }
+    releaseVAO();
 }

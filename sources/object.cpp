@@ -1,18 +1,18 @@
 #include "object.h"
 
-Object::Object( Model model, float x, float y, float z )
-        : m_model( model )
-        , position( x, y, z )
+Object::Object( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node )
+        : m_node( node )
+        , m_model( model )
 {
 
 }
 
-Mesh &Object::getModel()
+QSharedPointer<SceneNode> Object::getNode()
+{
+    return m_node;
+}
+
+QSharedPointer<Mesh> Object::getDraweable()
 {
     return m_model;
-}
-
-QVector3D Object::getPosition() const
-{
-    return this->position;
 }

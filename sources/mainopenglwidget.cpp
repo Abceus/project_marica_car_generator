@@ -30,6 +30,7 @@ void MainOpenglWidget::initializeGL()
 
 void MainOpenglWidget::paintGL()
 {
+    makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear( GL_COLOR_BUFFER_BIT );
@@ -46,11 +47,12 @@ void MainOpenglWidget::resizeGL( int w, int h )
 
 void MainOpenglWidget::setBodyObject( QSharedPointer<Object> object )
 {
-    if( m_body )
-    {
-        scene.removeObject( m_body );
-    }
-    m_body = scene.addObject( object );
+//    if( m_body )
+//    {
+//        scene.removeObject( m_body );
+//    }
+//    m_body = scene.addObject( object );
+    m_body = object;
 }
 
 //void MainOpenglWidget::setTireCollision( PhysObject *physObject )
@@ -65,7 +67,14 @@ Object* MainOpenglWidget::getBodyObject() const
 
 void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
 {
-    m_body->getModel().setTexture( filename, index );
+    m_body->getDraweable()->setTexture( filename, index );
+}
+
+Scene &MainOpenglWidget::getScene()
+{
+    // TODO: rework
+    makeCurrent();
+    return scene;
 }
 
 void MainOpenglWidget::mousePressEvent( QMouseEvent *event )

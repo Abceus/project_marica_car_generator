@@ -19,8 +19,10 @@
 
 #include "resources/unanimation.h"
 #include "resources/model.h"
+#include "render_system/drawable.h"
+#include "render_system/render_info.h"
 
-class Mesh
+class Mesh : public Drawable
 {
 public:
     Mesh();
@@ -36,6 +38,7 @@ public:
     size_t getTextureQueue( size_t index );
     void setTextureQueue( size_t index, float average );
     Model getModel();
+    void draw( const RenderInfo& renderInfo ) override;
 private:
     QOpenGLVertexArrayObject VAO;
     QOpenGLBuffer VBO, EBO;

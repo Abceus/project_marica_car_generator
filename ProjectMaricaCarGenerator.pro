@@ -49,7 +49,9 @@ SOURCES += sources/main.cpp\
     sources/openglsimulationwidget.cpp \
     sources/physics/physobject.cpp \
     sources/physics/physicworld.cpp \
-    sources/grid.cpp
+    sources/grid.cpp \
+    sources/render_system/scene_node.cpp \
+    sources/render_system/drawable.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -62,7 +64,10 @@ HEADERS  += includes/mainwindow.h \
     includes/openglsimulationwidget.h \
     includes/physics/physobject.h \
     includes/physics/physicworld.h \
-    includes/grid.h
+    includes/grid.h \
+    includes/render_system/scene_node.h \
+    includes/render_system/drawable.h \
+    includes/render_system/render_info.h
 
 FORMS    += ui/mainwindow.ui
 

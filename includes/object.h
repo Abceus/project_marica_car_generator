@@ -3,15 +3,17 @@
 #include <memory>
 
 #include "render_system/mesh.h"
+#include "render_system/scene_node.h"
 
 class Object
 {
 public:
-    Object( Model model, float x = 0, float y = 0, float z = 0 );
+    Object( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node );
     ~Object() = default;
-    Mesh& getModel();
-    virtual QVector3D getPosition() const;
+
+    QSharedPointer<SceneNode> getNode();
+    QSharedPointer<Mesh> getDraweable();
 protected:
-    QVector3D position;
-    Mesh m_model;
+    QSharedPointer<SceneNode> m_node;
+    QSharedPointer<Mesh> m_model;
 };

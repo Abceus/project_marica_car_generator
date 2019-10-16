@@ -5,6 +5,7 @@
 #include "resources/model.h"
 #include "object.h"
 #include "physics/physobject.h"
+#include "render_system/scene_node.h"
 
 #include <QSharedPointer>
 #include <QVector>
@@ -32,17 +33,23 @@ public:
     float getCameraScale();
     void setCameraScale( float value );
 
-    QSharedPointer<Object> addObject( QSharedPointer<Object> newObject );
-    void removeObject( QSharedPointer<Object> removeObject );
+//    QSharedPointer<Object> addObject( QSharedPointer<Object> newObject );
+//    void removeObject( QSharedPointer<Object> removeObject );
 
     void draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
     void resizeScreen( int w, int h );
 
+    QSharedPointer<SceneNode> addNode( QSharedPointer<SceneNode> newNode );
+
 private:
+    void drawNode( QSharedPointer<SceneNode> node, QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
     QVector3D camera_location;
     QVector3D camera_rotation;
     float camera_scale;
-    QVector<QSharedPointer<Object>> m_objects;
+//    QVector<QSharedPointer<Object>> m_objects;
+
+    QSharedPointer<SceneNode> m_rootNode;
+
     QOpenGLShaderProgram m_shaderProgram;
     QMatrix4x4 m_projection;
 

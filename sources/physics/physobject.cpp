@@ -1,33 +1,20 @@
 #include "physics/physobject.h"
 
-PhysObject::PhysObject( Model model, float x, float y, float z, float mass, QVector3D size )
-    : Object( model, x, y, z )
+PhysObject::PhysObject( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node, float mass, QVector3D size )
+    : Object( model, node )
 {
     colShape = std::make_unique<btBoxShape>( btVector3( size.x(), size.y(), size.z() ) );
     colShape = std::make_unique<btConvexHullShape>();
 
-    auto verts = model.vertices;
-    for( auto& vert: verts )
-    {
-        static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
-    }
-//    physMesh = std::make_unique<btTriangleMesh>();
-//    btTriangleMesh physMesh;
-//    auto mod = m_model->getModel();
-//    auto inds = mod.indices;
-//    auto verts = mod.vertices;
-//    for( auto& i: inds )
+//    auto verts = model.vertices;
+//    for( auto& vert: verts )
 //    {
-//        physMesh.addTriangle(
-//                { verts[i.vertexes[0]].X, verts[i.vertexes[0]].Y, verts[i.vertexes[0]].Z },
-//                { verts[i.vertexes[1]].X, verts[i.vertexes[1]].Y, verts[i.vertexes[1]].Z },
-//                { verts[i.vertexes[2]].X, verts[i.vertexes[2]].Y, verts[i.vertexes[2]].Z } );
+//        static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
 //    }
-//    colShape = std::make_unique<btBvhTriangleMeshShape>( &physMesh, true );
     btTransform startTransform;
     startTransform.setIdentity();
     m_mass = mass;
-    startTransform.setOrigin( btVector3( x, y, z ) );
+//    startTransform.setOrigin( btVector3( x, y, z ) );
 
     myMotionState = std::make_unique<btDefaultMotionState>( startTransform );
 }
@@ -40,15 +27,15 @@ void PhysObject::update( float dt )
 void PhysObject::setPhysic( btRigidBody* newBody )
 {
     physic = newBody;
-    physic->getWorldTransform().setOrigin(btVector3(position.x(), position.y(), position.z()));
+//    physic->getWorldTransform().setOrigin(btVector3(position.x(), position.y(), position.z()));
 }
 
-QVector3D PhysObject::getPosition() const
-{
-    btTransform transform;
-    physic->getMotionState()->getWorldTransform( transform );
-    return QVector3D( transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z() );
-}
+//QVector3D PhysObject::getPosition() const
+//{
+//    btTransform transform;
+//    physic->getMotionState()->getWorldTransform( transform );
+//    return QVector3D( transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z() );
+//}
 
 QQuaternion PhysObject::getRotation() const
 {

@@ -38,6 +38,8 @@ public:
     std::unique_ptr<Mesh> makeModel( const QString &filename );
     Object* getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
+
+    Scene& getScene();
 private:
     Scene scene;
     QSharedPointer<Object> m_body;

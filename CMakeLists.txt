@@ -32,6 +32,8 @@ add_executable( ProjectMaricaCarGenerator
         sources/openglsimulationwidget.cpp
         sources/physics/physobject.cpp
         sources/physics/physicworld.cpp
+        sources/render_system/drawable.cpp
+        sources/render_system/scene_node.cpp
         ${MOC_FOR_UI})
 
 if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)
