@@ -10,40 +10,37 @@ OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
 
 void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
 {
-//    scene->setBodyObject( new Object( makeModel( filename ) ) );
-//    scene.setTireCollision( new PhysObject( std::move( makeModel( filename ) ), 0.f, 0.f, -300.f, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
-
-//    scene.getTireCollision()->setPhysic( physicWorld.addBody( scene.getTireCollision()->getConstructionInfo() ) );
-
-//    btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
-
-//    btTransform startTransformGround;
-//    startTransformGround.setIdentity();
-//    btScalar massGround( 0.f );
-//    bool isDynamicGround = ( massGround != 0.f );
-
-//    btVector3 localInertiaGround(0, 0, 0);
-//    if ( isDynamicGround )
-//    {
-//        colShapeGround->calculateLocalInertia( massGround, localInertiaGround );
-//    }
-
-//    startTransformGround.setOrigin(btVector3(
-//            btScalar( 5.0 ),
-//            btScalar( -150.0 ),
-//            btScalar( -300.0 ) ) );
-
-//    auto myMotionStateGround = new btDefaultMotionState( startTransformGround );
-
-//    btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
-
-//    physicWorld.addBody( rbInfoGround );
-}
-
-std::unique_ptr<Mesh> OpenglSimulationWidget::makeModel( const QString &filename )
-{
     makeCurrent();
-    return std::make_unique<Mesh>( Model::readPSK( filename ) );
+    auto node = scene.addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+    node->setLocation( { 0.0f, 0.0f, -300.0f } );
+    auto drawable = node->addDrawable( QSharedPointer<Mesh>( new Mesh( Model::readPSK( filename ) ) ) );
+    m_tire = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
+
+    m_tire->setPhysic( physicWorld.addBody( m_tire->getConstructionInfo() ) );
+
+    btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
+
+    btTransform startTransformGround;
+    startTransformGround.setIdentity();
+    btScalar massGround( 0.f );
+    bool isDynamicGround = ( massGround != 0.f );
+
+    btVector3 localInertiaGround(0, 0, 0);
+    if ( isDynamicGround )
+    {
+        colShapeGround->calculateLocalInertia( massGround, localInertiaGround );
+    }
+
+    startTransformGround.setOrigin(btVector3(
+            btScalar( 5.0 ),
+            btScalar( -150.0 ),
+            btScalar( -350.0 ) ) );
+
+    auto myMotionStateGround = new btDefaultMotionState( startTransformGround );
+
+    btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
+
+    physicWorld.addBody( rbInfoGround );
 }
 
 void OpenglSimulationWidget::initializeGL()
@@ -64,43 +61,21 @@ void OpenglSimulationWidget::initializeGL()
 
 void OpenglSimulationWidget::paintGL()
 {
+    makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear( GL_COLOR_BUFFER_BIT );
+    auto now = std::chrono::high_resolution_clock::now();
+    float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
+    prevTime = now;
+    physicWorld.update( dt );
 
-//    ShaderProgram->bind();
+    if( m_tire )
+    {
+        m_tire->update( dt );;
+    }
 
-//    QMatrix4x4 view;
-
-//    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "view" ), view );
-//    ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "projection" ), projection );
-//    auto now = std::chrono::high_resolution_clock::now();
-//    float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
-//    prevTime = now;
-//    physicWorld.update( dt );
-
-//    if( scene->getTireCollision() != nullptr )
-//    {
-////        Object *object = scene->getBodyObject();
-//        PhysObject *physObject = scene->getTireCollision();
-//        QMatrix4x4 model;
-//        auto pos = physObject->getPosition();
-//        model.translate( physObject->getPosition() );
-//        model.rotate( physObject->getRotation() );
-//        ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "model" ), model );
-////        GLint current_vao;
-////        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-//        physObject->getModel()->bindVAO();
-////        f->glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-//        for( size_t i=0; i<physObject->getModel()->getTexturesSize(); i++ )
-//        {
-//            size_t index = physObject->getModel()->getTextureQueue( i );
-//            physObject->getModel()->bindTexture( i );
-//            ShaderProgram->setUniformValue( "texture", 0 );
-//            ShaderProgram->setUniformValue( ShaderProgram->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
-//            f->glDrawElements( GL_TRIANGLES, physObject->getModel()->getVAOsize(), GL_UNSIGNED_INT, nullptr );
-//        }
-//        physObject->getModel()->releaseVAO();
-//    }
+    scene.draw( f, ef );
 
     if( keys[Qt::Key_Up] )
     {
@@ -123,15 +98,7 @@ void OpenglSimulationWidget::paintGL()
 
 void OpenglSimulationWidget::resizeGL( int w, int h )
 {
-    // Calculate aspect ratio
-    const float aspect = static_cast<float>( w ) / static_cast<float>( h ? h : 1 );
-    const float zNear = 1.f, zFar = 10000.f, fov = 90.f;
-
-    // Reset projection
-    projection.setToIdentity();
-
-    // Set perspective projection
-    projection.perspective( fov, aspect, zNear, zFar );
+    scene.resizeScreen( w, h );
 }
 
 void OpenglSimulationWidget::keyPressEvent( QKeyEvent* event )

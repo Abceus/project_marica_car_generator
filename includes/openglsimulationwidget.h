@@ -31,13 +31,14 @@ public:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void rewriteThisShit( const QString &filename );
-    std::unique_ptr<Mesh> makeModel( const QString &filename );
 private:
     QMatrix4x4 projection;
     QMap<int, bool> keys;
     PhysicWorld physicWorld;
     Scene scene;
     std::chrono::time_point<std::chrono::high_resolution_clock> prevTime;
+
+    QSharedPointer<PhysObject> m_tire;
 protected:
     void initializeGL() override;
     void resizeGL( int w, int h ) override;
