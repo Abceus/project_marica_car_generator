@@ -51,7 +51,8 @@ SOURCES += sources/main.cpp\
     sources/physics/physicworld.cpp \
     sources/grid.cpp \
     sources/render_system/scene_node.cpp \
-    sources/render_system/drawable.cpp
+    sources/render_system/drawable.cpp \
+    sources/updatable.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -67,7 +68,8 @@ HEADERS  += includes/mainwindow.h \
     includes/grid.h \
     includes/render_system/scene_node.h \
     includes/render_system/drawable.h \
-    includes/render_system/render_info.h
+    includes/render_system/render_info.h \
+    includes/updatable.h
 
 FORMS    += ui/mainwindow.ui
 

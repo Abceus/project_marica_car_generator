@@ -39,6 +39,15 @@ void Scene::init()
     camera_scale = 1;
 }
 
+void Scene::clear()
+{
+    camera_location = QVector3D( 0, 0, 0 );
+    camera_rotation = QVector3D( 0, 0, 0 );
+    camera_scale = 1;
+
+    m_rootNode->clear();
+}
+
 QVector3D Scene::getCameraLocation()
 {
     return camera_location;

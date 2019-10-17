@@ -4,9 +4,9 @@ OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
         : QOpenGLWidget( parent )
         , scene()
         , prevTime( std::chrono::high_resolution_clock::now() )
+        , physicWorld( new PhysicWorld() )
 {
 }
-
 
 void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
 {
@@ -16,7 +16,10 @@ void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
     auto drawable = node->addDrawable( QSharedPointer<Mesh>( new Mesh( Model::readPSK( filename ) ) ) );
     m_tire = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
 
-    m_tire->setPhysic( physicWorld.addBody( m_tire->getConstructionInfo() ) );
+    m_tire->setPhysic( physicWorld->addBody( m_tire->getConstructionInfo() ) );
+
+    m_objects.append( physicWorld );
+    m_objects.append( m_tire );
 
     btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
 
@@ -40,7 +43,22 @@ void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
 
     btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
 
-    physicWorld.addBody( rbInfoGround );
+    physicWorld->addBody( rbInfoGround );
+}
+
+void OpenglSimulationWidget::closeEvent(QCloseEvent *event)
+{
+    QOpenGLWidget::closeEvent(event);
+    init();
+    emit closed();
+}
+
+void OpenglSimulationWidget::init()
+{
+    m_objects.clear();
+    m_tire = nullptr;
+    physicWorld->init();
+    scene.clear();
 }
 
 void OpenglSimulationWidget::initializeGL()
@@ -68,11 +86,10 @@ void OpenglSimulationWidget::paintGL()
     auto now = std::chrono::high_resolution_clock::now();
     float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();
     prevTime = now;
-    physicWorld.update( dt );
 
-    if( m_tire )
+    for( auto& object: m_objects )
     {
-        m_tire->update( dt );;
+        object->update( dt );
     }
 
     scene.draw( f, ef );

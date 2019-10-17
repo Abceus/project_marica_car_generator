@@ -29,7 +29,7 @@ void PhysObject::update( float dt )
     m_node->setRotation( QQuaternion( rotation.w(), rotation.x(), rotation.y(), rotation.z() ).toEulerAngles() );
 }
 
-void PhysObject::setPhysic( btRigidBody* newBody )
+void PhysObject::setPhysic( QSharedPointer<btRigidBody> newBody )
 {
     physic = newBody;
 //    physic->getWorldTransform().setOrigin(btVector3(position.x(), position.y(), position.z()));

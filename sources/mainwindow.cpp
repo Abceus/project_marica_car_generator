@@ -14,6 +14,8 @@ MainWindow::MainWindow( QWidget *parent )
     , ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
+
+    connect( &simulationWidget, &OpenglSimulationWidget::closed, this, &MainWindow::show );
 }
 
 MainWindow::~MainWindow()
@@ -59,6 +61,7 @@ void MainWindow::on_startSimulationButton_clicked()
         simulationWidget.show();
         simulationWidget.rewriteThisShit( QString(
                 "/home/jamil/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ));
+        hide();
     }
 }
 

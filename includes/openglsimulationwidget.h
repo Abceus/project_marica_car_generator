@@ -21,6 +21,7 @@
 
 #include "physics/physicworld.h"
 #include "render_system/scene.h"
+#include "updatable.h"
 
 class OpenglSimulationWidget :public QOpenGLWidget
 {
@@ -31,10 +32,13 @@ public:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void rewriteThisShit( const QString &filename );
+    void closeEvent(QCloseEvent *event) override;
+    void init();
 private:
+    QVector<QSharedPointer<IUpdatable>> m_objects;
     QMatrix4x4 projection;
     QMap<int, bool> keys;
-    PhysicWorld physicWorld;
+    QSharedPointer<PhysicWorld> physicWorld;
     Scene scene;
     std::chrono::time_point<std::chrono::high_resolution_clock> prevTime;
 
@@ -43,4 +47,6 @@ protected:
     void initializeGL() override;
     void resizeGL( int w, int h ) override;
     void paintGL() override;
+signals:
+    void closed();
 };

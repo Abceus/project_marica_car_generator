@@ -1,23 +1,26 @@
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <QVector>
+#include <QSharedPointer>
+#include <QScopedPointer>
 
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
-class PhysicWorld
+#include "updatable.h"
+
+class PhysicWorld : public IUpdatable
 {
 public:
     PhysicWorld();
-    btRigidBody* addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo );
-    void update( float dt );
+    void init();
+    QSharedPointer<btRigidBody> addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo );
+    void update( float dt ) override;
 private:
-    std::unique_ptr<btDefaultCollisionConfiguration> m_collisionConfiguration;
-    std::unique_ptr<btCollisionDispatcher> m_dispatcher;
-    std::unique_ptr<btDbvtBroadphase> m_broadphase;
-    std::unique_ptr<btSequentialImpulseConstraintSolver> m_solver;
-    std::unique_ptr<btDiscreteDynamicsWorld> m_dynamicsWorld;
-    // TODO: leak
-    std::vector<btRigidBody*> bodies;
+    QScopedPointer<btDefaultCollisionConfiguration> m_collisionConfiguration;
+    QScopedPointer<btCollisionDispatcher> m_dispatcher;
+    QScopedPointer<btDbvtBroadphase> m_broadphase;
+    QScopedPointer<btSequentialImpulseConstraintSolver> m_solver;
+    QScopedPointer<btDiscreteDynamicsWorld> m_dynamicsWorld;
+    QVector<QSharedPointer<btRigidBody>> bodies;
 };

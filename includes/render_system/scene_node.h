@@ -30,6 +30,7 @@ public:
     void removeDrawable( Drawable* removeDrawable );
 
     bool isEmpty() const;
+    void clear();
 
     QVector<QSharedPointer<SceneNode>>::ConstIterator begin();
     QVector<QSharedPointer<SceneNode>>::ConstIterator end();

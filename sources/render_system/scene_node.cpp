@@ -116,6 +116,12 @@ bool SceneNode::isEmpty() const
     return m_childrens.empty();
 }
 
+void SceneNode::clear()
+{
+    m_childrens.clear();
+    m_drawables.clear();
+}
+
 QVector<QSharedPointer<SceneNode>>::ConstIterator SceneNode::begin()
 {
     return m_childrens.begin();

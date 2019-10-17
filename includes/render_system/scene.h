@@ -19,6 +19,8 @@ public:
 
     void init();
 
+    void clear();
+
     QVector3D getCameraLocation();
     void setCameraLocation( QVector3D value );
 
