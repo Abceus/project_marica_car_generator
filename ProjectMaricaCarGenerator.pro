@@ -23,7 +23,7 @@ LIBS += -lBulletDynamics \
         -lBulletCollision \
         -lLinearMath
 
-CONFIG += c++14
+CONFIG += c++17
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -52,7 +52,8 @@ SOURCES += sources/main.cpp\
     sources/grid.cpp \
     sources/render_system/scene_node.cpp \
     sources/render_system/drawable.cpp \
-    sources/updatable.cpp
+    sources/updatable.cpp \
+    sources/render_system/renderer.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -69,7 +70,8 @@ HEADERS  += includes/mainwindow.h \
     includes/render_system/scene_node.h \
     includes/render_system/drawable.h \
     includes/render_system/render_info.h \
-    includes/updatable.h
+    includes/updatable.h \
+    includes/render_system/renderer.h
 
 FORMS    += ui/mainwindow.ui
 

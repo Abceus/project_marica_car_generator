@@ -3,6 +3,7 @@
 #include <QVector3D>
 #include <QVector>
 #include <QSharedPointer>
+#include <QOpenGLShaderProgram>
 
 #include "drawable.h"
 
@@ -38,6 +39,9 @@ public:
     QVector<QSharedPointer<Drawable>>::ConstIterator drawableBegin();
     QVector<QSharedPointer<Drawable>>::ConstIterator drawableEnd();
 
+    void setShaderProgram( QSharedPointer<QOpenGLShaderProgram> newProgram );
+    QSharedPointer<QOpenGLShaderProgram> getShaderProgram() const;
+
 private:
     QVector3D m_location;
     QVector3D m_rotation;
@@ -45,4 +49,5 @@ private:
     SceneNode* m_parent;
     QVector<QSharedPointer<SceneNode>> m_childrens;
     QVector<QSharedPointer<Drawable>> m_drawables;
+    QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
 };

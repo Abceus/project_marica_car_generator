@@ -17,7 +17,7 @@ public:
     Scene();
     ~Scene() = default;
 
-    void init();
+    void init( QSharedPointer<QOpenGLShaderProgram> shaderProgram );
 
     void clear();
 
@@ -43,6 +43,6 @@ private:
 
     QSharedPointer<SceneNode> m_rootNode;
 
-    QOpenGLShaderProgram m_shaderProgram;
+    QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
     QMatrix4x4 m_projection;
 };

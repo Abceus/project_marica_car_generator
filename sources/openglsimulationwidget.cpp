@@ -72,7 +72,7 @@ void OpenglSimulationWidget::initializeGL()
     f->glEnable( GL_BLEND );
     f->glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    scene.init();
+//    scene.init();
 
     makeCurrent();
 }

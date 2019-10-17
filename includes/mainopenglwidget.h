@@ -21,6 +21,7 @@
 #include "resources/model.h"
 #include "render_system/scene.h"
 #include "object.h"
+#include "render_system/renderer.h"
 
 class MainOpenglWidget :public QOpenGLWidget
 {
@@ -34,14 +35,14 @@ public:
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
     void setBodyObject( QSharedPointer<Object> object );
-//    void setTireCollision( PhysObject *physObject );
-    std::unique_ptr<Mesh> makeModel( const QString &filename );
     Object* getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
-    Scene& getScene();
+    QSharedPointer<Scene> getScene();
+    Renderer& getRenderer();
 private:
-    Scene scene;
+    QSharedPointer<Scene> m_scene;
+    Renderer m_renderer;
     QSharedPointer<Object> m_body;
     QPoint leftClickPos;
     bool leftPressed;

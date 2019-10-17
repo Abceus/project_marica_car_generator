@@ -8,6 +8,7 @@ SceneNode::SceneNode()
     , m_scale( 1.0f, 1.0f, 1.0f )
     , m_parent(nullptr)
     , m_drawables()
+    , m_shaderProgram(nullptr)
 {
 
 }
@@ -140,4 +141,14 @@ QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableBegin()
 QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableEnd()
 {
     return m_drawables.end();
+}
+
+void SceneNode::setShaderProgram(QSharedPointer<QOpenGLShaderProgram> newProgram)
+{
+    m_shaderProgram = newProgram;
+}
+
+QSharedPointer<QOpenGLShaderProgram> SceneNode::getShaderProgram() const
+{
+    return m_shaderProgram;
 }

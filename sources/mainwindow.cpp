@@ -34,8 +34,8 @@ void MainWindow::on_meshOpenButton_clicked()
         auto model = Model::readPSK( fileName );
         size_t textureSize = model.materials.size();
 
-        auto node = ui->mainOpenGLWidget->getScene().addNode( QSharedPointer<SceneNode>( new SceneNode ) );
-        auto drawable = node->addDrawable( QSharedPointer<Drawable>( new Mesh( Model::readPSK( fileName ) ) ) );
+        auto node = ui->mainOpenGLWidget->getScene()->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+        auto drawable = node->addDrawable( ui->mainOpenGLWidget->getRenderer().makeDrawable<Mesh>( Model::readPSK( fileName ) ) );
 
         ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( drawable.staticCast<Mesh>(), node ) ) );
 

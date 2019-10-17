@@ -5,7 +5,7 @@
 
 MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     : QOpenGLWidget( parent )
-    , scene()
+    , m_scene(new Scene)
 {
     setMouseTracking( true );
     leftPressed = false;
@@ -15,6 +15,7 @@ MainOpenglWidget::MainOpenglWidget( QWidget *parent )
 
 void MainOpenglWidget::initializeGL()
 {
+    makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClearColor( 0.25f, 0.25f, 0.25f, 1.0f );
 
@@ -24,8 +25,27 @@ void MainOpenglWidget::initializeGL()
     f->glEnable( GL_BLEND );
     f->glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    scene.init();
-    makeCurrent();
+    m_renderer = Renderer( context(), context()->surface() );
+
+    auto vertexShader = m_renderer.loadShader( "resources/shaders/defaultvertexshader.vert", QOpenGLShader::Vertex );
+
+    if( !vertexShader )
+    {
+        qDebug() << "The vertex shader wasn't compiled";
+    }
+
+    auto fragmentShader = m_renderer.loadShader( "resources/shaders/defaultfragmentshader.frag", QOpenGLShader::Fragment );
+
+    if( !fragmentShader )
+    {
+        qDebug() << "The fragment shader wasn't compiled";
+    }
+
+    auto program = m_renderer.getShaderProgram( vertexShader, fragmentShader );
+
+    m_scene->init( program );
+
+    doneCurrent();
 }
 
 void MainOpenglWidget::paintGL()
@@ -35,30 +55,20 @@ void MainOpenglWidget::paintGL()
     QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear( GL_COLOR_BUFFER_BIT );
 
-    scene.draw( f, ef );
+    m_renderer.draw( m_scene );
 
     update();
 }
 
 void MainOpenglWidget::resizeGL( int w, int h )
 {
-    scene.resizeScreen( w, h );
+    m_scene->resizeScreen( w, h );
 }
 
 void MainOpenglWidget::setBodyObject( QSharedPointer<Object> object )
 {
-//    if( m_body )
-//    {
-//        scene.removeObject( m_body );
-//    }
-//    m_body = scene.addObject( object );
     m_body = object;
 }
-
-//void MainOpenglWidget::setTireCollision( PhysObject *physObject )
-//{
-//    scene->setTireCollision( std::shared_ptr<PhysObject>( physObject ) );
-//}
 
 Object* MainOpenglWidget::getBodyObject() const
 {
@@ -70,11 +80,14 @@ void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
     m_body->getDraweable()->setTexture( filename, index );
 }
 
-Scene &MainOpenglWidget::getScene()
+QSharedPointer<Scene> MainOpenglWidget::getScene()
 {
-    // TODO: rework
-    makeCurrent();
-    return scene;
+    return m_scene;
+}
+
+Renderer &MainOpenglWidget::getRenderer()
+{
+    return m_renderer;
 }
 
 void MainOpenglWidget::mousePressEvent( QMouseEvent *event )
@@ -117,40 +130,34 @@ void MainOpenglWidget::mouseMoveEvent( QMouseEvent *event )
 {
     if( leftPressed && rightPressed )
     {
-        QVector3D currentCameraLocation = scene.getCameraLocation();
+        QVector3D currentCameraLocation = m_scene->getCameraLocation();
         currentCameraLocation.setY( currentCameraLocation.y() - ( leftClickPos.y() - event->y() ) * 10 );
         auto c = cursor();
         c.setPos( mapToGlobal( leftClickPos ) );
         setCursor(c);
-        scene.setCameraLocation( currentCameraLocation );
+        m_scene->setCameraLocation( currentCameraLocation );
     }
     else if( leftPressed )
     {
-        QVector3D camera_rotation_now = scene.getCameraRotation();
+        QVector3D camera_rotation_now = m_scene->getCameraRotation();
         camera_rotation_now.setY( camera_rotation_now.y() - ( leftClickPos.x() - event->x() ) / 5 );
-        auto cameraLocationNow = scene.getCameraLocation();
+        auto cameraLocationNow = m_scene->getCameraLocation();
         cameraLocationNow.setZ( cameraLocationNow.z() + qCos( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
         cameraLocationNow.setX( cameraLocationNow.x() - qSin( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
         auto c = cursor();
         c.setPos( mapToGlobal( leftClickPos ) );
         setCursor(c);
-        scene.setCameraRotation( camera_rotation_now );
-        scene.setCameraLocation( cameraLocationNow );
+        m_scene->setCameraRotation( camera_rotation_now );
+        m_scene->setCameraLocation( cameraLocationNow );
     }
     else if( rightPressed )
     {
-        QVector3D camera_rotation_now = scene.getCameraRotation();
+        QVector3D camera_rotation_now = m_scene->getCameraRotation();
         camera_rotation_now.setY( camera_rotation_now.y() - ( rightClickPos.x() - event->x() ) / 5 );
         camera_rotation_now.setX( camera_rotation_now.x() - ( rightClickPos.y() - event->y() ) / 5 );
         auto c = cursor();
         c.setPos( mapToGlobal( rightClickPos ) );
         setCursor(c);
-        scene.setCameraRotation( camera_rotation_now );
+        m_scene->setCameraRotation( camera_rotation_now );
     }
-}
-
-std::unique_ptr<Mesh> MainOpenglWidget::makeModel( const QString &filename )
-{
-    makeCurrent();
-    return std::make_unique<Mesh>( Model::readPSK( filename ) );
 }
