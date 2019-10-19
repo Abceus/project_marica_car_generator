@@ -1,11 +1,11 @@
 #include "physics/physobject.h"
 
-PhysObject::PhysObject( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node, float mass, QVector3D size )
-    : Object( model, node )
+PhysObject::PhysObject( QSharedPointer<Mesh> drawable, QSharedPointer<SceneNode> node, const Model& physModel, float mass, QVector3D size )
+    : Object( drawable, node )
 {
     colShape = std::make_unique<btConvexHullShape>();
 
-    auto verts = model->getModel().vertices;
+    auto verts = physModel.vertices;
     for( auto& vert: verts )
     {
         static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
@@ -15,6 +15,8 @@ PhysObject::PhysObject( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> no
     m_mass = mass;
     auto location = node->getLocation();
     startTransform.setOrigin( btVector3( location.x(), location.y(), location.z() ) );
+    auto rotationQuaternion = QQuaternion::fromEulerAngles( node->getRotation() );
+    startTransform.setRotation( btQuaternion( rotationQuaternion.x(), rotationQuaternion.y(), rotationQuaternion.z(), rotationQuaternion.length() ) );
 
     myMotionState = std::make_unique<btDefaultMotionState>( startTransform );
 }

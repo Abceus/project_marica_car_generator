@@ -80,6 +80,16 @@ void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
     m_body->getDraweable()->setTexture( filename, index );
 }
 
+void MainOpenglWidget::setBodyCollisionModel(Model model)
+{
+    m_bodyCollision = std::move( model );
+}
+
+Model MainOpenglWidget::getBodyCollisionModel() const
+{
+    return m_bodyCollision;
+}
+
 QSharedPointer<Scene> MainOpenglWidget::getScene()
 {
     return m_scene;

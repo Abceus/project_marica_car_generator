@@ -32,7 +32,7 @@ public:
     ~OpenglSimulationWidget() override = default;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
-    void prepare( const Model &filename );
+    void prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation );
     void closeEvent(QCloseEvent *event) override;
     void init();
 private:

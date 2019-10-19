@@ -38,6 +38,8 @@ void MainWindow::on_meshOpenButton_clicked()
         auto node = ui->mainOpenGLWidget->getScene()->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
         auto drawable = node->addDrawable( ui->mainOpenGLWidget->getRenderer().makeDrawable<Mesh>( Model::readPSK( fileName ) ) );
 
+        node->setRotation( {0.0f, 0.0f, 45.0f } );
+
         ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( drawable.staticCast<Mesh>(), node ) ) );
 
         if( fileName.size() > 50 )
@@ -60,7 +62,7 @@ void MainWindow::on_startSimulationButton_clicked()
     if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
-        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable()->getModel() );
+        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
         hide();
     }
 }
@@ -116,4 +118,24 @@ void MainWindow::addButtonToArrayLayout()
     this->ui->skinButtonArrayLayout->addWidget( newButton );
     newButton->show();
     this->ui->skinButtonArrayLayout->update();
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
+                                                    QDir::currentPath(),
+                                                    tr( "PSK (*.psk)" ) );
+
+    if( fileName != "" )
+    {
+        auto model = Model::readPSK( fileName );
+
+        ui->mainOpenGLWidget->setBodyCollisionModel( Model::readPSK( fileName ) );
+
+        if( fileName.size() > 50 )
+        {
+            fileName = "..." + fileName.right( 47 );
+        }
+        ui->pushButton_2->setText( fileName );
+    }
 }

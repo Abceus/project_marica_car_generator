@@ -8,13 +8,16 @@ OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
 {
 }
 
-void OpenglSimulationWidget::prepare( const Model &bodyModel )
+void OpenglSimulationWidget::prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation )
 {
     makeCurrent();
     auto node = m_scene->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
-    node->setLocation( { 0.0f, 0.0f, -300.0f } );
+    node->setLocation( nodeInformation->getLocation() + QVector3D( 0.0f, 500.0f, -300.0f ) );
+    node->setRotation( nodeInformation->getRotation() );
+    node->setScale( nodeInformation->getScale() );
+
     auto drawable = node->addDrawable( QSharedPointer<Mesh>( new Mesh( bodyModel ) ) );
-    m_body = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
+    m_body = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, bodyPhysModel, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
 
     m_body->setPhysic( physicWorld->addBody( m_body->getConstructionInfo() ) );
 

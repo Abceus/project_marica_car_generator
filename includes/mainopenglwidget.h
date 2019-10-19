@@ -38,12 +38,16 @@ public:
     QSharedPointer<Object> getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
+    void setBodyCollisionModel( Model model );
+    Model getBodyCollisionModel() const;
+
     QSharedPointer<Scene> getScene();
     Renderer& getRenderer();
 private:
     QSharedPointer<Scene> m_scene;
     Renderer m_renderer;
     QSharedPointer<Object> m_body;
+    Model m_bodyCollision;
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;

@@ -20,6 +20,8 @@ private slots:
     void on_startSimulationButton_clicked();
     void on_tireColiisionOpenButton_clicked();
     void skinOpenButton_clicked(int i);
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow *ui;
     OpenglSimulationWidget simulationWidget;
