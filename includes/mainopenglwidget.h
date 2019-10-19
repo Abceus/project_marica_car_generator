@@ -35,7 +35,7 @@ public:
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
     void setBodyObject( QSharedPointer<Object> object );
-    Object* getBodyObject() const;
+    QSharedPointer<Object> getBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
     QSharedPointer<Scene> getScene();

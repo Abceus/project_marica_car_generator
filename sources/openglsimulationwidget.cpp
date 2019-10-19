@@ -2,26 +2,26 @@
 
 OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
         : QOpenGLWidget( parent )
-        , scene()
+        , m_scene( new Scene )
         , prevTime( std::chrono::high_resolution_clock::now() )
         , physicWorld( new PhysicWorld() )
 {
 }
 
-void OpenglSimulationWidget::rewriteThisShit( const QString &filename )
+void OpenglSimulationWidget::prepare( const Model &bodyModel )
 {
     makeCurrent();
-    auto node = scene.addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+    auto node = m_scene->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
     node->setLocation( { 0.0f, 0.0f, -300.0f } );
-    auto drawable = node->addDrawable( QSharedPointer<Mesh>( new Mesh( Model::readPSK( filename ) ) ) );
-    m_tire = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
+    auto drawable = node->addDrawable( QSharedPointer<Mesh>( new Mesh( bodyModel ) ) );
+    m_body = QSharedPointer<PhysObject>( new PhysObject( drawable.staticCast<Mesh>(), node, 1000.f, QVector3D( 10.f, 3.f, 10.f ) ) );
 
-    m_tire->setPhysic( physicWorld->addBody( m_tire->getConstructionInfo() ) );
+    m_body->setPhysic( physicWorld->addBody( m_body->getConstructionInfo() ) );
 
     m_objects.append( physicWorld );
-    m_objects.append( m_tire );
+    m_objects.append( m_body );
 
-    btBoxShape* colShapeGround = new btBoxShape( btVector3( 20.f, 50.f, 20.f ) );
+    btBoxShape* colShapeGround = new btBoxShape( btVector3( 2000.f, 50.f, 2000.f ) );
 
     btTransform startTransformGround;
     startTransformGround.setIdentity();
@@ -56,9 +56,9 @@ void OpenglSimulationWidget::closeEvent(QCloseEvent *event)
 void OpenglSimulationWidget::init()
 {
     m_objects.clear();
-    m_tire = nullptr;
+    m_body = nullptr;
     physicWorld->init();
-    scene.clear();
+    m_scene->clear();
 }
 
 void OpenglSimulationWidget::initializeGL()
@@ -72,7 +72,26 @@ void OpenglSimulationWidget::initializeGL()
     f->glEnable( GL_BLEND );
     f->glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-//    scene.init();
+
+    m_renderer = Renderer( context(), context()->surface() );
+
+    auto vertexShader = m_renderer.loadShader( "resources/shaders/defaultvertexshader.vert", QOpenGLShader::Vertex );
+
+    if( !vertexShader )
+    {
+        qDebug() << "The vertex shader wasn't compiled";
+    }
+
+    auto fragmentShader = m_renderer.loadShader( "resources/shaders/defaultfragmentshader.frag", QOpenGLShader::Fragment );
+
+    if( !fragmentShader )
+    {
+        qDebug() << "The fragment shader wasn't compiled";
+    }
+
+    auto program = m_renderer.getShaderProgram( vertexShader, fragmentShader );
+
+    m_scene->init( program );
 
     makeCurrent();
 }
@@ -92,7 +111,7 @@ void OpenglSimulationWidget::paintGL()
         object->update( dt );
     }
 
-    scene.draw( f, ef );
+    m_scene->draw( f, ef );
 
     if( keys[Qt::Key_Up] )
     {
@@ -115,7 +134,7 @@ void OpenglSimulationWidget::paintGL()
 
 void OpenglSimulationWidget::resizeGL( int w, int h )
 {
-    scene.resizeScreen( w, h );
+    m_scene->resizeScreen( w, h );
 }
 
 void OpenglSimulationWidget::keyPressEvent( QKeyEvent* event )

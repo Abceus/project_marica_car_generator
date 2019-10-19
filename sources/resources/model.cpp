@@ -24,7 +24,6 @@ Model Model::readPSK( const QString &filename )
     QFile file( filename );
     if ( !file.open( QIODevice::ReadOnly ) )
         return newModel;
-    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
 
     file.read( reinterpret_cast<char*>( &GeneralHeader ), sizeof( VChunkHeader ) );
     qDebug() << GeneralHeader.ChunkID << " " << GeneralHeader.DataCount << " " << GeneralHeader.DataSize << " " << GeneralHeader.TypeFlags;

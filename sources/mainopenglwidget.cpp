@@ -70,9 +70,9 @@ void MainOpenglWidget::setBodyObject( QSharedPointer<Object> object )
     m_body = object;
 }
 
-Object* MainOpenglWidget::getBodyObject() const
+ QSharedPointer<Object> MainOpenglWidget::getBodyObject() const
 {
-    return m_body.get();
+    return m_body;
 }
 
 void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )

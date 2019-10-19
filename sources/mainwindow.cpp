@@ -8,6 +8,7 @@
 #include "object.h"
 #include "render_system/scene_node.h"
 #include "physics/physobject.h"
+#include "render_system/wireframe.h"
 
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
@@ -56,11 +57,10 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_startSimulationButton_clicked()
 {
-    if( simulationWidget.isHidden() )
+    if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
-        simulationWidget.rewriteThisShit( QString(
-                "/home/jamil/gits/ProjectMaricaCarGenerator/example/MaricaFlatoutCollision/StaticMesh/pm_speedevil_tireKColl.psk" ));
+        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable()->getModel() );
         hide();
     }
 }
@@ -72,7 +72,7 @@ void MainWindow::on_tireColiisionOpenButton_clicked()
 
 void MainWindow::skinOpenButton_clicked(int i)
 {
-    if( ui->mainOpenGLWidget->getBodyObject() != nullptr )
+    if( ui->mainOpenGLWidget->getBodyObject() )
     {
         QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
                                                         QDir::currentPath(),
