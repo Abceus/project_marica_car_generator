@@ -1,4 +1,5 @@
 #include <memory>
+#include <algorithm>
 
 #include <QFile>
 

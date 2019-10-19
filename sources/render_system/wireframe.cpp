@@ -26,22 +26,52 @@ WireframeMesh::WireframeMesh(Model model)
 
     m_VAO.bind();
 
+    auto vertices = QVector<Vertex>::fromStdVector( model.vertices );
+
+    std::sort( vertices.begin(), vertices.end(), []( const Vertex& a, const Vertex& b )
+    {
+        if( a.X != b.X )
+        {
+            return a.X < b.X;
+        }
+        if( a.Y != b.Y )
+        {
+            return a.Y < b.Y;
+        }
+        return a.Z < b.Z;
+    } );
+
+    auto vertexRemoveIterator = std::unique( vertices.begin(), vertices.end(), []( const Vertex& a, const Vertex& b ){ return a.X == b.X && a.Y == b.Y && a.Z == b.Z; } );
+    vertices.erase( vertexRemoveIterator, vertices.end() );
+
     QVector<Edge> edges;
+
+    QVector<GLuint> vertexConformity;
+    vertexConformity.reserve(model.vertices.size());
+
+    for( const auto& vertex: model.vertices )
+    {
+        vertexConformity.append( static_cast<GLuint>( std::find_if( vertices.begin(), vertices.end(),
+                                               [vertex]( const Vertex& a )
+                                                  {
+                                                      return a.X == vertex.X && a.Y == vertex.Y && a.Z == vertex.Z;
+                                                  }) - vertices.begin() ) );
+    }
 
     for( const auto& indice: model.indices )
     {
         for( size_t i = 0; i < 3; i++ )
         {
-            edges.append( { indice.vertexes[i], indice.vertexes[(i+1)%3] } );
+            edges.append( { vertexConformity[indice.vertexes[i]], vertexConformity[indice.vertexes[(i+1)%3]] } );
         }
     }
 
     std::sort( edges.begin(), edges.end(), []( const Edge& a, const Edge& b ){ return a.vertexes[0] == b.vertexes[0] ? a.vertexes[1] < b.vertexes[1] : a.vertexes[0] < b.vertexes[0]; } );
-    auto removeIterator = std::unique( edges.begin(), edges.end(), []( const Edge& a, const Edge& b ){ return a.vertexes[0] == b.vertexes[0] && a.vertexes[1] == b.vertexes[1]; } );
-    edges.erase( removeIterator, edges.end() );
+    auto edgeRemoveIterator = std::unique( edges.begin(), edges.end(), []( const Edge& a, const Edge& b ){ return a.vertexes[0] == b.vertexes[0] && a.vertexes[1] == b.vertexes[1]; } );
+    edges.erase( edgeRemoveIterator, edges.end() );
 
     m_VBO.bind();
-    m_VBO.allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
+    m_VBO.allocate( vertices.data(), sizeof( Vertex )*vertices.size() );
 
     m_EBO.bind();
     m_EBO.allocate( edges.data(), sizeof( Edge )*edges.size() );
