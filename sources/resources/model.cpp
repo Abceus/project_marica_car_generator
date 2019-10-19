@@ -29,22 +29,22 @@ Model Model::readPSK( const QString &filename )
     qDebug() << GeneralHeader.ChunkID << " " << GeneralHeader.DataCount << " " << GeneralHeader.DataSize << " " << GeneralHeader.TypeFlags;
     file.read( reinterpret_cast<char*>( &PointsHeader ), sizeof( VChunkHeader ) );
     qDebug() << PointsHeader.ChunkID << " " << PointsHeader.DataCount << " " << PointsHeader.DataSize << " " << PointsHeader.TypeFlags;
-    PointsData.reserve( static_cast<size_t>( PointsHeader.DataCount ) );
+    PointsData.resize( static_cast<size_t>( PointsHeader.DataCount ) );
     file.read( reinterpret_cast<char*>( PointsData.data() ), PointsHeader.DataSize * PointsHeader.DataCount );
 
     file.read( reinterpret_cast<char*>( &WedgesHeader ), sizeof( VChunkHeader ) );
     qDebug() << WedgesHeader.ChunkID << " " << WedgesHeader.DataCount << " " << WedgesHeader.DataSize << " " << WedgesHeader.TypeFlags;
-    WedgesData.reserve( static_cast<size_t>( WedgesHeader.DataCount ) );
+    WedgesData.resize( static_cast<size_t>( WedgesHeader.DataCount ) );
     file.read( reinterpret_cast<char*>( WedgesData.data() ), WedgesHeader.DataSize * WedgesHeader.DataCount );
 
     file.read( reinterpret_cast<char*>( &FacesHeader ), sizeof( VChunkHeader ) );
     qDebug() << FacesHeader.ChunkID << " " << FacesHeader.DataCount << " " << FacesHeader.DataSize << " " << FacesHeader.TypeFlags;
-    FacesData.reserve( static_cast<size_t>( FacesHeader.DataCount ) );
+    FacesData.resize( static_cast<size_t>( FacesHeader.DataCount ) );
     file.read( reinterpret_cast<char*>( FacesData.data() ), FacesHeader.DataSize * FacesHeader.DataCount );
 
     file.read( reinterpret_cast<char*>( &MaterialsHeader ), sizeof( VChunkHeader ) );
     qDebug() << MaterialsHeader.ChunkID << " " << MaterialsHeader.DataCount << " " << MaterialsHeader.DataSize << " " << MaterialsHeader.TypeFlags;
-    MaterialsData.reserve( static_cast<size_t>( MaterialsHeader.DataCount ) );
+    MaterialsData.resize( static_cast<size_t>( MaterialsHeader.DataCount ) );
     file.read( reinterpret_cast<char*>( MaterialsData.data() ), MaterialsHeader.DataSize * MaterialsHeader.DataCount );
 
     file.close();

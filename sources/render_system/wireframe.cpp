@@ -62,7 +62,11 @@ WireframeMesh::WireframeMesh(Model model)
     {
         for( size_t i = 0; i < 3; i++ )
         {
-            edges.append( { vertexConformity[indice.vertexes[i]], vertexConformity[indice.vertexes[(i+1)%3]] } );
+            auto firstPoint = vertexConformity[indice.vertexes[i]];
+            auto secondPoint = vertexConformity[indice.vertexes[(i+1)%3]];
+            auto min = std::min( firstPoint, secondPoint );
+            auto max = std::max( firstPoint, secondPoint );
+            edges.append( { min, max } );
         }
     }
 
