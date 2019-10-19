@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 3.9 )
 
+project( ProjectMaricaCarGenerator )
+
 set( CMAKE_CXX_STANDARD 14 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -34,6 +36,7 @@ add_executable( ProjectMaricaCarGenerator
         sources/physics/physicworld.cpp
         sources/render_system/drawable.cpp
         sources/render_system/scene_node.cpp
+        sources/render_system/wireframe.cpp
         ${MOC_FOR_UI})
 
 if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)
@@ -44,6 +47,20 @@ target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes ${BULLET_INCLUDE_DIRECTORY})
 
 target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets BulletDynamics BulletCollision LinearMath)
+
+# if (UNIX)
+# target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletDynamics/libBulletDynamics.a
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletCollision/libBulletCollision.a
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/LinearMath/libLinearMath.a)
+# endif (UNIX)
+
+# if (MSVC)
+# target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/BulletDynamics_Debug.lib
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/BulletCollision_Debug.lib
+#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/LinearMath_Debug.lib)
+# endif (MSVC)
 
 set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )
