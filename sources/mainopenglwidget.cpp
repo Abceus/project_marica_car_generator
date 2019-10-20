@@ -2,6 +2,7 @@
 #include <QtMath>
 
 #include "mainopenglwidget.h"
+#include "render_system/wireframe.h"
 
 MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     : QOpenGLWidget( parent )
@@ -11,6 +12,10 @@ MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     leftPressed = false;
     rightPressed = false;
     setCursor( Qt::CrossCursor );
+
+    auto node = m_scene->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+    m_body = QSharedPointer<Object>( new Object( nullptr, node ) );
+    m_collisionBody = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
 }
 
 void MainOpenglWidget::initializeGL()
@@ -45,6 +50,24 @@ void MainOpenglWidget::initializeGL()
 
     m_scene->init( program );
 
+    auto meshVertexShader = m_renderer.loadShader( "resources/shaders/meshvertexshader.vert", QOpenGLShader::Vertex );
+
+    if( !meshVertexShader )
+    {
+        qDebug() << "The mesh vertex shader wasn't compiled";
+    }
+
+    auto meshFragmentShader = m_renderer.loadShader( "resources/shaders/meshfragmentshader.frag", QOpenGLShader::Fragment );
+
+    if( !meshFragmentShader )
+    {
+        qDebug() << "The mesh fragment shader wasn't compiled";
+    }
+
+    auto meshProgram = m_renderer.getShaderProgram( meshVertexShader, meshFragmentShader );
+
+    m_body->getNode()->setShaderProgram( meshProgram );
+
     doneCurrent();
 }
 
@@ -65,29 +88,29 @@ void MainOpenglWidget::resizeGL( int w, int h )
     m_scene->resizeScreen( w, h );
 }
 
-void MainOpenglWidget::setBodyObject( QSharedPointer<Object> object )
+void MainOpenglWidget::setBodyMesh(QSharedPointer<Mesh> bodyMesh)
 {
-    m_body = object;
+
 }
 
  QSharedPointer<Object> MainOpenglWidget::getBodyObject() const
 {
-    return m_body;
-}
+     return m_body;
+ }
+
+ QSharedPointer<Object> MainOpenglWidget::getCollisionBodyObject() const
+ {
+     return m_collisionBody;
+ }
 
 void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
 {
-    m_body->getDraweable()->setTexture( filename, index );
-}
-
-void MainOpenglWidget::setBodyCollisionModel(Model model)
-{
-    m_bodyCollision = std::move( model );
+    m_body->getDraweable().staticCast<Mesh>()->setTexture( filename, index );
 }
 
 Model MainOpenglWidget::getBodyCollisionModel() const
 {
-    return m_bodyCollision;
+    return m_collisionBody->getDraweable().staticCast<WireframeMesh>()->getModel();
 }
 
 QSharedPointer<Scene> MainOpenglWidget::getScene()

@@ -79,7 +79,9 @@ FORMS    += ui/mainwindow.ui
 
 DISTFILES += \
     resources/shaders/defaultfragmentshader.frag \
-    resources/shaders/defaultvertexshader.vert
+    resources/shaders/defaultvertexshader.vert \
+    resources/shaders/meshfragmentshader.frag \
+    resources/shaders/meshvertexshader.vert
 
 win32 {
     build_pass: CONFIG(debug, debug|release) {

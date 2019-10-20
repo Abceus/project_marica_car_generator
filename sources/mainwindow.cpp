@@ -35,12 +35,12 @@ void MainWindow::on_meshOpenButton_clicked()
         auto model = Model::readPSK( fileName );
         size_t textureSize = model.materials.size();
 
-        auto node = ui->mainOpenGLWidget->getScene()->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
+        auto node = ui->mainOpenGLWidget->getBodyObject()->getNode();
         auto drawable = node->addDrawable( ui->mainOpenGLWidget->getRenderer().makeDrawable<Mesh>( Model::readPSK( fileName ) ) );
 
-        node->setRotation( {0.0f, 0.0f, 45.0f } );
+        node->setRotation( { 0.0f, 0.0f, 45.0f } );
 
-        ui->mainOpenGLWidget->setBodyObject( QSharedPointer<Object>( new Object( drawable.staticCast<Mesh>(), node ) ) );
+        ui->mainOpenGLWidget->setBodyMesh( drawable.staticCast<Mesh>() );
 
         if( fileName.size() > 50 )
         {
@@ -62,7 +62,7 @@ void MainWindow::on_startSimulationButton_clicked()
     if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
-        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
+        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
         hide();
     }
 }
@@ -129,8 +129,8 @@ void MainWindow::on_pushButton_2_clicked()
     if( fileName != "" )
     {
         auto model = Model::readPSK( fileName );
-
-        ui->mainOpenGLWidget->setBodyCollisionModel( Model::readPSK( fileName ) );
+        auto node = ui->mainOpenGLWidget->getCollisionBodyObject()->getNode();
+        auto drawable = node->addDrawable( ui->mainOpenGLWidget->getRenderer().makeDrawable<WireframeMesh>( model, QColor( 0, 255, 0 ) ) );
 
         if( fileName.size() > 50 )
         {

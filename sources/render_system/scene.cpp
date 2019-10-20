@@ -4,13 +4,14 @@
 Scene::Scene()
     : camera_scale( 1.f )
     , m_shaderProgram(nullptr)
+    , m_defaultShaderProgram(nullptr)
     , m_rootNode( QSharedPointer<SceneNode>( new SceneNode ) )
 {
 }
 
 void Scene::init( QSharedPointer<QOpenGLShaderProgram> shaderProgram )
 {
-    m_rootNode->setShaderProgram( shaderProgram );
+    m_defaultShaderProgram = shaderProgram;
 
     camera_location = QVector3D( 0, 0, 0 );
     camera_rotation = QVector3D( 0, 0, 0 );
@@ -73,7 +74,7 @@ void Scene::setCameraScale( float value )
 void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
 {
     drawNode( m_rootNode, f, ef );
-    m_shaderProgram = nullptr;
+    m_shaderProgram->release();
 }
 
 void Scene::resizeScreen(int w, int h)
@@ -97,9 +98,30 @@ QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
 
 void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
 {
-    if( node->getShaderProgram() && m_shaderProgram != node->getShaderProgram() )
+    bool shaderChanged = false;
+    if( node->getShaderProgram() )
     {
-        m_shaderProgram = node->getShaderProgram();
+        if( m_shaderProgram != node->getShaderProgram() )
+        {
+            if( m_shaderProgram )
+            {
+                m_shaderProgram->release();
+            }
+            m_shaderProgram = node->getShaderProgram();
+            shaderChanged = true;
+        }
+    } else if( m_shaderProgram != m_defaultShaderProgram )
+    {
+        if( m_shaderProgram )
+        {
+            m_shaderProgram->release();
+        }
+        m_shaderProgram = m_defaultShaderProgram;
+        shaderChanged = true;
+    }
+
+    if( shaderChanged )
+    {
         m_shaderProgram->bind();
 
         QMatrix4x4 view;

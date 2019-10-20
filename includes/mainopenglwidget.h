@@ -34,11 +34,12 @@ public:
     void mouseMoveEvent( QMouseEvent *event ) override;
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
-    void setBodyObject( QSharedPointer<Object> object );
+//    void setBodyObject( QSharedPointer<Object> object );
+    void setBodyMesh( QSharedPointer<Mesh> bodyMesh );
     QSharedPointer<Object> getBodyObject() const;
+    QSharedPointer<Object> getCollisionBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
-    void setBodyCollisionModel( Model model );
     Model getBodyCollisionModel() const;
 
     QSharedPointer<Scene> getScene();
@@ -47,7 +48,7 @@ private:
     QSharedPointer<Scene> m_scene;
     Renderer m_renderer;
     QSharedPointer<Object> m_body;
-    Model m_bodyCollision;
+    QSharedPointer<Object> m_collisionBody;
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;

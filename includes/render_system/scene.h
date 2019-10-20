@@ -44,5 +44,6 @@ private:
     QSharedPointer<SceneNode> m_rootNode;
 
     QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
+    QSharedPointer<QOpenGLShaderProgram> m_defaultShaderProgram;
     QMatrix4x4 m_projection;
 };

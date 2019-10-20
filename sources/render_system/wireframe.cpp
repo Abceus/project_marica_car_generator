@@ -9,7 +9,9 @@ struct Edge
     GLuint vertexes[2];
 };
 
-WireframeMesh::WireframeMesh(Model model)
+WireframeMesh::WireframeMesh(Model model, QColor color)
+    : m_model( std::move( model ) )
+    , m_color( std::move( color ) )
 {
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions* fe = QOpenGLContext::currentContext()->extraFunctions();
@@ -26,7 +28,7 @@ WireframeMesh::WireframeMesh(Model model)
 
     m_VAO.bind();
 
-    auto vertices = QVector<Vertex>::fromStdVector( model.vertices );
+    auto vertices = QVector<Vertex>::fromStdVector( m_model.vertices );
 
     std::sort( vertices.begin(), vertices.end(), []( const Vertex& a, const Vertex& b )
     {
@@ -47,9 +49,9 @@ WireframeMesh::WireframeMesh(Model model)
     QVector<Edge> edges;
 
     QVector<GLuint> vertexConformity;
-    vertexConformity.reserve(model.vertices.size());
+    vertexConformity.reserve( m_model.vertices.size());
 
-    for( const auto& vertex: model.vertices )
+    for( const auto& vertex: m_model.vertices )
     {
         vertexConformity.append( static_cast<GLuint>( std::find_if( vertices.begin(), vertices.end(),
                                                [vertex]( const Vertex& a )
@@ -58,7 +60,7 @@ WireframeMesh::WireframeMesh(Model model)
                                                   }) - vertices.begin() ) );
     }
 
-    for( const auto& indice: model.indices )
+    for( const auto& indice: m_model.indices )
     {
         for( size_t i = 0; i < 3; i++ )
         {
@@ -86,8 +88,6 @@ WireframeMesh::WireframeMesh(Model model)
     m_VAO.release();
 
     m_VAOsize = edges.size() * 2;
-
-    m_model = model;
 }
 
 Model WireframeMesh::getModel()
@@ -98,6 +98,7 @@ Model WireframeMesh::getModel()
 void WireframeMesh::draw(const RenderInfo &renderInfo)
 {
     m_VAO.bind();
+    renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "color" ), m_color );
     renderInfo.f->glDrawElements( GL_LINES, m_VAOsize, GL_UNSIGNED_INT, nullptr );
     m_VAO.release();
 }

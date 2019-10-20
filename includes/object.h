@@ -8,12 +8,12 @@
 class Object
 {
 public:
-    Object( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node );
+    Object( QSharedPointer<Drawable> model, QSharedPointer<SceneNode> node );
     ~Object() = default;
 
     QSharedPointer<SceneNode> getNode();
-    QSharedPointer<Mesh> getDraweable();
+    QSharedPointer<Drawable> getDraweable();
 protected:
     QSharedPointer<SceneNode> m_node;
-    QSharedPointer<Mesh> m_model;
+    QSharedPointer<Drawable> m_model;
 };
