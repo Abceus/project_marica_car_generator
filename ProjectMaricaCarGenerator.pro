@@ -73,15 +73,16 @@ HEADERS  += includes/mainwindow.h \
     includes/render_system/render_info.h \
     includes/updatable.h \
     includes/render_system/renderer.h \
-    includes/render_system/wireframe.h
+    includes/render_system/wireframe.h \
+    includes/render_system/render_node.h
 
 FORMS    += ui/mainwindow.ui
 
 DISTFILES += \
-    resources/shaders/defaultfragmentshader.frag \
-    resources/shaders/defaultvertexshader.vert \
-    resources/shaders/meshfragmentshader.frag \
-    resources/shaders/meshvertexshader.vert
+    resources/shaders/colorfragmentshader.frag \
+    resources/shaders/colorvertexshader.vert \
+    resources/shaders/texturefragmentshader.frag \
+    resources/shaders/texturevertexshader.vert
 
 win32 {
     build_pass: CONFIG(debug, debug|release) {

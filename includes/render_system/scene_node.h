@@ -4,11 +4,13 @@
 #include <QVector>
 #include <QSharedPointer>
 #include <QOpenGLShaderProgram>
+#include <QObject>
 
-#include "drawable.h"
+#include "drawable.h"`
 
-class SceneNode
+class SceneNode : public QObject
 {
+    Q_OBJECT
 public:
     SceneNode();
 
@@ -50,4 +52,10 @@ private:
     QVector<QSharedPointer<SceneNode>> m_childrens;
     QVector<QSharedPointer<Drawable>> m_drawables;
     QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
+
+signals:
+    void drawableAdded( SceneNode* node, Drawable* drawable );
+    void drawableRemoved( SceneNode* node, Drawable* drawable );
+    void nodeAdded( SceneNode* node );
+    void nodeRemoved( SceneNode* node );
 };

@@ -80,6 +80,11 @@ QSharedPointer<SceneNode> SceneNode::addChild(QSharedPointer<SceneNode> newChild
     {
         m_childrens.append(newChild);
         newChild->setParent(this);
+        connect( newChild.get(), &SceneNode::drawableAdded, this, [=](SceneNode* node, Drawable* drawable){ emit drawableAdded(node, drawable); });
+        connect( newChild.get(), &SceneNode::drawableRemoved, this, [=](SceneNode* node, Drawable* drawable){ emit drawableRemoved(node, drawable); });
+        connect( newChild.get(), &SceneNode::nodeAdded, this, [=](SceneNode* node){ emit nodeAdded(node); });
+        connect( newChild.get(), &SceneNode::nodeRemoved, this, [=](SceneNode* node){ emit nodeRemoved(node); });
+        emit nodeAdded( newChild.get() );
     }
     return newChild;
 }
@@ -91,6 +96,7 @@ void SceneNode::removeChild(SceneNode *removeChild)
     {
         m_childrens.erase( found );
         removeChild->setParent(nullptr);
+        emit nodeRemoved( removeChild );
     }
 }
 
@@ -99,6 +105,7 @@ QSharedPointer<Drawable> SceneNode::addDrawable(QSharedPointer<Drawable> newDraw
     if( !m_drawables.contains(newDrawable) )
     {
         m_drawables.append(newDrawable);
+        emit drawableAdded( this, newDrawable.get() );
     }
     return newDrawable;
 }
@@ -109,6 +116,7 @@ void SceneNode::removeDrawable(Drawable *removeDrawable)
     if( found != m_drawables.end() )
     {
         m_drawables.erase(found);
+        emit drawableRemoved( this, removeDrawable );
     }
 }
 

@@ -43,6 +43,10 @@ public:
     Model getModel();
     void draw( const RenderInfo& renderInfo ) override;
 private:
+//    QVector<QVector<GLuint>> m_indices;
+    QVector<size_t> m_buffersOffsets;
+    QVector<size_t> m_bufferSizes;
+
     QOpenGLVertexArrayObject VAO;
     QOpenGLBuffer VBO, EBO;
     QVector<QSharedPointer<QOpenGLTexture>> textures;

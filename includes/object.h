@@ -12,8 +12,11 @@ public:
     ~Object() = default;
 
     QSharedPointer<SceneNode> getNode();
-    QSharedPointer<Drawable> getDraweable();
+    QSharedPointer<Drawable> getDrawable();
+
+    void setNode( QSharedPointer<SceneNode> node );
+    void setDrawable( QSharedPointer<Drawable> drawable );
 protected:
     QSharedPointer<SceneNode> m_node;
-    QSharedPointer<Drawable> m_model;
+    QSharedPointer<Drawable> m_drawable;
 };

@@ -62,7 +62,7 @@ void MainWindow::on_startSimulationButton_clicked()
     if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
-        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
+        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDrawable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
         hide();
     }
 }

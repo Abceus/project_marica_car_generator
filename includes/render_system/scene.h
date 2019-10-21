@@ -4,14 +4,16 @@
 #include "object.h"
 #include "physics/physobject.h"
 #include "render_system/scene_node.h"
+#include "render_system/render_node.h"
 
 #include <QSharedPointer>
 #include <QVector>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
+//#include <QObject>
 
-class Scene
+class Scene : public QObject
 {
 public:
     Scene();
@@ -46,4 +48,14 @@ private:
     QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
     QSharedPointer<QOpenGLShaderProgram> m_defaultShaderProgram;
     QMatrix4x4 m_projection;
+
+    QVector<RenderNode> m_renderNodes;
+
+    void addNodeToRenders( SceneNode* node );
+
+private slots:
+    void drawableAdded( SceneNode* node, Drawable* drawable );
+    void drawableRemoved( SceneNode* node, Drawable* drawable );
+    void nodeAdded( SceneNode* node );
+    void nodeRemoved( SceneNode* node );
 };
