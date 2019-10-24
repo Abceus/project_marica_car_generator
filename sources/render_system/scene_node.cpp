@@ -160,3 +160,12 @@ QSharedPointer<QOpenGLShaderProgram> SceneNode::getShaderProgram() const
 {
     return m_shaderProgram;
 }
+
+QMatrix4x4 SceneNode::getMatrix() const
+{
+    QMatrix4x4 result;
+    result.translate( getLocation() );
+    result.rotate( QQuaternion::fromEulerAngles( getRotation() ) );
+    result.scale( getScale() );
+    return result;
+}

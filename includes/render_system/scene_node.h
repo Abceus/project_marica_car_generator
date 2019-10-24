@@ -5,6 +5,7 @@
 #include <QSharedPointer>
 #include <QOpenGLShaderProgram>
 #include <QObject>
+#include <QMatrix4x4>
 
 #include "drawable.h"`
 
@@ -43,6 +44,8 @@ public:
 
     void setShaderProgram( QSharedPointer<QOpenGLShaderProgram> newProgram );
     QSharedPointer<QOpenGLShaderProgram> getShaderProgram() const;
+
+    QMatrix4x4 getMatrix() const;
 
 private:
     QVector3D m_location;

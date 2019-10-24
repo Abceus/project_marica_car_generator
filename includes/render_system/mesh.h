@@ -38,21 +38,24 @@ public:
     void addTexture( QString filename );
     size_t getTexturesSize();
     GLsizei getVAOsize();
-    size_t getTextureQueue( size_t index );
-    void setTextureQueue( size_t index, float average );
     Model getModel();
     void draw( const RenderInfo& renderInfo ) override;
+    void subdraw( const RenderInfo& renderInfo, size_t materialIndex, size_t from, size_t size ) override;
+    QVector<Face> getTransparentFaces() const override;
+    QVector<Vertex> getVertexes() const override;
 private:
-//    QVector<QVector<GLuint>> m_indices;
     QVector<size_t> m_buffersOffsets;
     QVector<size_t> m_bufferSizes;
+
+    QVector<QVector<Face>> m_faces;
+
+    QVector<size_t> m_transparentBuffers;
 
     QOpenGLVertexArrayObject VAO;
     QOpenGLBuffer VBO, EBO;
     QVector<QSharedPointer<QOpenGLTexture>> textures;
-    std::vector<std::pair<size_t, float>> textureQueue;
     GLsizei VAOsize;
-    void sortTextures();
-    float averageAlpha( QImage image );
     Model m_model;
+
+    float averageAlpha( QImage image );
 };

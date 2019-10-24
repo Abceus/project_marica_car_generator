@@ -73,6 +73,23 @@ Mesh::Mesh( const Model& model )
     VAOsize = model.VAOsize;
 
     m_model = model;
+
+    for( size_t i = 0; i < m_buffersOffsets.size(); i++ )
+    {
+        QVector<Face> buffersFaces;
+        for( size_t j = m_buffersOffsets[i]; j < m_buffersOffsets[i] + m_bufferSizes[i]; j++ )
+        {
+            Face f;
+            f.indiceIndex = j;
+            f.materialIndex = m_model.vertices[m_model.indices[j/3].vertexes[0]].MaterialIndex;
+            for( size_t k = 0; k < 3; k++ )
+            {
+                f.points[k] = m_model.indices[j/3].vertexes[k];
+            }
+            buffersFaces.append( f );
+        }
+        m_faces.append( buffersFaces );
+    }
 }
 
 Mesh::~Mesh()
@@ -97,58 +114,36 @@ void Mesh::setTexture( QString filename, size_t index )
     QImage image = ResourceManager::Instance().get<QString, QImage>( filename );
     if( !image.isNull() )
     {
-        this->setTextureQueue( index, this->averageAlpha( image ) );
-
-//        if( averageAlpha( image ) < 240.0f )
-//        {
-
-//        }
-        this->setTextureQueue( index, this->averageAlpha( image ) );
-        textures[index]->destroy();
-        this->textures[index] = QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) );
+        if( averageAlpha( image ) < 240.0f && !m_transparentBuffers.contains( index ) )
+        {
+            m_transparentBuffers.append( index );
+        } else if( m_transparentBuffers.contains( index ) )
+        {
+            m_transparentBuffers.removeOne( index );
+        }
     }
     else
     {
         //TODO: Load default image from texture manager
         image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
-        this->setTextureQueue( index, this->averageAlpha( image ) );
-        textures[index]->destroy();
-        this->textures[index] = QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) );
+        if( m_transparentBuffers.contains( index ) )
+        {
+            m_transparentBuffers.removeOne( index );
+        }
     }
-    this->sortTextures();
+    textures[index]->destroy();
+    this->textures[index] = QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) );
 }
 
 void Mesh::addTexture( QString filename )
 {
     QImage image = ResourceManager::Instance().get<QString, QImage>( filename );
-    if( !image.isNull() )
-    {
-        this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-//        this->textures.emplace_back( QOpenGLTexture( image ) );
-    }
-    else
+    if( image.isNull() )
     {
         //TODO: Load default image from texture manager
         image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
-        this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-        this->textures.append( QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) ) );
     }
-    this->sortTextures();
-}
-
-void Mesh::sortTextures()
-{
-    std::sort( this->textureQueue.begin(), this->textureQueue.end(),
-                  []( const std::pair<int, float>& lhs, const std::pair<int, float>& rhs)
-                  {
-                        return lhs.second > rhs.second;
-                  }
-              );
-}
-
-size_t Mesh::getTextureQueue( size_t index )
-{
-    return this->textureQueue.at( index ).first;
+    this->textures.append( QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) ) );
 }
 
 float Mesh::averageAlpha( QImage image )
@@ -162,18 +157,6 @@ float Mesh::averageAlpha( QImage image )
         }
     }
     return sum / ( image.height() * image.width() );
-}
-
-void Mesh::setTextureQueue( size_t index, float average )
-{
-    for( auto& texture: textureQueue )
-    {
-        if( texture.first == index )
-        {
-            texture.second = average;
-            return;
-        }
-    }
 }
 
 void Mesh::bindVAO()
@@ -201,9 +184,39 @@ void Mesh::draw( const RenderInfo& renderInfo )
     bindVAO();
     for( size_t i=0; i< m_bufferSizes.size(); i++ )
     {
-        size_t index = getTextureQueue( i );
+        if( m_transparentBuffers.contains( i ) )
+        {
+            continue;
+        }
         bindTexture( i );
         renderInfo.f->glDrawElements( GL_TRIANGLES, m_bufferSizes[i], GL_UNSIGNED_INT, reinterpret_cast<GLvoid*>( m_buffersOffsets[i] * sizeof( GLuint ) ) );
     }
     releaseVAO();
+}
+
+void Mesh::subdraw(const RenderInfo &renderInfo, size_t materialIndex, size_t from, size_t size)
+{
+    if( size > 1 )
+    {
+        qDebug() << "hi";
+    }
+    bindVAO();
+    bindTexture( materialIndex );
+    renderInfo.f->glDrawElements( GL_TRIANGLES, size, GL_UNSIGNED_INT, reinterpret_cast<GLvoid*>( from * sizeof( GLuint ) ) );
+    releaseVAO();
+}
+
+QVector<Face> Mesh::getTransparentFaces() const
+{
+    QVector<Face> result;
+    for( const auto& i: m_transparentBuffers )
+    {
+        result += m_faces[i];
+    }
+    return result;
+}
+
+QVector<Vertex> Mesh::getVertexes() const
+{
+    return QVector<Vertex>::fromStdVector( m_model.vertices );
 }

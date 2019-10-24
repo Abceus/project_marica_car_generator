@@ -1,6 +1,16 @@
 #include "render_system/drawable.h"
 
-QVector<Subdrawable> Drawable::getTransparentSubdrawables() const
+void Drawable::subdraw(const RenderInfo &renderInfo, size_t materialIndex, size_t from, size_t size)
+{
+
+}
+
+QVector<Face> Drawable::getTransparentFaces() const
+{
+    return {};
+}
+
+QVector<Vertex> Drawable::getVertexes() const
 {
     return {};
 }
