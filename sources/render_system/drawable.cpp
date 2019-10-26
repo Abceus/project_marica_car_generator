@@ -14,3 +14,8 @@ QVector<Vertex> Drawable::getVertexes() const
 {
     return {};
 }
+
+AABBBox Drawable::getRootAABBB() const
+{
+    return AABBBox();
+}

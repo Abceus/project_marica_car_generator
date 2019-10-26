@@ -24,6 +24,7 @@
 #include "resources/model.h"
 #include "render_system/drawable.h"
 #include "render_system/render_info.h"
+#include "render_system/aabb.h"
 
 class Mesh : public Drawable
 {
@@ -43,6 +44,8 @@ public:
     void subdraw( const RenderInfo& renderInfo, size_t materialIndex, size_t from, size_t size ) override;
     QVector<Face> getTransparentFaces() const override;
     QVector<Vertex> getVertexes() const override;
+
+    AABBBox getRootAABBB() const override;
 private:
     QVector<size_t> m_buffersOffsets;
     QVector<size_t> m_bufferSizes;
@@ -56,6 +59,8 @@ private:
     QVector<QSharedPointer<QOpenGLTexture>> textures;
     GLsizei VAOsize;
     Model m_model;
+
+    AABBBox m_aabb;
 
     float averageAlpha( QImage image );
 };

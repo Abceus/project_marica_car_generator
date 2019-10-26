@@ -54,7 +54,8 @@ SOURCES += sources/main.cpp\
     sources/render_system/drawable.cpp \
     sources/updatable.cpp \
     sources/render_system/renderer.cpp \
-    sources/render_system/wireframe.cpp
+    sources/render_system/wireframe.cpp \
+    sources/render_system/aabb.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
@@ -74,7 +75,9 @@ HEADERS  += includes/mainwindow.h \
     includes/updatable.h \
     includes/render_system/renderer.h \
     includes/render_system/wireframe.h \
-    includes/render_system/render_node.h
+    includes/render_system/render_node.h \
+    includes/render_system/aabb.h \
+    includes/render_system/face.h
 
 FORMS    += ui/mainwindow.ui
 

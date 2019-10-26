@@ -32,6 +32,8 @@ Mesh::Mesh( const Model& model )
     VBO.bind();
     VBO.allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
 
+    m_aabb = AABBBox( QVector3D( minX, maxY, maxZ ), QVector3D( maxX, minY, minZ ) );
+
     QVector<QVector<GLuint>> m_indices;
     for( auto& material: model.materials )
     {
@@ -219,4 +221,9 @@ QVector<Face> Mesh::getTransparentFaces() const
 QVector<Vertex> Mesh::getVertexes() const
 {
     return QVector<Vertex>::fromStdVector( m_model.vertices );
+}
+
+AABBBox Mesh::getRootAABBB() const
+{
+    m_aabb;
 }
