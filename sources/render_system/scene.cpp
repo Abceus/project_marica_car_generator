@@ -1,15 +1,17 @@
 #include "render_system/scene.h"
+#include "vector3d.h"
+
 #include <QOpenGLShader>
-#include <QVector3D>
 #include <QFile>
 
 #include <algorithm>
 
 Scene::Scene()
-    : camera_scale( 1.f )
-    , m_shaderProgram(nullptr)
+    : m_shaderProgram(nullptr)
     , m_defaultShaderProgram(nullptr)
     , m_rootNode( QSharedPointer<SceneNode>( new SceneNode ) )
+    , m_rotationCameraNode( m_rootNode->addChild( QSharedPointer<SceneNode>( new SceneNode ) ))
+    , m_cameraNode( m_rotationCameraNode->addChild( QSharedPointer<SceneNode>( new SceneNode ) ))
 {
     connect( m_rootNode.get(), &SceneNode::nodeAdded, this, &Scene::nodeAdded );
     connect( m_rootNode.get(), &SceneNode::nodeRemoved, this, &Scene::nodeRemoved );
@@ -21,53 +23,28 @@ void Scene::init( QSharedPointer<QOpenGLShaderProgram> shaderProgram )
 {
     m_defaultShaderProgram = shaderProgram;
 
-    camera_location = QVector3D( 0, 0, 0 );
-    camera_rotation = QVector3D( 0, 0, 0 );
-    camera_scale = 1;
+    m_cameraNode->setLocation( Vector3D() );
+    m_cameraNode->setRotation( Vector3D() );
+    m_cameraNode->setScale( 1.0f );
+    m_rotationCameraNode->setRotation( Vector3D() );
 }
 
 void Scene::clear()
 {
-    camera_location = QVector3D( 0, 0, 0 );
-    camera_rotation = QVector3D( 0, 0, 0 );
-    camera_scale = 1;
+    m_cameraNode->setLocation( Vector3D() );
+    m_cameraNode->setRotation( Vector3D() );
+    m_cameraNode->setScale( 1.0f );
+    m_rotationCameraNode->setRotation( Vector3D() );
 
     m_rootNode->clear();
-}
-
-QVector3D Scene::getCameraLocation()
-{
-    return camera_location;
-}
-
-void Scene::setCameraLocation( QVector3D value )
-{
-    camera_location = value;
-}
-
-QVector3D Scene::getCameraRotation()
-{
-    return camera_rotation;
-}
-
-void Scene::setCameraRotation( QVector3D value )
-{
-    camera_rotation = value;
-}
-
-float Scene::getCameraScale()
-{
-    return camera_scale;
-}
-
-void Scene::setCameraScale( float value )
-{
-    camera_scale = value;
+    m_renderNodes.clear();
 }
 
 void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
 {
 //    drawNode( m_rootNode, f, ef );
+
+    qDebug() << m_cameraNode->getLocation().x() << " " << m_cameraNode->getLocation().y() << " " << m_cameraNode->getLocation().z();
 
     struct FaceCollection
     {
@@ -82,7 +59,7 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
         QVector<bool>* vc;
         QVector<float>* vcv;
         Face* f;
-        float getDistance( const QVector3D& cameraLocation ) const
+        float getDistance( const Vector3D& cameraLocation ) const
         {
             QVector<float> distances;
             distances.resize(3);
@@ -94,8 +71,8 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
                 }
                 else
                 {
-                    auto t = QVector3D( v->at( f->points[i] ).X, v->at( f->points[i] ).Y, v->at( f->points[i] ).Z );
-                    t = rn->m_node->getMatrix().map( t );
+                    auto t = Vector3D( v->at( f->points[i] ).X, v->at( f->points[i] ).Y, v->at( f->points[i] ).Z );
+                    t = rn->m_node->getMatrix().map( t.getQtVector() );
 //                    auto t2 = t + rn->m_node->getLocation();
 //                    distances[i] = cameraLocation.distanceToPoint( QVector3D( v->at( f->points[i] ).X, v->at( f->points[i] ).Y, v->at( f->points[i] ).Z ) + rn->m_node->getLocation() );
 
@@ -120,57 +97,67 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
         auto node = renderNode.m_node;
         auto drawable = renderNode.m_drawable;
 
-        bool shaderChanged = false;
-        if( node->getShaderProgram() )
+        if( drawable->getEnable() )
         {
-            if( m_shaderProgram != node->getShaderProgram() )
+            bool shaderChanged = false;
+            if( node->getShaderProgram() )
+            {
+                if( m_shaderProgram != node->getShaderProgram() )
+                {
+                    if( m_shaderProgram )
+                    {
+                        m_shaderProgram->release();
+                    }
+                    m_shaderProgram = node->getShaderProgram();
+                    shaderChanged = true;
+                }
+            } else if( m_shaderProgram != m_defaultShaderProgram )
             {
                 if( m_shaderProgram )
                 {
                     m_shaderProgram->release();
                 }
-                m_shaderProgram = node->getShaderProgram();
+                m_shaderProgram = m_defaultShaderProgram;
                 shaderChanged = true;
             }
-        } else if( m_shaderProgram != m_defaultShaderProgram )
-        {
-            if( m_shaderProgram )
+
+            if( shaderChanged )
             {
-                m_shaderProgram->release();
+                m_shaderProgram->bind();
+
+                QMatrix4x4 view;
+                view.rotate( QQuaternion::fromEulerAngles( -m_cameraNode->getOriginRotation().getQtVector() ) );
+                view.translate( -m_cameraNode->getLocation().getQtVector() );
+                view.rotate( QQuaternion::fromEulerAngles( -m_cameraNode->getParentRotation().getQtVector() ) );
+
+                m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
+                m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_camera.getProjection() );
             }
-            m_shaderProgram = m_defaultShaderProgram;
-            shaderChanged = true;
+
+            QMatrix4x4 model;
+//            qDebug() << drawable;
+//            qDebug() << node->getParentRotation().getQtVector().x() << " " << node->getParentRotation().getQtVector().y() << " " << node->getParentRotation().getQtVector().z();
+//            qDebug() << node->getOriginRotation().getQtVector().x() << " " << node->getOriginRotation().getQtVector().y() << " " << node->getOriginRotation().getQtVector().z();
+
+            model.rotate( QQuaternion::fromEulerAngles( node->getParentRotation().getQtVector() ) );
+            model.translate( node->getLocation().getQtVector() );
+            model.rotate( QQuaternion::fromEulerAngles( node->getOriginRotation().getQtVector() ) );
+            model.scale( node->getScale().getQtVector() );
+
+            qDebug() << model;
+
+            m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
+
+            drawable->draw( {f, ef, m_shaderProgram.get()} );
+
+            transparentFaces.append( { renderNode, drawable->getTransparentFaces() } );
+            vertexes.append( drawable->getVertexes() );
+            vertexesCalculated.append( QVector<bool>() );
+            vertexesCalculated.back().resize( drawable->getVertexes().size() );
+            vertexesCalculated.back().fill( false );
+            vertexesCalculatedValues.append( QVector<float>() );
+            vertexesCalculatedValues.back().resize( drawable->getVertexes().size() );
         }
-
-        if( shaderChanged )
-        {
-            m_shaderProgram->bind();
-
-            QMatrix4x4 view;
-            QQuaternion rotation = QQuaternion::fromEulerAngles( getCameraRotation() );
-            view.rotate( rotation );
-            view.translate( getCameraLocation() );
-
-            m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
-            m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_projection );
-        }
-
-        QMatrix4x4 model;
-        model.translate( node->getLocation() );
-        model.rotate( QQuaternion::fromEulerAngles( node->getRotation() ) );
-        model.scale( node->getScale() );
-
-        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
-
-        drawable->draw( {f, ef, m_shaderProgram.get()} );
-
-        transparentFaces.append( { renderNode, drawable->getTransparentFaces() } );
-        vertexes.append( drawable->getVertexes() );
-        vertexesCalculated.append( QVector<bool>() );
-        vertexesCalculated.back().resize( drawable->getVertexes().size() );
-        vertexesCalculated.back().fill( false );
-        vertexesCalculatedValues.append( QVector<float>() );
-        vertexesCalculatedValues.back().resize( drawable->getVertexes().size() );
     }
 
     for( size_t i = 0; i < transparentFaces.size(); i++ )
@@ -183,8 +170,8 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
     }
 
     std::sort( shits.begin(), shits.end(), [=]( const Shit& a, const Shit& b ) {
-        auto aDistance = a.getDistance( camera_location );
-        auto bDistance = b.getDistance( camera_location );
+        auto aDistance = a.getDistance( m_cameraNode->getLocation() );
+        auto bDistance = b.getDistance( m_cameraNode->getLocation() );
         if( aDistance == bDistance )
         {
             if( a.rn->m_node == b.rn->m_node )
@@ -200,14 +187,14 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
         return aDistance < bDistance;
     } );
 
-    QFile file("./test.txt");
+//    QFile file("./test.txt");
 
-    if( !shits.empty() )
-    {
-        file.open( QIODevice::WriteOnly );
-    }
+//    if( !shits.empty() )
+//    {
+//        file.open( QIODevice::WriteOnly );
+//    }
 
-    QTextStream stream(&file);
+//    QTextStream stream(&file);
 
     int row = 1;
     int startIndex = 0;
@@ -265,18 +252,17 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
             m_shaderProgram->bind();
 
             QMatrix4x4 view;
-            QQuaternion rotation = QQuaternion::fromEulerAngles( getCameraRotation() );
-            view.rotate( rotation );
-            view.translate( getCameraLocation() );
+            view.rotate( QQuaternion::fromEulerAngles( -m_cameraNode->getRotation().getQtVector() ) );
+            view.translate( -m_cameraNode->getLocation().getQtVector() );
 
             m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
-            m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_projection );
+            m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_camera.getProjection() );
         }
 
         QMatrix4x4 model;
-        model.translate( node->getLocation() );
-        model.rotate( QQuaternion::fromEulerAngles( node->getRotation() ) );
-        model.scale( node->getScale() );
+        model.translate( node->getLocation().getQtVector() );
+        model.rotate( QQuaternion::fromEulerAngles( node->getRotation().getQtVector() ) );
+        model.scale( node->getScale().getQtVector() );
 
         m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
 
@@ -285,10 +271,10 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
         row = 1;
     }
 
-    if( !shits.empty() )
-    {
-        file.close();
-    }
+//    if( !shits.empty() )
+//    {
+//        file.close();
+//    }
 
     if( m_shaderProgram )
     {
@@ -299,15 +285,7 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
 
 void Scene::resizeScreen(int w, int h)
 {
-    // Calculate aspect ratio
-    const float aspect = static_cast<float>( w ) / static_cast<float>( h ? h : 1 );
-    const float zNear = 1.f, zFar = 10000.f, fov = 90.f;
-
-    // Reset projection
-    m_projection.setToIdentity();
-
-    // Set perspective projection
-    m_projection.perspective( fov, aspect, zNear, zFar );
+    m_camera.resizeScreen(w, h);
 }
 
 QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
@@ -316,60 +294,75 @@ QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
     return newNode;
 }
 
-void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
+QSharedPointer<SceneNode> Scene::getCameraNode() const
 {
-    bool shaderChanged = false;
-    if( node->getShaderProgram() )
-    {
-        if( m_shaderProgram != node->getShaderProgram() )
-        {
-            if( m_shaderProgram )
-            {
-                m_shaderProgram->release();
-            }
-            m_shaderProgram = node->getShaderProgram();
-            shaderChanged = true;
-        }
-    } else if( m_shaderProgram != m_defaultShaderProgram )
-    {
-        if( m_shaderProgram )
-        {
-            m_shaderProgram->release();
-        }
-        m_shaderProgram = m_defaultShaderProgram;
-        shaderChanged = true;
-    }
-
-    if( shaderChanged )
-    {
-        m_shaderProgram->bind();
-
-        QMatrix4x4 view;
-        QQuaternion rotation = QQuaternion::fromEulerAngles( getCameraRotation() );
-        view.rotate( rotation );
-        view.translate( getCameraLocation() );
-
-        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
-        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_projection );
-    }
-
-    QMatrix4x4 model;
-    model.translate( node->getLocation() );
-    model.rotate( QQuaternion::fromEulerAngles( node->getRotation() ) );
-    model.scale( node->getScale() );
-
-    m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
-
-    for( auto i = node->drawableBegin(); i != node->drawableEnd(); i++ )
-    {
-        (*i)->draw({f, ef, m_shaderProgram.get()});
-    }
-
-    for( const auto& childNode: *node )
-    {
-        drawNode( childNode, f, ef );
-    }
+    return m_cameraNode;
 }
+
+QSharedPointer<SceneNode> Scene::getRotationCameraNode() const
+{
+    return m_rotationCameraNode;
+}
+
+Camera &Scene::getCamera()
+{
+    return m_camera;
+}
+
+//void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
+//{
+//    bool shaderChanged = false;
+//    if( node->getShaderProgram() )
+//    {
+//        if( m_shaderProgram != node->getShaderProgram() )
+//        {
+//            if( m_shaderProgram )
+//            {
+//                m_shaderProgram->release();
+//            }
+//            m_shaderProgram = node->getShaderProgram();
+//            shaderChanged = true;
+//        }
+//    } else if( m_shaderProgram != m_defaultShaderProgram )
+//    {
+//        if( m_shaderProgram )
+//        {
+//            m_shaderProgram->release();
+//        }
+//        m_shaderProgram = m_defaultShaderProgram;
+//        shaderChanged = true;
+//    }
+
+//    if( shaderChanged )
+//    {
+//        m_shaderProgram->bind();
+
+//        QMatrix4x4 view;
+//        view.rotate( QQuaternion::fromEulerAngles( -m_camera.getOrientation().getQtVector() ) );
+//        view.translate( -m_cameraNode->getLocation().getQtVector() );
+//        view.rotate( QQuaternion::fromEulerAngles( -m_cameraNode->getRotation().getQtVector() ) );
+
+//        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
+//        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_camera.getProjection() );
+//    }
+
+//    QMatrix4x4 model;
+//    model.translate( node->getLocation().getQtVector() );
+//    model.rotate( QQuaternion::fromEulerAngles( node->getRotation().getQtVector() ) );
+//    model.scale( node->getScale().getQtVector() );
+
+//    m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
+
+//    for( auto i = node->drawableBegin(); i != node->drawableEnd(); i++ )
+//    {
+//        (*i)->draw({f, ef, m_shaderProgram.get()});
+//    }
+
+//    for( const auto& childNode: *node )
+//    {
+//        drawNode( childNode, f, ef );
+//    }
+//}
 
 void Scene::addNodeToRenders(SceneNode *node)
 {

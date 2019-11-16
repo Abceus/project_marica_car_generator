@@ -1,6 +1,7 @@
 #include "render_system/scene_node.h"
 
 #include <algorithm>
+#include <QtMath>
 
 SceneNode::SceneNode()
     : m_location()
@@ -13,7 +14,7 @@ SceneNode::SceneNode()
 
 }
 
-QVector3D SceneNode::getLocation() const
+Vector3D SceneNode::getLocation() const
 {
     if( m_parent )
     {
@@ -22,12 +23,17 @@ QVector3D SceneNode::getLocation() const
     return m_location;
 }
 
-void SceneNode::setLocation(const QVector3D &location)
+Vector3D SceneNode::getOriginLocation() const
+{
+    return m_location;
+}
+
+void SceneNode::setLocation(const Vector3D &location)
 {
     m_location = location;
 }
 
-QVector3D SceneNode::getRotation() const
+Vector3D SceneNode::getRotation() const
 {
     if( m_parent )
     {
@@ -36,12 +42,26 @@ QVector3D SceneNode::getRotation() const
     return m_rotation;
 }
 
-void SceneNode::setRotation(const QVector3D &rotation)
+Vector3D SceneNode::getOriginRotation() const
+{
+    return m_rotation;
+}
+
+Vector3D SceneNode::getParentRotation() const
+{
+    if( m_parent )
+    {
+        return m_parent->getRotation();
+    }
+    return { 0.0f, 0.0f, 0.0f };
+}
+
+void SceneNode::setRotation(const Vector3D &rotation)
 {
     m_rotation = rotation;
 }
 
-QVector3D SceneNode::getScale() const
+Scale3D SceneNode::getScale() const
 {
     if( m_parent )
     {
@@ -50,7 +70,7 @@ QVector3D SceneNode::getScale() const
     return m_scale;
 }
 
-void SceneNode::setScale(const QVector3D &scale)
+void SceneNode::setScale(const Scale3D &scale)
 {
     m_scale = scale;
 }
@@ -67,10 +87,10 @@ void SceneNode::setParent(SceneNode *parent)
         return;
     }
 
-    if( m_parent )
-    {
-        m_parent->removeChild(this);
-    }
+//    if( m_parent )
+//    {
+//        m_parent->removeChild(this);
+//    }
     m_parent = parent;
 }
 
@@ -164,8 +184,8 @@ QSharedPointer<QOpenGLShaderProgram> SceneNode::getShaderProgram() const
 QMatrix4x4 SceneNode::getMatrix() const
 {
     QMatrix4x4 result;
-    result.translate( getLocation() );
-    result.rotate( QQuaternion::fromEulerAngles( getRotation() ) );
-    result.scale( getScale() );
+    result.translate( getLocation().getQtVector() );
+    result.rotate( QQuaternion::fromEulerAngles( getRotation().getQtVector() ) );
+    result.scale( getScale().getQtVector() );
     return result;
 }

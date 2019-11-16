@@ -5,6 +5,8 @@
 #include "physics/physobject.h"
 #include "render_system/scene_node.h"
 #include "render_system/render_node.h"
+#include "vector3d.h"
+#include "render_system/camera.h"
 
 #include <QSharedPointer>
 #include <QVector>
@@ -23,31 +25,27 @@ public:
 
     void clear();
 
-    QVector3D getCameraLocation();
-    void setCameraLocation( QVector3D value );
-
-    QVector3D getCameraRotation();
-    void setCameraRotation( QVector3D value );
-
-    float getCameraScale();
-    void setCameraScale( float value );
-
     void draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
     void resizeScreen( int w, int h );
 
     QSharedPointer<SceneNode> addNode( QSharedPointer<SceneNode> newNode );
 
+    QSharedPointer<SceneNode> getCameraNode() const;
+    QSharedPointer<SceneNode> getRotationCameraNode() const;
+    Camera &getCamera();
+
 private:
-    void drawNode( QSharedPointer<SceneNode> node, QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
-    QVector3D camera_location;
-    QVector3D camera_rotation;
-    float camera_scale;
+//    void drawNode( QSharedPointer<SceneNode> node, QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
 
     QSharedPointer<SceneNode> m_rootNode;
 
+    //TODO: rework
+    Camera m_camera;
+    QSharedPointer<SceneNode> m_rotationCameraNode;
+    QSharedPointer<SceneNode> m_cameraNode;
+
     QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
     QSharedPointer<QOpenGLShaderProgram> m_defaultShaderProgram;
-    QMatrix4x4 m_projection;
 
     QVector<RenderNode> m_renderNodes;
 

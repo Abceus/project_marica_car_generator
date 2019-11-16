@@ -15,6 +15,7 @@ public:
     PhysicWorld();
     void init();
     QSharedPointer<btRigidBody> addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo );
+    void addConstraint(btTypedConstraint* constraint, bool disableCollisionsBetweenLinkedBodies=false);
     void update( float dt ) override;
 private:
     QScopedPointer<btDefaultCollisionConfiguration> m_collisionConfiguration;
@@ -23,4 +24,5 @@ private:
     QScopedPointer<btSequentialImpulseConstraintSolver> m_solver;
     QScopedPointer<btDiscreteDynamicsWorld> m_dynamicsWorld;
     QVector<QSharedPointer<btRigidBody>> bodies;
+    QVector<QSharedPointer<btTypedConstraint>> constraints;
 };

@@ -10,10 +10,11 @@
 class PhysObject : public Object, public IUpdatable
 {
 public:
-    PhysObject( QSharedPointer<Mesh> model, QSharedPointer<SceneNode> node, const Model& physModel, float mass,
-            QVector3D size=QVector3D( 0.f, 0.f, 0.f ) );
+    // TODO: rework
+    PhysObject( QSharedPointer<Drawable> model, QSharedPointer<SceneNode> node, const Model& physModel, float mass );
     void update( float dt ) override;
     void setPhysic( QSharedPointer<btRigidBody> newBody );
+    QSharedPointer<btRigidBody> getPhysic() const;
 //    QVector3D getPosition() const override;
     QQuaternion getRotation() const;
     btRigidBody::btRigidBodyConstructionInfo getConstructionInfo();

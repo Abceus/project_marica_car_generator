@@ -32,12 +32,12 @@ public:
     ~OpenglSimulationWidget() override = default;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
-    void prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation );
+    void prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation, const Model &wheelModel,
+                  QSharedPointer<SceneNode> leftSteerNode, QSharedPointer<SceneNode> rightSteerNode, QSharedPointer<SceneNode> leftEngNode, QSharedPointer<SceneNode> rightEngNode );
     void closeEvent(QCloseEvent *event) override;
     void init();
 private:
     QVector<QSharedPointer<IUpdatable>> m_objects;
-    QMatrix4x4 projection;
     QMap<int, bool> keys;
     QSharedPointer<PhysicWorld> physicWorld;
     QSharedPointer<Scene> m_scene;
@@ -45,6 +45,13 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> prevTime;
 
     QSharedPointer<PhysObject> m_body;
+
+    QSharedPointer<PhysObject> m_leftSteerWheel;
+    QSharedPointer<PhysObject> m_rightSteerWheel;
+    QSharedPointer<PhysObject> m_leftEngWheel;
+    QSharedPointer<PhysObject> m_rightEngWheel;
+    btHinge2Constraint* pHinge2;
+    btScalar m_testBlyat;
 protected:
     void initializeGL() override;
     void resizeGL( int w, int h ) override;

@@ -20,7 +20,17 @@ private slots:
     void on_startSimulationButton_clicked();
     void on_tireColiisionOpenButton_clicked();
     void skinOpenButton_clicked(int i);
-    void on_pushButton_2_clicked();
+    void on_collisionOpenButton_clicked();
+
+    void on_wheelSteerAlongSpinBox_valueChanged(double arg1);
+
+    void on_wheelSteerAcrossSpinBox_valueChanged(double arg1);
+
+    void on_wheelEngAlongSpinBox_valueChanged(double arg1);
+
+    void on_wheelEngAcrossSpinBox_valueChanged(double arg1);
+
+    void on_wheelVertSpinBox_valueChanged(double arg1);
 
 private:
     Ui::MainWindow *ui;

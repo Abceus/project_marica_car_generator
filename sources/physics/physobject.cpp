@@ -1,22 +1,33 @@
 #include "physics/physobject.h"
+#include <QtMath>
 
-PhysObject::PhysObject( QSharedPointer<Mesh> drawable, QSharedPointer<SceneNode> node, const Model& physModel, float mass, QVector3D size )
+PhysObject::PhysObject( QSharedPointer<Drawable> drawable, QSharedPointer<SceneNode> node, const Model& physModel, float mass )
     : Object( drawable, node )
 {
     colShape = std::make_unique<btConvexHullShape>();
 
     auto verts = physModel.vertices;
-    for( auto& vert: verts )
+//    for( auto& vert: verts )
+//    {
+//        static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
+//    }
+    auto indices = physModel.indices;
+    for( const auto& indice: indices )
     {
-        static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
+        for( const auto& index: indice.vertexes )
+        {
+            const auto& vert = verts[index];
+            static_cast<btConvexHullShape *>( colShape.get() )->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
+        }
     }
     btTransform startTransform;
     startTransform.setIdentity();
     m_mass = mass;
     auto location = node->getLocation();
-    startTransform.setOrigin( btVector3( location.x(), location.y(), location.z() ) );
-    auto rotationQuaternion = QQuaternion::fromEulerAngles( node->getRotation() );
-    startTransform.setRotation( btQuaternion( rotationQuaternion.x(), rotationQuaternion.y(), rotationQuaternion.z(), rotationQuaternion.length() ) );
+//    startTransform.setRotation( btQuaternion( qDegreesToRadians( node->getParentRotation().y() ), qDegreesToRadians( node->getParentRotation().x() ), qDegreesToRadians( node->getParentRotation().z() ) ) );
+    startTransform.setOrigin( location.getBulletVector() );
+    startTransform.setRotation( btQuaternion( qDegreesToRadians( node->getOriginRotation().y() ), qDegreesToRadians( node->getOriginRotation().x() ), qDegreesToRadians( node->getOriginRotation().z() ) ) );
+//    startTransform.setRotation( btQuaternion( qDegreesToRadians( node->getOriginRotation().z() ), qDegreesToRadians( node->getOriginRotation().y() ), qDegreesToRadians( -node->getOriginRotation().x() ) ) );
 
     myMotionState = std::make_unique<btDefaultMotionState>( startTransform );
 }
@@ -25,7 +36,7 @@ void PhysObject::update( float dt )
 {
     btTransform transform;
     physic->getMotionState()->getWorldTransform( transform );
-    m_node->setLocation( QVector3D( transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z() ) );
+    m_node->setLocation( transform.getOrigin() );
 
     btQuaternion rotation = physic->getWorldTransform().getRotation();
     m_node->setRotation( QQuaternion( rotation.w(), rotation.x(), rotation.y(), rotation.z() ).toEulerAngles() );
@@ -34,7 +45,12 @@ void PhysObject::update( float dt )
 void PhysObject::setPhysic( QSharedPointer<btRigidBody> newBody )
 {
     physic = newBody;
-//    physic->getWorldTransform().setOrigin(btVector3(position.x(), position.y(), position.z()));
+    //    physic->getWorldTransform().setOrigin(btVector3(position.x(), position.y(), position.z()));
+}
+
+QSharedPointer<btRigidBody> PhysObject::getPhysic() const
+{
+    return physic;
 }
 
 //QVector3D PhysObject::getPosition() const

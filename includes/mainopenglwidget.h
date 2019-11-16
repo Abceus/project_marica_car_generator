@@ -37,10 +37,18 @@ public:
 //    void setBodyObject( QSharedPointer<Object> object );
     void setBodyMesh( QSharedPointer<Mesh> bodyMesh );
     QSharedPointer<Object> getBodyObject() const;
-    QSharedPointer<Object> getCollisionBodyObject() const;
     void setBodyTexture( const QString &filename, size_t index );
 
+    QSharedPointer<Object> getCollisionBodyObject() const;
     Model getBodyCollisionModel() const;
+
+    Model getWheelCollisionModel() const;
+    QSharedPointer<Object> getLeftSteerWheel() const;
+    QSharedPointer<Object> getRightSteerWheel() const;
+    QSharedPointer<Object> getLeftEngWheel() const;
+    QSharedPointer<Object> getRightEngWheel() const;
+
+    void setWheelCollision( const Model& model );
 
     QSharedPointer<Scene> getScene();
     Renderer& getRenderer();
@@ -49,6 +57,12 @@ private:
     Renderer m_renderer;
     QSharedPointer<Object> m_body;
     QSharedPointer<Object> m_collisionBody;
+
+    QSharedPointer<Object> m_leftSteerWheel;
+    QSharedPointer<Object> m_rightSteerWheel;
+    QSharedPointer<Object> m_leftEngWheel;
+    QSharedPointer<Object> m_rightEngWheel;
+
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;

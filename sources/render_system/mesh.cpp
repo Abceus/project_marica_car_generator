@@ -29,10 +29,18 @@ Mesh::Mesh( const Model& model )
 
     VAO.bind();
 
-    VBO.bind();
-    VBO.allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
+    QVector<Vertex> vertices;
+    vertices.reserve( model.vertices.size() );
 
-    m_aabb = AABBBox( QVector3D( minX, maxY, maxZ ), QVector3D( maxX, minY, minZ ) );
+    for( const auto& vertex: model.vertices )
+    {
+        vertices.append( { vertex.Y, vertex.Z, -vertex.X, vertex.U, vertex.V, vertex.MaterialIndex } );
+    }
+
+    VBO.bind();
+    VBO.allocate( vertices.data(), sizeof( Vertex )*vertices.size() );
+
+//    m_aabb = AABBBox( QVector3D( minX, maxY, maxZ ), QVector3D( maxX, minY, minZ ) );
 
     QVector<QVector<GLuint>> m_indices;
     for( auto& material: model.materials )
@@ -43,7 +51,7 @@ Mesh::Mesh( const Model& model )
 
     for( size_t i = 0; i < model.indices.size(); i++ )
     {
-        auto materialIndex = static_cast<size_t>( model.vertices[model.indices[i].vertexes[0]].MaterialIndex );
+        auto materialIndex = static_cast<size_t>( vertices[model.indices[i].vertexes[0]].MaterialIndex );
         for( auto j = 0; j < 3; j++ )
         {
             m_indices[materialIndex].append( model.indices[i].vertexes[j] );
@@ -83,7 +91,7 @@ Mesh::Mesh( const Model& model )
         {
             Face f;
             f.indiceIndex = j;
-            f.materialIndex = m_model.vertices[m_model.indices[j/3].vertexes[0]].MaterialIndex;
+            f.materialIndex = vertices[m_model.indices[j/3].vertexes[0]].MaterialIndex;
             for( size_t k = 0; k < 3; k++ )
             {
                 f.points[k] = m_model.indices[j/3].vertexes[k];
@@ -127,7 +135,7 @@ void Mesh::setTexture( QString filename, size_t index )
     else
     {
         //TODO: Load default image from texture manager
-        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/DefaultTexture.tga" );
         if( m_transparentBuffers.contains( index ) )
         {
             m_transparentBuffers.removeOne( index );
@@ -143,7 +151,7 @@ void Mesh::addTexture( QString filename )
     if( image.isNull() )
     {
         //TODO: Load default image from texture manager
-        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/DefaultTexture.tga" );
     }
     this->textures.append( QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) ) );
 }

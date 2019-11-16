@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QVector3D>
 #include <QVector>
 #include <QSharedPointer>
 #include <QOpenGLShaderProgram>
@@ -8,6 +7,7 @@
 #include <QMatrix4x4>
 
 #include "drawable.h"`
+#include "vector3d.h"
 
 class SceneNode : public QObject
 {
@@ -15,14 +15,17 @@ class SceneNode : public QObject
 public:
     SceneNode();
 
-    QVector3D getLocation() const;
-    void setLocation( const QVector3D& location );
+    Vector3D getLocation() const;
+    Vector3D getOriginLocation() const;
+    void setLocation( const Vector3D& location );
 
-    QVector3D getRotation() const;
-    void setRotation( const QVector3D& rotation );
+    Vector3D getRotation() const;
+    Vector3D getOriginRotation() const;
+    Vector3D getParentRotation() const;
+    void setRotation( const Vector3D& rotation );
 
-    QVector3D getScale() const;
-    void setScale( const QVector3D& scale );
+    Scale3D getScale() const;
+    void setScale( const Scale3D& scale );
     void setScale( float scale );
 
     void setParent( SceneNode* parent );
@@ -48,9 +51,9 @@ public:
     QMatrix4x4 getMatrix() const;
 
 private:
-    QVector3D m_location;
-    QVector3D m_rotation;
-    QVector3D m_scale;
+    Vector3D m_location;
+    Vector3D m_rotation;
+    Scale3D m_scale;
     SceneNode* m_parent;
     QVector<QSharedPointer<SceneNode>> m_childrens;
     QVector<QSharedPointer<Drawable>> m_drawables;

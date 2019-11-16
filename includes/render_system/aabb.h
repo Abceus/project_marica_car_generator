@@ -35,6 +35,6 @@ private:
     AABBBox( QVector<AABBBox> childrens );
     QVector3D m_leftUpNear;
     QVector3D m_rightDownFurther;
-    QVector<QSharedPointer<AABBBox>> m_childrens;
+    QVector<AABBBox> m_childrens;
     QVector<Face> m_innerFaces;
 };

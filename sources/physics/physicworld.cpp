@@ -17,7 +17,13 @@ void PhysicWorld::init()
         m_dynamicsWorld->removeRigidBody( body.get() );
     }
 
+    for( const auto& constraint: constraints )
+    {
+        m_dynamicsWorld->removeConstraint( constraint.get() );
+    }
+
     bodies.clear();
+    constraints.clear();
 }
 
 QSharedPointer<btRigidBody> PhysicWorld::addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo )
@@ -25,6 +31,12 @@ QSharedPointer<btRigidBody> PhysicWorld::addBody( btRigidBody::btRigidBodyConstr
     bodies.append( QSharedPointer<btRigidBody>( new btRigidBody ( rbInfo ) ) );
     m_dynamicsWorld->addRigidBody( bodies.last().get() );
     return bodies.last();
+}
+
+void PhysicWorld::addConstraint(btTypedConstraint *constraint, bool disableCollisionsBetweenLinkedBodies)
+{
+    constraints.append( QSharedPointer<btTypedConstraint>( constraint ) );
+    m_dynamicsWorld->addConstraint( constraint, disableCollisionsBetweenLinkedBodies );
 }
 
 void PhysicWorld::update( float dt )

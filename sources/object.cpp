@@ -24,5 +24,9 @@ void Object::setNode(QSharedPointer<SceneNode> node)
 
 void Object::setDrawable(QSharedPointer<Drawable> drawable)
 {
-    m_drawable = drawable;
+    if( m_drawable )
+    {
+        m_node->removeDrawable( m_drawable.get() );
+    }
+    m_drawable = m_node->addDrawable( drawable );
 }

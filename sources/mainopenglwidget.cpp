@@ -3,6 +3,7 @@
 
 #include "mainopenglwidget.h"
 #include "render_system/wireframe.h"
+#include "render_system/box.h"
 
 MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     : QOpenGLWidget( parent )
@@ -16,6 +17,11 @@ MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     auto node = m_scene->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
     m_body = QSharedPointer<Object>( new Object( nullptr, node ) );
     m_collisionBody = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+
+    m_leftSteerWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+    m_rightSteerWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+    m_leftEngWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+    m_rightEngWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
 }
 
 void MainOpenglWidget::initializeGL()
@@ -113,6 +119,40 @@ Model MainOpenglWidget::getBodyCollisionModel() const
     return m_collisionBody->getDrawable().staticCast<WireframeMesh>()->getModel();
 }
 
+Model MainOpenglWidget::getWheelCollisionModel() const
+{
+    return m_leftEngWheel->getDrawable().staticCast<WireframeMesh>()->getModel();
+}
+
+QSharedPointer<Object> MainOpenglWidget::getLeftSteerWheel() const
+{
+    return m_leftSteerWheel;
+}
+
+QSharedPointer<Object> MainOpenglWidget::getRightSteerWheel() const
+{
+    return m_rightSteerWheel;
+}
+
+QSharedPointer<Object> MainOpenglWidget::getLeftEngWheel() const
+{
+    return m_leftEngWheel;
+}
+
+QSharedPointer<Object> MainOpenglWidget::getRightEngWheel() const
+{
+    return m_rightEngWheel;
+}
+
+void MainOpenglWidget::setWheelCollision(const Model &model)
+{
+    auto drawable = m_renderer.makeDrawable<WireframeMesh>( model, QColor( 0, 255, 0 ) );
+    m_leftSteerWheel->setDrawable( drawable );
+    m_rightSteerWheel->setDrawable( drawable );
+    m_leftEngWheel->setDrawable( drawable );
+    m_rightEngWheel->setDrawable( drawable );
+}
+
 QSharedPointer<Scene> MainOpenglWidget::getScene()
 {
     return m_scene;
@@ -163,34 +203,40 @@ void MainOpenglWidget::mouseMoveEvent( QMouseEvent *event )
 {
     if( leftPressed && rightPressed )
     {
-        QVector3D currentCameraLocation = m_scene->getCameraLocation();
-        currentCameraLocation.setY( currentCameraLocation.y() - ( leftClickPos.y() - event->y() ) * 10 );
+        Vector3D currentCameraLocation = m_scene->getCameraNode()->getLocation();
+        currentCameraLocation.setZ( currentCameraLocation.z() + ( leftClickPos.y() - event->y() ) * 10 );
         auto c = cursor();
         c.setPos( mapToGlobal( leftClickPos ) );
         setCursor(c);
-        m_scene->setCameraLocation( currentCameraLocation );
+        m_scene->getCameraNode()->setLocation( currentCameraLocation );
     }
     else if( leftPressed )
     {
-        QVector3D camera_rotation_now = m_scene->getCameraRotation();
-        camera_rotation_now.setY( camera_rotation_now.y() - ( leftClickPos.x() - event->x() ) / 5 );
-        auto cameraLocationNow = m_scene->getCameraLocation();
-        cameraLocationNow.setZ( cameraLocationNow.z() + qCos( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
-        cameraLocationNow.setX( cameraLocationNow.x() - qSin( qDegreesToRadians( camera_rotation_now.y() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
+//        Vector3D camera_rotation_now = m_scene->getCameraNode()->getRotation();
+        Vector3D camera_rotation_now = m_scene->getRotationCameraNode()->getRotation();
+        Vector3D camera_rotation_now2 = m_scene->getCameraNode()->getRotation();
+        camera_rotation_now.setZ( camera_rotation_now.z() + ( leftClickPos.x() - event->x() ) / 5 );
+        camera_rotation_now2.setY( camera_rotation_now2.y() + ( leftClickPos.x() - event->x() ) / 5 );
+        auto cameraLocationNow = m_scene->getCameraNode()->getLocation();
+//        cameraLocationNow.setX( cameraLocationNow.x() + qCos( qDegreesToRadians( -camera_rotation_now.z() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
+//        cameraLocationNow.setY( cameraLocationNow.y() + qSin( qDegreesToRadians( -camera_rotation_now.z() ) ) * ( leftClickPos.y() - event->y() ) * 10 );
+        cameraLocationNow.setX( cameraLocationNow.x() + ( leftClickPos.y() - event->y() ) * 10 );
         auto c = cursor();
         c.setPos( mapToGlobal( leftClickPos ) );
         setCursor(c);
-        m_scene->setCameraRotation( camera_rotation_now );
-        m_scene->setCameraLocation( cameraLocationNow );
+//        m_scene->getCamera().setOrientation( camera_rotation_now );
+        m_scene->getCameraNode()->setLocation( cameraLocationNow );
+        m_scene->getRotationCameraNode()->setRotation( camera_rotation_now );
+//        m_scene->getCameraNode()->setRotation( camera_rotation_now2 );
     }
     else if( rightPressed )
     {
-        QVector3D camera_rotation_now = m_scene->getCameraRotation();
-        camera_rotation_now.setY( camera_rotation_now.y() - ( rightClickPos.x() - event->x() ) / 5 );
-        camera_rotation_now.setX( camera_rotation_now.x() - ( rightClickPos.y() - event->y() ) / 5 );
+        Vector3D camera_rotation_now = m_scene->getCameraNode()->getRotation();
+        camera_rotation_now.setZ( camera_rotation_now.z() - ( rightClickPos.x() - event->x() ) / 5 );
+        camera_rotation_now.setY( camera_rotation_now.y() - ( rightClickPos.y() - event->y() ) / 5 );
         auto c = cursor();
         c.setPos( mapToGlobal( rightClickPos ) );
         setCursor(c);
-        m_scene->setCameraRotation( camera_rotation_now );
+        m_scene->getCameraNode()->setRotation( camera_rotation_now );
     }
 }

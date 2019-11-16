@@ -10,7 +10,8 @@ struct Edge
 };
 
 WireframeMesh::WireframeMesh(Model model, QColor color)
-    : m_model( std::move( model ) )
+    : Drawable()
+    , m_model( std::move( model ) )
     , m_color( std::move( color ) )
 {
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
@@ -28,7 +29,12 @@ WireframeMesh::WireframeMesh(Model model, QColor color)
 
     m_VAO.bind();
 
-    auto vertices = QVector<Vertex>::fromStdVector( m_model.vertices );
+    QVector<Vertex> vertices;
+
+    for( const auto& vertex: m_model.vertices )
+    {
+        vertices.append( { vertex.Y, vertex.Z, -vertex.X, vertex.U, vertex.V, vertex.MaterialIndex } );
+    }
 
     std::sort( vertices.begin(), vertices.end(), []( const Vertex& a, const Vertex& b )
     {
@@ -56,7 +62,8 @@ WireframeMesh::WireframeMesh(Model model, QColor color)
         vertexConformity.append( static_cast<GLuint>( std::find_if( vertices.begin(), vertices.end(),
                                                [vertex]( const Vertex& a )
                                                   {
-                                                      return a.X == vertex.X && a.Y == vertex.Y && a.Z == vertex.Z;
+                                                        return a.X == vertex.Y && a.Y == vertex.Z && a.Z == -vertex.X;
+//                                                        return a.X == vertex.X && a.Y == vertex.Y && a.Z == vertex.Z;
                                                   }) - vertices.begin() ) );
     }
 

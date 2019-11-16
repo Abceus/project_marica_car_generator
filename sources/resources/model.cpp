@@ -20,6 +20,8 @@ Model Model::readPSK( const QString &filename )
     std::vector<VTriangle> FacesData;
     VChunkHeader MaterialsHeader{};
     std::vector<VMaterial> MaterialsData;
+    VChunkHeader BonesHeader{};
+    std::vector<VBone> BonesData;
 
     QFile file( filename );
     if ( !file.open( QIODevice::ReadOnly ) )
@@ -46,6 +48,11 @@ Model Model::readPSK( const QString &filename )
     qDebug() << MaterialsHeader.ChunkID << " " << MaterialsHeader.DataCount << " " << MaterialsHeader.DataSize << " " << MaterialsHeader.TypeFlags;
     MaterialsData.resize( static_cast<size_t>( MaterialsHeader.DataCount ) );
     file.read( reinterpret_cast<char*>( MaterialsData.data() ), MaterialsHeader.DataSize * MaterialsHeader.DataCount );
+
+    file.read( reinterpret_cast<char*>( &BonesHeader ), sizeof( VChunkHeader ) );
+    qDebug() << BonesHeader.ChunkID << " " << BonesHeader.DataCount << " " << BonesHeader.DataSize << " " << BonesHeader.TypeFlags;
+    BonesData.resize( static_cast<size_t>( BonesHeader.DataCount ) );
+    file.read( reinterpret_cast<char*>( BonesData.data() ), BonesHeader.DataSize * BonesHeader.DataCount );
 
     file.close();
 
