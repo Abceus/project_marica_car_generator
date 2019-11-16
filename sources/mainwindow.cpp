@@ -26,9 +26,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_meshOpenButton_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                    QDir::currentPath(),
-                                                    tr( "PSK (*.psk)" ) );
+    //QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
+    //                                                QDir::currentPath(),
+    //                                                tr( "PSK (*.psk)" ) );
+
+    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
+    fileDialog.setFileMode( QFileDialog::ExistingFiles );
+    fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
+
+    //QStringList fileNames = fileDialog.selectedFiles();
+
+    QString fileName;// = fileNames.empty() ? "" : fileNames[0];
+
+    if (QDialog::Accepted == fileDialog.exec())
+    {
+        fileName = fileDialog.selectedFiles()[0];
+    }
 
     if( fileName != "" )
     {
