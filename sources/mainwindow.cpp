@@ -7,7 +7,9 @@
 #include "resources/model.h"
 #include "object.h"
 #include "render_system/scene_node.h"
+#ifndef WITHOUT_SIMULATION
 #include "physics/physobject.h"
+#endif
 #include "render_system/wireframe.h"
 
 MainWindow::MainWindow( QWidget *parent )
@@ -49,7 +51,9 @@ MainWindow::MainWindow( QWidget *parent )
     ui->mainOpenGLWidget->getLeftEngWheel()->getNode()->setLocation( leftEngWheelLocation );
     ui->mainOpenGLWidget->getRightEngWheel()->getNode()->setLocation( rightEngWheelLocation );
 
+#ifndef WITHOUT_SIMULATION
     connect( &simulationWidget, &OpenglSimulationWidget::closed, this, &MainWindow::show );
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +109,7 @@ void MainWindow::on_meshOpenButton_clicked()
 
 void MainWindow::on_startSimulationButton_clicked()
 {
+#ifndef WITHOUT_SIMULATION
     if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
@@ -113,6 +118,7 @@ void MainWindow::on_startSimulationButton_clicked()
                                   ui->mainOpenGLWidget->getRightSteerWheel()->getNode(), ui->mainOpenGLWidget->getLeftEngWheel()->getNode(), ui->mainOpenGLWidget->getRightEngWheel()->getNode() );
         hide();
     }
+#endif
 }
 
 

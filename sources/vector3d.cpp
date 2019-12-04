@@ -23,12 +23,14 @@ Vector3D::Vector3D(const QVector3D &base)
 {
 }
 
+#ifndef WITHOUT_SIMULATION
 Vector3D::Vector3D(const btVector3 &base)
     : m_x( -base.z() )
     , m_y( base.x() )
     , m_z( base.y() )
 {
 }
+#endif
 
 float Vector3D::x() const
 {
@@ -65,10 +67,13 @@ QVector3D Vector3D::getQtVector() const
     return QVector3D( m_y, m_z, -m_x );
 }
 
+#ifndef WITHOUT_SIMULATION
 btVector3 Vector3D::getBulletVector() const
 {
     return btVector3( m_y, m_z, -m_x );
 }
+
+#endif
 
 Vector3D operator + (Vector3D const &v1, Vector3D const &v2)
 {
@@ -120,12 +125,15 @@ Scale3D::Scale3D(const QVector3D &base)
 {
 }
 
+
+#ifndef WITHOUT_SIMULATION
 Scale3D::Scale3D(const btVector3 &base)
     : m_x( base.z() < 0 ? -base.z() : base.z() )
     , m_y( base.x() < 0 ? -base.x() : base.x() )
     , m_z( base.y() < 0 ? -base.y() : base.y() )
 {
 }
+#endif
 
 float Scale3D::x() const
 {
@@ -162,10 +170,12 @@ QVector3D Scale3D::getQtVector() const
     return QVector3D( m_y, m_z, m_x );
 }
 
+#ifndef WITHOUT_SIMULATION
 btVector3 Scale3D::getBulletVector() const
 {
     return btVector3( m_y, m_z, m_x );
 }
+#endif
 
 Scale3D operator + (Scale3D const &v1, Scale3D const &v2)
 {

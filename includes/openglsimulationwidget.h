@@ -20,6 +20,7 @@
 #include <QMatrix4x4>
 
 #include "physics/physicworld.h"
+#include "physics/physobject.h"
 #include "render_system/scene.h"
 #include "updatable.h"
 #include "render_system/renderer.h"

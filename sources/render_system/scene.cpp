@@ -5,6 +5,7 @@
 #include <QFile>
 
 #include <algorithm>
+#include <cmath>
 
 Scene::Scene()
     : m_shaderProgram(nullptr)

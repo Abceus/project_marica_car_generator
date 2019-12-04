@@ -8,21 +8,39 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-!defined(BULLET_INCLUDE_DIRECTORY, var) {
-    BULLET_INCLUDE_DIRECTORY = "/usr/include/bullet"
+!defined(WITHOUT_SIMULATION, var) {
+    WITHOUT_SIMULATION = 0
+} else {
+    WITHOUT_SIMULATION = 1
+}
+
+equals(WITHOUT_SIMULATION, 1) {
+    DEFINES += "WITHOUT_SIMULATION=1"
+}
+
+equals(WITHOUT_SIMULATION, 0) {
+    !defined(BULLET_INCLUDE_DIRECTORY, var) {
+        BULLET_INCLUDE_DIRECTORY = "/usr/include/bullet"
+    }
 }
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
-INCLUDEPATH += includes $$BULLET_INCLUDE_DIRECTORY
+INCLUDEPATH += includes
 QTPLUGIN     += qtga
 
-defined(BULLET_LIBRARY_DIRECTORY, var) {
-    LIBS += -L$$BULLET_LIBRARY_DIRECTORY
+equals(WITHOUT_SIMULATION, 0) {
+    INCLUDEPATH += $$BULLET_INCLUDE_DIRECTORY
+    defined(BULLET_LIBRARY_DIRECTORY, var) {
+        LIBS += -L$$BULLET_LIBRARY_DIRECTORY
+    }
 }
 
-LIBS += -lBulletDynamics \
-        -lBulletCollision \
-        -lLinearMath
+
+equals(WITHOUT_SIMULATION, 0) {
+    LIBS += -lBulletDynamics \
+            -lBulletCollision \
+            -lLinearMath
+}
 
 CONFIG += c++17
 
@@ -47,9 +65,6 @@ SOURCES += sources/main.cpp\
     sources/object.cpp \
     sources/resources/resource_manager.cpp \
     sources/render_system/mesh.cpp \
-    sources/openglsimulationwidget.cpp \
-    sources/physics/physobject.cpp \
-    sources/physics/physicworld.cpp \
     sources/grid.cpp \
     sources/render_system/scene_node.cpp \
     sources/render_system/drawable.cpp \
@@ -69,9 +84,6 @@ HEADERS  += includes/mainwindow.h \
     includes/object.h \
     includes/resources/resource_manager.h \
     includes/render_system/mesh.h \
-    includes/openglsimulationwidget.h \
-    includes/physics/physobject.h \
-    includes/physics/physicworld.h \
     includes/grid.h \
     includes/render_system/scene_node.h \
     includes/render_system/drawable.h \
@@ -85,6 +97,16 @@ HEADERS  += includes/mainwindow.h \
     includes/render_system/box.h \
     includes/vector3d.h \
     includes/render_system/camera.h
+
+equals(WITHOUT_SIMULATION, 0) {
+    SOURCES += sources/openglsimulationwidget.cpp \
+        sources/physics/physobject.cpp \
+        sources/physics/physicworld.cpp
+
+    HEADERS  += includes/openglsimulationwidget.h \
+        includes/physics/physobject.h \
+        includes/physics/physicworld.h
+}
 
 FORMS    += ui/mainwindow.ui
 

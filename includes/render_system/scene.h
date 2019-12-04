@@ -2,7 +2,6 @@
 
 #include "resources/model.h"
 #include "object.h"
-#include "physics/physobject.h"
 #include "render_system/scene_node.h"
 #include "render_system/render_node.h"
 #include "vector3d.h"

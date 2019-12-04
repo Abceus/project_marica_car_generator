@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QMainWindow>
+#ifndef WITHOUT_SIMULATION
 #include "openglsimulationwidget.h"
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -34,5 +36,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+#ifndef WITHOUT_SIMULATION
     OpenglSimulationWidget simulationWidget;
+#endif
 };
