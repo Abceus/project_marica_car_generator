@@ -100,6 +100,7 @@ AABBBox AABBBox::createFromFaces(QVector<Face> faces, QVector<Vertex> vertexes, 
 
     auto averageX = ( maxX - minX ) / row;
 //    for( )
+    return AABBBox();
 }
 
 AABBBox::AABBBox(QVector<AABBBox> childrens)

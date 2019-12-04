@@ -3,7 +3,8 @@
 #include <vector>
 
 #ifdef _WIN32
-    #include <Windows.h>
+#define NOMINMAX
+#include <Windows.h>
 #endif
 #include <GL/glu.h>
 #include <GL/gl.h>

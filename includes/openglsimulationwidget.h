@@ -4,6 +4,7 @@
 #include <memory>
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <Windows.h>
 #endif
 #include <GL/glu.h>
