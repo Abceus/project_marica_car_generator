@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <QFileInfo>
 
 template<typename Key, typename Value>
 class ResourcesHolder
@@ -29,11 +30,12 @@ template<typename Key, typename Value>
 template<typename... Args>
 Value ResourcesHolder<Key, Value>::get( const Key& key, Args... args )
 {
-    auto found = resources.find(key);
+    auto fullPath = QFileInfo(key).absoluteFilePath();
+    auto found = resources.find(fullPath);
     if(found == resources.end())
     {
-        resources.emplace(key, Value(key, args...));
-        found = resources.find(key);
+        resources.emplace(fullPath, Value(fullPath, args...));
+        found = resources.find(fullPath);
     }
     return found->second;
 }

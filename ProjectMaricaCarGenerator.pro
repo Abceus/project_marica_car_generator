@@ -14,6 +14,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ProjectMaricaCarGenerator
 TEMPLATE = app
 INCLUDEPATH += includes $$BULLET_INCLUDE_DIRECTORY
+QTPLUGIN     += qtga
 
 defined(BULLET_LIBRARY_DIRECTORY, var) {
     LIBS += -L$$BULLET_LIBRARY_DIRECTORY

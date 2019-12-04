@@ -59,9 +59,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_meshOpenButton_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                    QDir::currentPath(),
-                                                    tr( "PSK (*.psk)" ) );
+    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
+    fileDialog.setFileMode( QFileDialog::ExistingFiles );
+    fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
+
+    QString fileName;
+
+    if (QDialog::Accepted == fileDialog.exec())
+    {
+        fileName = fileDialog.selectedFiles()[0];
+    }
 
     if( fileName != "" )
     {
@@ -110,9 +118,17 @@ void MainWindow::on_startSimulationButton_clicked()
 
 void MainWindow::on_tireColiisionOpenButton_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                    QDir::currentPath(),
-                                                    tr( "PSK (*.psk)" ) );
+    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
+    fileDialog.setFileMode( QFileDialog::ExistingFiles );
+    fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
+
+    QString fileName;
+
+    if (QDialog::Accepted == fileDialog.exec())
+    {
+        fileName = fileDialog.selectedFiles()[0];
+    }
 
     if( fileName != "" )
     {
@@ -129,10 +145,18 @@ void MainWindow::on_tireColiisionOpenButton_clicked()
 void MainWindow::skinOpenButton_clicked(int i)
 {
     if( ui->mainOpenGLWidget->getBodyObject() )
-    {
-        QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                        QDir::currentPath(),
-                                                        tr( "Image (*.png *.xpm *.jpg)" ) );
+    {   
+        QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "Image (*.png *.xpm *.jpg)" ) );
+        fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
+        fileDialog.setFileMode( QFileDialog::ExistingFiles );
+        fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
+
+        QString fileName;
+
+        if (QDialog::Accepted == fileDialog.exec())
+        {
+            fileName = fileDialog.selectedFiles()[0];
+        }
 
         if( fileName != "" )
         {
@@ -176,9 +200,17 @@ void MainWindow::addButtonToArrayLayout()
 
 void MainWindow::on_collisionOpenButton_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                    QDir::currentPath(),
-                                                    tr( "PSK (*.psk)" ) );
+    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
+    fileDialog.setFileMode( QFileDialog::ExistingFiles );
+    fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
+
+    QString fileName;
+
+    if (QDialog::Accepted == fileDialog.exec())
+    {
+        fileName = fileDialog.selectedFiles()[0];
+    }
 
     if( fileName != "" )
     {
