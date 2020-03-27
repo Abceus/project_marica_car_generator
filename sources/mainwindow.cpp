@@ -70,12 +70,14 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
     m_errorSystem->active();
+#ifndef WITHOUT_SIMULATION
     if(!simulationWidget.isGLinited())
     {
         // Call for init GL
         simulationWidget.show();
         simulationWidget.close();
     }
+#endif
 }
 
 void MainWindow::on_meshOpenButton_clicked()

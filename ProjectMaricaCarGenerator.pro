@@ -9,7 +9,7 @@ QT       += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 !defined(WITHOUT_SIMULATION, var) {
-    WITHOUT_SIMULATION = 1
+    WITHOUT_SIMULATION = 0
 } else {
     WITHOUT_SIMULATION = 1
 }
@@ -57,6 +57,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += sources/main.cpp\
+    sources/errorsystem.cpp \
+    sources/impl_errorsystem.cpp \
     sources/mainwindow.cpp \
     sources/mainopenglwidget.cpp \
     sources/resources/model.cpp \
@@ -65,6 +67,7 @@ SOURCES += sources/main.cpp\
     sources/resources/resource_pointer.cpp \
     sources/resources/resource_submanager.cpp \
     sources/resources/unanimation.cpp \
+    sources/resources/file.cpp \
     sources/object.cpp \
     sources/render_system/mesh.cpp \
     sources/grid.cpp \
@@ -77,9 +80,12 @@ SOURCES += sources/main.cpp\
     sources/render_system/box.cpp \
     sources/vector3d.cpp \
     sources/render_system/camera.cpp \
-    sources/resources/loaders/texture_loader.cpp
+    sources/resources/loaders/texture_loader.cpp \
+    sources/resources/loaders/file_loader.cpp
 
 HEADERS  += includes/mainwindow.h \
+    sources/errorsystem.h \
+    sources/impl_errorsystem.h \
     includes/mainopenglwidget.h \
     includes/render_system/scene.h \
     includes/resources/loaders/loader.h \
@@ -88,6 +94,7 @@ HEADERS  += includes/mainwindow.h \
     includes/resources/resource_pointer.h \
     includes/resources/resource_submanager.h \
     includes/resources/unanimation.h \
+    includes/resources/file.h \
     includes/object.h \
     includes/render_system/mesh.h \
     includes/grid.h \
@@ -103,7 +110,8 @@ HEADERS  += includes/mainwindow.h \
     includes/render_system/box.h \
     includes/vector3d.h \
     includes/render_system/camera.h \
-    includes/resources/loaders/texture_loader.h
+    includes/resources/loaders/texture_loader.h \
+    sources/resources/loaders/file_loader.h
 
 equals(WITHOUT_SIMULATION, 0) {
     SOURCES += sources/openglsimulationwidget.cpp \
