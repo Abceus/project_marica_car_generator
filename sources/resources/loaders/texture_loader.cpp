@@ -1,22 +1,25 @@
 #include "resources/loaders/texture_loader.h"
-#include <fstream>
+#include "resources/resource_manager.h"
+#include <QDataStream>
+#include <QImage>
 
-QImage loadTga(const char* filePath, bool &success)
+QImage loadTga(const QByteArray& buffer, bool &success)
 {
     QImage img;
-    if (!img.load(filePath))
+//    if (!img.load(filePath))
     {
 
         // open the file
-        std::fstream fsPicture(filePath, std::ios::in | std::ios::binary);
+//        std::fstream fsPicture(filePath, std::ios::in | std::ios::binary);
+        QDataStream fsPicture(buffer);
 
-        if (!fsPicture.is_open())
-        {
-            img = QImage(1, 1, QImage::Format_RGB32);
-            img.fill(Qt::red);
-            success = false;
-            return img;
-        }
+//        if (!fsPicture.is_open())
+//        {
+//            img = QImage(1, 1, QImage::Format_RGB32);
+//            img.fill(Qt::red);
+//            success = false;
+//            return img;
+//        }
 
         // some variables
         std::vector<std::uint8_t>* vui8Pixels;
@@ -26,7 +29,7 @@ QImage loadTga(const char* filePath, bool &success)
 
         // read in the header
         std::uint8_t ui8x18Header[19] = { 0 };
-        fsPicture.read(reinterpret_cast<char*>(&ui8x18Header), sizeof(ui8x18Header) - 1);
+        fsPicture.readRawData(reinterpret_cast<char*>(&ui8x18Header), sizeof(ui8x18Header) - 1);
 
         //get variables
         vui8Pixels = new std::vector<std::uint8_t>;
@@ -50,11 +53,11 @@ QImage loadTga(const char* filePath, bool &success)
         vui8Pixels->resize(ui32Size);
 
         // jump to the data block
-        fsPicture.seekg(ui32IDLength + ui32PaletteLength, std::ios_base::cur);
+        fsPicture.skipRawData(ui32IDLength + ui32PaletteLength);
 
         if (ui32PicType == 2 && (ui32BpP == 24 || ui32BpP == 32))
         {
-            fsPicture.read(reinterpret_cast<char*>(vui8Pixels->data()), ui32Size);
+            fsPicture.readRawData(reinterpret_cast<char*>(vui8Pixels->data()), ui32Size);
         }
         // else if compressed 24 or 32 bit
         else if (ui32PicType == 10 && (ui32BpP == 24 || ui32BpP == 32))	// compressed
@@ -64,14 +67,14 @@ QImage loadTga(const char* filePath, bool &success)
             unsigned int tempByteIndex = 0;
 
             do {
-                fsPicture.read(reinterpret_cast<char*>(&tempChunkHeader), sizeof(tempChunkHeader));
+                fsPicture.readRawData(reinterpret_cast<char*>(&tempChunkHeader), sizeof(tempChunkHeader));
 
                 if (tempChunkHeader >> 7)	// repeat count
                 {
                     // just use the first 7 bits
                     tempChunkHeader = (uint8_t(tempChunkHeader << 1) >> 1);
 
-                    fsPicture.read(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
+                    fsPicture.readRawData(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
 
                     for (int i = 0; i <= tempChunkHeader; i++)
                     {
@@ -88,7 +91,7 @@ QImage loadTga(const char* filePath, bool &success)
 
                     for (int i = 0; i <= tempChunkHeader; i++)
                     {
-                        fsPicture.read(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
+                        fsPicture.readRawData(reinterpret_cast<char*>(&tempData), ui32BpP / 8);
 
                         vui8Pixels->at(tempByteIndex++) = tempData[0];
                         vui8Pixels->at(tempByteIndex++) = tempData[1];
@@ -99,16 +102,16 @@ QImage loadTga(const char* filePath, bool &success)
             } while (tempByteIndex < ui32Size);
         }
         // not useable format
-        else
-        {
-            fsPicture.close();
-            img = QImage(1, 1, QImage::Format_RGB32);
-            img.fill(Qt::red);
-            success = false;
-            return img;
-        }
+//        else
+//        {
+//            fsPicture.close();
+//            img = QImage(1, 1, QImage::Format_RGB32);
+//            img.fill(Qt::red);
+//            success = false;
+//            return img;
+//        }
 
-        fsPicture.close();
+//        fsPicture.close();
 
         img = QImage(ui32Width, ui32Height, QImage::Format_RGB888);
 
@@ -136,17 +139,24 @@ QImage loadTga(const char* filePath, bool &success)
 
 QImage *TextureLoader::load(const QString &path)
 {
-    if( path.right(4) == ".tga" )
+    auto file = ResourceManager::Instance().getFileManager().get(path);
+    if( !file.get() )
+    {
+        return nullptr;
+    }
+
+    if( file->getExtension() == "tga" )
     {
         bool success;
-        auto clone = loadTga( path.toStdString().c_str(), success );
+        auto clone = loadTga( file->getBuffer(), success );
         if( success )
         {
             return new QImage( clone );
         }
         return nullptr;
     }
-    return new QImage( path );
+    auto imageClone = QImage::fromData(file->getBuffer(), file->getExtension().toStdString().c_str());
+    return new QImage(imageClone);
 }
 
 void TextureLoader::remove(QImage *path)
