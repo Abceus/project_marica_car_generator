@@ -4,6 +4,7 @@
 #include "mainopenglwidget.h"
 #include "render_system/wireframe.h"
 #include "render_system/box.h"
+#include "errorsystem.h"
 
 MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     : QOpenGLWidget( parent )
@@ -42,14 +43,16 @@ void MainOpenglWidget::initializeGL()
 
     if( !vertexShader )
     {
-        qDebug() << "The vertex shader wasn't compiled";
+        ErrorSystem::showError("The vertex shader wasn't compiled", true);
+        return;
     }
 
     auto fragmentShader = m_renderer.loadShader( "resources/shaders/colorfragmentshader.frag", QOpenGLShader::Fragment );
 
     if( !fragmentShader )
     {
-        qDebug() << "The fragment shader wasn't compiled";
+        ErrorSystem::showError("The fragment shader wasn't compiled", true);
+        return;
     }
 
     auto program = m_renderer.getShaderProgram( vertexShader, fragmentShader );
@@ -60,14 +63,16 @@ void MainOpenglWidget::initializeGL()
 
     if( !meshVertexShader )
     {
-        qDebug() << "The mesh vertex shader wasn't compiled";
+        ErrorSystem::showError("The mesh vertex shader wasn't compiled", true);
+        return;
     }
 
     auto meshFragmentShader = m_renderer.loadShader( "resources/shaders/texturefragmentshader.frag", QOpenGLShader::Fragment );
 
     if( !meshFragmentShader )
     {
-        qDebug() << "The mesh fragment shader wasn't compiled";
+        ErrorSystem::showError("The mesh fragment shader wasn't compiled", true);
+        return;
     }
 
     auto meshProgram = m_renderer.getShaderProgram( meshVertexShader, meshFragmentShader );
@@ -81,7 +86,7 @@ void MainOpenglWidget::paintGL()
 {
     makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
+//    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear( GL_COLOR_BUFFER_BIT );
 
     m_renderer.draw( m_scene );
@@ -114,14 +119,24 @@ void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
     m_body->getDrawable().staticCast<Mesh>()->setTexture( filename, index );
 }
 
-Model MainOpenglWidget::getBodyCollisionModel() const
+std::optional<Model> MainOpenglWidget::getBodyCollisionModel() const
 {
-    return m_collisionBody->getDrawable().staticCast<WireframeMesh>()->getModel();
+    auto wireframeMesh = m_collisionBody->getDrawable().staticCast<WireframeMesh>();
+    if(wireframeMesh)
+    {
+        return wireframeMesh->getModel();
+    }
+    return std::nullopt;
 }
 
-Model MainOpenglWidget::getWheelCollisionModel() const
+std::optional<Model> MainOpenglWidget::getWheelCollisionModel() const
 {
-    return m_leftEngWheel->getDrawable().staticCast<WireframeMesh>()->getModel();
+    auto wireframeMesh = m_leftEngWheel->getDrawable().staticCast<WireframeMesh>();
+    if(wireframeMesh)
+    {
+        return wireframeMesh->getModel();
+    }
+    return std::nullopt;
 }
 
 QSharedPointer<Object> MainOpenglWidget::getLeftSteerWheel() const

@@ -26,7 +26,6 @@ QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::
         bool success = shader->compileSourceFile( path );
         if( !success )
         {
-            qDebug() << "The vertex shader wasn't compiled";
             return nullptr;
         }
         m_shaders.insert( path, shader );
@@ -47,7 +46,6 @@ QSharedPointer<QOpenGLShaderProgram> Renderer::getShaderProgram(QSharedPointer<Q
         shaderProgram->addShader( fragmentShader.get() );
         if( !shaderProgram->link() )
         {
-            qDebug() << "The shader program wasn't linked";
             return nullptr;
         }
         m_programs.insert( QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>( vertexShader, fragmentShader ), shaderProgram );

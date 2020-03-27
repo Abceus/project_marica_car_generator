@@ -34,10 +34,11 @@ public:
     ~OpenglSimulationWidget() override = default;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
-    void prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation, const Model &wheelModel,
+    bool prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation, const Model &wheelModel,
                   QSharedPointer<SceneNode> leftSteerNode, QSharedPointer<SceneNode> rightSteerNode, QSharedPointer<SceneNode> leftEngNode, QSharedPointer<SceneNode> rightEngNode );
     void closeEvent(QCloseEvent *event) override;
     void init();
+    bool isGLinited() const;
 private:
     QVector<QSharedPointer<IUpdatable>> m_objects;
     QMap<int, bool> keys;
@@ -54,6 +55,7 @@ private:
     QSharedPointer<PhysObject> m_rightEngWheel;
     btHinge2Constraint* pHinge2;
     btScalar m_testBlyat;
+    bool m_GLinited;
 protected:
     void initializeGL() override;
     void resizeGL( int w, int h ) override;

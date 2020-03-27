@@ -363,7 +363,7 @@ QVector<Face> Mesh::getTransparentFaces() const
 
 QVector<Vertex> Mesh::getVertexes() const
 {
-    return QVector<Vertex>::fromStdVector( m_model.vertices );
+    return QVector<Vertex>( m_model.vertices.begin(), m_model.vertices.end() );
 }
 
 AABBBox Mesh::getRootAABBB() const

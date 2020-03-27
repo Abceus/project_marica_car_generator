@@ -2,23 +2,25 @@
 #include "render_system/wireframe.h"
 #include "render_system/box.h"
 
+#include "errorsystem.h"
 
 OpenglSimulationWidget::OpenglSimulationWidget( QWidget *parent )
         : QOpenGLWidget( parent )
+        , physicWorld( new PhysicWorld() )
         , m_scene( new Scene )
         , prevTime( std::chrono::high_resolution_clock::now() )
-        , physicWorld( new PhysicWorld() )
         , m_body( nullptr )
-        , m_leftEngWheel( nullptr )
-        , m_rightEngWheel( nullptr )
         , m_leftSteerWheel( nullptr )
         , m_rightSteerWheel( nullptr )
+        , m_leftEngWheel( nullptr )
+        , m_rightEngWheel( nullptr )
         , pHinge2( nullptr )
         , m_testBlyat( 0.0f )
+        , m_GLinited( false )
 {
 }
 
-void OpenglSimulationWidget::prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation, const Model &wheelModel,
+bool OpenglSimulationWidget::prepare( const Model &bodyModel, const Model &bodyPhysModel, QSharedPointer<SceneNode> nodeInformation, const Model &wheelModel,
                                       QSharedPointer<SceneNode> leftSteerNode, QSharedPointer<SceneNode> rightSteerNode, QSharedPointer<SceneNode> leftEngNode, QSharedPointer<SceneNode> rightEngNode )
 {
     makeCurrent();
@@ -118,17 +120,25 @@ void OpenglSimulationWidget::prepare( const Model &bodyModel, const Model &bodyP
 
     if( !meshVertexShader )
     {
-        qDebug() << "The mesh vertex shader wasn't compiled";
+        ErrorSystem::showError("The mesh vertex shader wasn't compiled", true);
+        return false;
     }
 
     auto meshFragmentShader = m_renderer.loadShader( "resources/shaders/texturefragmentshader.frag", QOpenGLShader::Fragment );
 
     if( !meshFragmentShader )
     {
-        qDebug() << "The mesh fragment shader wasn't compiled";
+        ErrorSystem::showError("The mesh fragment shader wasn't compiled", true);
+        return false;
     }
 
     auto meshProgram = m_renderer.getShaderProgram( meshVertexShader, meshFragmentShader );
+
+    if( !meshProgram )
+    {
+        ErrorSystem::showError("The mesh program wasn't compiled", true);
+        return false;
+    }
 
     m_body->getNode()->setShaderProgram( meshProgram );
 
@@ -159,6 +169,7 @@ void OpenglSimulationWidget::prepare( const Model &bodyModel, const Model &bodyP
     btRigidBody::btRigidBodyConstructionInfo rbInfoGround( massGround, myMotionStateGround, colShapeGround, localInertiaGround );
 
     physicWorld->addBody( rbInfoGround );
+    return true;
 }
 
 void OpenglSimulationWidget::closeEvent(QCloseEvent *event)
@@ -180,6 +191,11 @@ void OpenglSimulationWidget::init()
     m_scene->clear();
 }
 
+bool OpenglSimulationWidget::isGLinited() const
+{
+    return m_GLinited;
+}
+
 void OpenglSimulationWidget::initializeGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -197,28 +213,37 @@ void OpenglSimulationWidget::initializeGL()
 
     if( !vertexShader )
     {
-        qDebug() << "The vertex shader wasn't compiled";
+        ErrorSystem::showError("The vertex shader wasn't compiled", true);
+        return;
     }
 
     auto fragmentShader = m_renderer.loadShader( "resources/shaders/colorfragmentshader.frag", QOpenGLShader::Fragment );
 
     if( !fragmentShader )
     {
-        qDebug() << "The fragment shader wasn't compiled";
+        ErrorSystem::showError("The fragment shader wasn't compiled", true);
+        return;
     }
 
     auto program = m_renderer.getShaderProgram( vertexShader, fragmentShader );
 
+    if( !program )
+    {
+        ErrorSystem::showError("The program  wasn't compiled", true);
+        return;
+    }
+
     m_scene->init( program );
 
     doneCurrent();
+    m_GLinited = true;
 }
 
 void OpenglSimulationWidget::paintGL()
 {
     makeCurrent();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
+//    QOpenGLExtraFunctions *ef = QOpenGLContext::currentContext()->extraFunctions();
     f->glClear( GL_COLOR_BUFFER_BIT );
     auto now = std::chrono::high_resolution_clock::now();
     float dt = std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1> >>( now - prevTime ).count();

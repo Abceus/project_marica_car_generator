@@ -41,9 +41,9 @@ public:
     void setBodyTexture( const QString &filename, size_t index );
 
     QSharedPointer<Object> getCollisionBodyObject() const;
-    Model getBodyCollisionModel() const;
+    std::optional<Model> getBodyCollisionModel() const;
 
-    Model getWheelCollisionModel() const;
+    std::optional<Model> getWheelCollisionModel() const;
     QSharedPointer<Object> getLeftSteerWheel() const;
     QSharedPointer<Object> getRightSteerWheel() const;
     QSharedPointer<Object> getLeftEngWheel() const;

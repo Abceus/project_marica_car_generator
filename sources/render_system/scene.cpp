@@ -45,7 +45,7 @@ void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
 {
 //    drawNode( m_rootNode, f, ef );
 
-    qDebug() << m_cameraNode->getLocation().x() << " " << m_cameraNode->getLocation().y() << " " << m_cameraNode->getLocation().z();
+//    qDebug() << m_cameraNode->getLocation().x() << " " << m_cameraNode->getLocation().y() << " " << m_cameraNode->getLocation().z();
 
     struct FaceCollection
     {

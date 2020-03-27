@@ -12,9 +12,12 @@
 #endif
 #include "render_system/wireframe.h"
 
+#include "errorsystem.h"
+
 MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
     , ui( new Ui::MainWindow )
+    , m_errorSystem(dynamic_cast<ImplErrorSystem*>(ErrorSystem::setSystem<ImplErrorSystem>(this)))
 {
     ui->setupUi( this );
 
@@ -54,11 +57,25 @@ MainWindow::MainWindow( QWidget *parent )
 #ifndef WITHOUT_SIMULATION
     connect( &simulationWidget, &OpenglSimulationWidget::closed, this, &MainWindow::show );
 #endif
+
+    m_errorSystem->setCriticalCallback([this]{ this->close(); });
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+    m_errorSystem->active();
+    if(!simulationWidget.isGLinited())
+    {
+        // Call for init GL
+        simulationWidget.show();
+        simulationWidget.close();
+    }
 }
 
 void MainWindow::on_meshOpenButton_clicked()
@@ -110,13 +127,34 @@ void MainWindow::on_meshOpenButton_clicked()
 void MainWindow::on_startSimulationButton_clicked()
 {
 #ifndef WITHOUT_SIMULATION
-    if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
+    auto bodyDrawable = ui->mainOpenGLWidget->getBodyObject()->getDrawable();
+    if( !bodyDrawable )
     {
-        simulationWidget.show();
-        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDrawable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(),
-                                  ui->mainOpenGLWidget->getBodyObject()->getNode(), ui->mainOpenGLWidget->getWheelCollisionModel(), ui->mainOpenGLWidget->getLeftSteerWheel()->getNode(),
+        ErrorSystem::showError( "Body model not selected" );
+        return;
+    }
+    auto bodyCollision = ui->mainOpenGLWidget->getBodyCollisionModel();
+    if( !bodyCollision )
+    {
+        ErrorSystem::showError( "Body collision not selected" );
+        return;
+    }
+    auto tireCollision = ui->mainOpenGLWidget->getWheelCollisionModel();
+    if( !tireCollision )
+    {
+        ErrorSystem::showError( "Tire collision not selected" );
+        return;
+    }
+    if( simulationWidget.isHidden() )
+    {
+        bool success = simulationWidget.prepare( bodyDrawable.staticCast<Mesh>()->getModel(), bodyCollision.value(),
+                                  ui->mainOpenGLWidget->getBodyObject()->getNode(), tireCollision.value(), ui->mainOpenGLWidget->getLeftSteerWheel()->getNode(),
                                   ui->mainOpenGLWidget->getRightSteerWheel()->getNode(), ui->mainOpenGLWidget->getLeftEngWheel()->getNode(), ui->mainOpenGLWidget->getRightEngWheel()->getNode() );
-        hide();
+        if(success)
+        {
+            simulationWidget.show();
+            hide();
+        }
     }
 #endif
 }

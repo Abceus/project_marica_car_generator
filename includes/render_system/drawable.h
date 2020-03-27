@@ -10,6 +10,7 @@ class Drawable
 {
 public:
     Drawable();
+    virtual ~Drawable() = default;
     virtual void draw( const RenderInfo& renderInfo ) = 0;
     void setEnable( bool value );
     bool getEnable() const;

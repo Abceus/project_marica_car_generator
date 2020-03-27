@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QMatrix4x4>
 
-#include "drawable.h"`
+#include "drawable.h"
 #include "vector3d.h"
 
 class SceneNode : public QObject

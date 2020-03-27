@@ -4,6 +4,7 @@
 #ifndef WITHOUT_SIMULATION
 #include "openglsimulationwidget.h"
 #endif
+#include "impl_errorsystem.h"
 
 namespace Ui {
 class MainWindow;
@@ -15,6 +16,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow() override;
+    void showEvent(QShowEvent *event) override;
     void clearSkinArrayLayout();
     void addButtonToArrayLayout();
 private slots:
@@ -39,4 +41,5 @@ private:
 #ifndef WITHOUT_SIMULATION
     OpenglSimulationWidget simulationWidget;
 #endif
+    ImplErrorSystem* m_errorSystem;
 };
