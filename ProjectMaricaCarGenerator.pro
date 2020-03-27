@@ -9,7 +9,7 @@ QT       += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 !defined(WITHOUT_SIMULATION, var) {
-    WITHOUT_SIMULATION = 0
+    WITHOUT_SIMULATION = 1
 } else {
     WITHOUT_SIMULATION = 1
 }
@@ -61,9 +61,11 @@ SOURCES += sources/main.cpp\
     sources/mainopenglwidget.cpp \
     sources/resources/model.cpp \
     sources/render_system/scene.cpp \
+    sources/resources/resource_manager.cpp \
+    sources/resources/resource_pointer.cpp \
+    sources/resources/resource_submanager.cpp \
     sources/resources/unanimation.cpp \
     sources/object.cpp \
-    sources/resources/resource_manager.cpp \
     sources/render_system/mesh.cpp \
     sources/grid.cpp \
     sources/render_system/scene_node.cpp \
@@ -74,15 +76,19 @@ SOURCES += sources/main.cpp\
     sources/render_system/aabb.cpp \
     sources/render_system/box.cpp \
     sources/vector3d.cpp \
-    sources/render_system/camera.cpp
+    sources/render_system/camera.cpp \
+    sources/resources/loaders/texture_loader.cpp
 
 HEADERS  += includes/mainwindow.h \
     includes/mainopenglwidget.h \
     includes/render_system/scene.h \
+    includes/resources/loaders/loader.h \
     includes/resources/model.h \
+    includes/resources/resource_manager.h \
+    includes/resources/resource_pointer.h \
+    includes/resources/resource_submanager.h \
     includes/resources/unanimation.h \
     includes/object.h \
-    includes/resources/resource_manager.h \
     includes/render_system/mesh.h \
     includes/grid.h \
     includes/render_system/scene_node.h \
@@ -96,7 +102,8 @@ HEADERS  += includes/mainwindow.h \
     includes/render_system/face.h \
     includes/render_system/box.h \
     includes/vector3d.h \
-    includes/render_system/camera.h
+    includes/render_system/camera.h \
+    includes/resources/loaders/texture_loader.h
 
 equals(WITHOUT_SIMULATION, 0) {
     SOURCES += sources/openglsimulationwidget.cpp \

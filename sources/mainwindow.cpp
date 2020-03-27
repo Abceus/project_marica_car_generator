@@ -190,7 +190,7 @@ void MainWindow::skinOpenButton_clicked(int i)
 {
     if( ui->mainOpenGLWidget->getBodyObject() )
     {   
-        QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "Image (*.png *.xpm *.jpg)" ) );
+        QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "Image (*.bmp *.tga *.dds)" ) );
         fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
         fileDialog.setFileMode( QFileDialog::ExistingFiles );
         fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
