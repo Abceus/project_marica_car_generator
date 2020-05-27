@@ -39,38 +39,9 @@ Box::Box( Vector3D size, QColor color )
         0, 2, 6,
         0, 4, 6
     };
-
-    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions* fe = QOpenGLContext::currentContext()->extraFunctions();
-    if(!f || !fe)
-        return;
-
-    m_VAO.create();
-    m_VBO = QOpenGLBuffer( QOpenGLBuffer::VertexBuffer );
-    m_VBO.create();
-    m_VBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_EBO = QOpenGLBuffer( QOpenGLBuffer::IndexBuffer );
-    m_EBO.create();
-    m_EBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
-
-    m_VAO.bind();
-
-    m_VBO.bind();
-    m_VBO.allocate( vertexes, sizeof( vertexes ) * sizeof( float ) );
-
-    m_EBO.bind();
-    m_EBO.allocate( indices, sizeof( indices ) * sizeof( unsigned ) );
-
-    f->glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, nullptr );
-    f->glEnableVertexAttribArray( 0 );
-
-    m_VAO.release();
 }
 
-void Box::draw(const RenderInfo &renderInfo)
+QVector<DrawBuffer> Box::getDrawBuffer() const
 {
-    m_VAO.bind();
-    renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "color" ), m_color );
-    renderInfo.f->glDrawElements( GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr );
-    m_VAO.release();
+    return QVector<DrawBuffer>();
 }

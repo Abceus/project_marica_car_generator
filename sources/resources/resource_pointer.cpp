@@ -1,7 +1,7 @@
 #include "resources/resource_pointer.h"
 
-Counter::Counter()
-    : m_createFinished(false)
+Counter::Counter(bool hasMaster)
+    : m_createFinished(!hasMaster)
     , m_count(1)
 {
 
@@ -21,6 +21,11 @@ Counter Counter::operator--(int)
 {
     m_count--;
     return *this;
+}
+
+bool Counter::operator==(int other) const
+{
+    return m_count == other;
 }
 
 bool Counter::needRemove() const

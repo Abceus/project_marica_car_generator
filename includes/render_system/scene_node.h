@@ -9,9 +9,8 @@
 #include "drawable.h"
 #include "vector3d.h"
 
-class SceneNode : public QObject
+class SceneNode
 {
-    Q_OBJECT
 public:
     SceneNode();
 
@@ -21,7 +20,7 @@ public:
 
     Vector3D getRotation() const;
     Vector3D getOriginRotation() const;
-    Vector3D getParentRotation() const;
+//    Vector3D getParentRotation() const;
     void setRotation( const Vector3D& rotation );
 
     Scale3D getScale() const;
@@ -31,7 +30,8 @@ public:
     void setParent( SceneNode* parent );
 
     QSharedPointer<SceneNode> addChild( QSharedPointer<SceneNode> newChild );
-    void removeChild( SceneNode* removeChild );
+    void removeChild( SceneNode* removedChild );
+    void removeChild( QSharedPointer<SceneNode> removedChild );
 
     QSharedPointer<Drawable> addDrawable( QSharedPointer<Drawable> newDrawable );
     void removeDrawable( Drawable* removeDrawable );
@@ -45,9 +45,7 @@ public:
     QVector<QSharedPointer<Drawable>>::ConstIterator drawableBegin();
     QVector<QSharedPointer<Drawable>>::ConstIterator drawableEnd();
 
-    void setShaderProgram( QSharedPointer<QOpenGLShaderProgram> newProgram );
-    QSharedPointer<QOpenGLShaderProgram> getShaderProgram() const;
-
+    QMatrix4x4 getOriginMatrix() const;
     QMatrix4x4 getMatrix() const;
 
 private:
@@ -57,11 +55,4 @@ private:
     SceneNode* m_parent;
     QVector<QSharedPointer<SceneNode>> m_childrens;
     QVector<QSharedPointer<Drawable>> m_drawables;
-    QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
-
-signals:
-    void drawableAdded( SceneNode* node, Drawable* drawable );
-    void drawableRemoved( SceneNode* node, Drawable* drawable );
-    void nodeAdded( SceneNode* node );
-    void nodeRemoved( SceneNode* node );
 };

@@ -9,18 +9,13 @@ SceneNode::SceneNode()
     , m_scale( 1.0f, 1.0f, 1.0f )
     , m_parent(nullptr)
     , m_drawables()
-    , m_shaderProgram(nullptr)
 {
 
 }
 
 Vector3D SceneNode::getLocation() const
 {
-    if( m_parent )
-    {
-        return m_location + m_parent->getLocation();
-    }
-    return m_location;
+    return getMatrix() * QVector3D();
 }
 
 Vector3D SceneNode::getOriginLocation() const
@@ -47,14 +42,14 @@ Vector3D SceneNode::getOriginRotation() const
     return m_rotation;
 }
 
-Vector3D SceneNode::getParentRotation() const
-{
-    if( m_parent )
-    {
-        return m_parent->getRotation();
-    }
-    return { 0.0f, 0.0f, 0.0f };
-}
+//Vector3D SceneNode::getParentRotation() const
+//{
+//    if( m_parent )
+//    {
+//        return m_parent->getRotation();
+//    }
+//    return { 0.0f, 0.0f, 0.0f };
+//}
 
 void SceneNode::setRotation(const Vector3D &rotation)
 {
@@ -87,10 +82,11 @@ void SceneNode::setParent(SceneNode *parent)
         return;
     }
 
-//    if( m_parent )
-//    {
-//        m_parent->removeChild(this);
-//    }
+    if( m_parent )
+    {
+        m_parent->removeChild(this);
+    }
+
     m_parent = parent;
 }
 
@@ -100,11 +96,6 @@ QSharedPointer<SceneNode> SceneNode::addChild(QSharedPointer<SceneNode> newChild
     {
         m_childrens.append(newChild);
         newChild->setParent(this);
-        connect( newChild.get(), &SceneNode::drawableAdded, this, [=](SceneNode* node, Drawable* drawable){ emit drawableAdded(node, drawable); });
-        connect( newChild.get(), &SceneNode::drawableRemoved, this, [=](SceneNode* node, Drawable* drawable){ emit drawableRemoved(node, drawable); });
-        connect( newChild.get(), &SceneNode::nodeAdded, this, [=](SceneNode* node){ emit nodeAdded(node); });
-        connect( newChild.get(), &SceneNode::nodeRemoved, this, [=](SceneNode* node){ emit nodeRemoved(node); });
-        emit nodeAdded( newChild.get() );
     }
     return newChild;
 }
@@ -116,8 +107,12 @@ void SceneNode::removeChild(SceneNode *removeChild)
     {
         m_childrens.erase( found );
         removeChild->setParent(nullptr);
-        emit nodeRemoved( removeChild );
     }
+}
+
+void SceneNode::removeChild( QSharedPointer<SceneNode> removedChild )
+{
+    removeChild(removedChild.get());
 }
 
 QSharedPointer<Drawable> SceneNode::addDrawable(QSharedPointer<Drawable> newDrawable)
@@ -125,7 +120,6 @@ QSharedPointer<Drawable> SceneNode::addDrawable(QSharedPointer<Drawable> newDraw
     if( !m_drawables.contains(newDrawable) )
     {
         m_drawables.append(newDrawable);
-        emit drawableAdded( this, newDrawable.get() );
     }
     return newDrawable;
 }
@@ -136,13 +130,24 @@ void SceneNode::removeDrawable(Drawable *removeDrawable)
     if( found != m_drawables.end() )
     {
         m_drawables.erase(found);
-        emit drawableRemoved( this, removeDrawable );
     }
 }
 
 bool SceneNode::isEmpty() const
 {
-    return m_childrens.empty();
+    if( !m_drawables.empty() )
+    {
+        return false;
+    }
+
+    for( const auto& child: m_childrens )
+    {
+        if( !child->isEmpty() )
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void SceneNode::clear()
@@ -171,21 +176,20 @@ QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableEnd()
     return m_drawables.end();
 }
 
-void SceneNode::setShaderProgram(QSharedPointer<QOpenGLShaderProgram> newProgram)
+QMatrix4x4 SceneNode::getOriginMatrix() const
 {
-    m_shaderProgram = newProgram;
-}
-
-QSharedPointer<QOpenGLShaderProgram> SceneNode::getShaderProgram() const
-{
-    return m_shaderProgram;
+    QMatrix4x4 result;
+    result.translate( m_location.getQtVector() );
+    result.rotate( QQuaternion::fromEulerAngles( m_rotation.getQtVector() ) );
+    result.scale( m_scale.getQtVector() );
+    return result;
 }
 
 QMatrix4x4 SceneNode::getMatrix() const
 {
-    QMatrix4x4 result;
-    result.translate( getLocation().getQtVector() );
-    result.rotate( QQuaternion::fromEulerAngles( getRotation().getQtVector() ) );
-    result.scale( getScale().getQtVector() );
-    return result;
+    if( m_parent )
+    {
+        return getOriginMatrix() * m_parent->getMatrix();
+    }
+    return getOriginMatrix();
 }

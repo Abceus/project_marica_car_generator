@@ -18,22 +18,23 @@ class Renderer
 {
 public:
     Renderer( QOpenGLContext* context = nullptr, QSurface* surface = nullptr );
+    void init();
     void draw( QSharedPointer<Scene> scene );
 
     template<typename T, typename... Args>
     QSharedPointer<T> makeDrawable( Args... args );
 
-    QSharedPointer<QOpenGLShader> loadShader( QString path, QOpenGLShader::ShaderTypeBit type );
-    QSharedPointer<QOpenGLShaderProgram> getShaderProgram( QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader );
+    QSharedPointer<Camera> getMainCamera() const;
+    void setMainCamera( QSharedPointer<Camera> camera );
 private:
     void makeCurrent();
     void done();
     QOpenGLContext* m_context;
     QSurface* m_surface;
 
-    // TODO: rework
-    QMap<QString, QSharedPointer<QOpenGLShader>> m_shaders;
-    QMap<QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>, QSharedPointer<QOpenGLShaderProgram>> m_programs;
+    Batching m_bathing;
+
+    QSharedPointer<Camera> m_mainCamera;
 };
 
 template<typename T, typename... Args>

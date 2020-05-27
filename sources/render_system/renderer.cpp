@@ -4,54 +4,25 @@ Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
     : m_context( context )
     , m_surface( surface )
 {
+}
 
+void Renderer::init()
+{
+    makeCurrent();
+    m_bathing.init();
+    done();
 }
 
 void Renderer::draw(QSharedPointer<Scene> scene)
 {
-    makeCurrent();
-    scene->draw( m_context->functions(), m_context->extraFunctions() );
-    done();
-}
-
-QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::ShaderTypeBit type)
-{
-    auto found = m_shaders.find( path );
-
-    if( found == m_shaders.end() )
+    if( m_mainCamera )
     {
         makeCurrent();
-        QSharedPointer<QOpenGLShader> shader( new QOpenGLShader( type ) );
-
-        bool success = shader->compileSourceFile( path );
-        if( !success )
-        {
-            return nullptr;
-        }
-        m_shaders.insert( path, shader );
-        return shader;
+        scene->draw( m_bathing, m_mainCamera );
+        m_bathing.draw();
+        m_bathing.clear();
+        done();
     }
-
-    return *found;
-}
-
-QSharedPointer<QOpenGLShaderProgram> Renderer::getShaderProgram(QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader)
-{
-    makeCurrent();
-    auto found = m_programs.find( QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>( vertexShader, fragmentShader ) );
-    if( found == m_programs.end() )
-    {
-        QSharedPointer<QOpenGLShaderProgram> shaderProgram( new QOpenGLShaderProgram );
-        shaderProgram->addShader( vertexShader.get() );
-        shaderProgram->addShader( fragmentShader.get() );
-        if( !shaderProgram->link() )
-        {
-            return nullptr;
-        }
-        m_programs.insert( QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>( vertexShader, fragmentShader ), shaderProgram );
-        return shaderProgram;
-    }
-    return *found;
 }
 
 void Renderer::makeCurrent()
@@ -62,4 +33,14 @@ void Renderer::makeCurrent()
 void Renderer::done()
 {
     m_context->doneCurrent();
+}
+
+QSharedPointer<Camera> Renderer::getMainCamera() const
+{
+    return m_mainCamera;
+}
+
+void Renderer::setMainCamera( QSharedPointer<Camera> camera )
+{
+    m_mainCamera = camera;
 }

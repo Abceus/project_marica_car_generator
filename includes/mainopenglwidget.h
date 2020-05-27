@@ -23,10 +23,17 @@
 #include "render_system/scene.h"
 #include "object.h"
 #include "render_system/renderer.h"
+#include "project_model.h"
 
 class MainOpenglWidget :public QOpenGLWidget
 {
     Q_OBJECT
+public slots:
+    void changeMeshModel( ResourcePointer<Model> model );
+    void changeBodyModel( ResourcePointer<Model> model );
+    void changeTireModel( ResourcePointer<Model> model );
+
+    void changeSkin( size_t index, ResourcePointer<QImage> texture );
 public:
     explicit MainOpenglWidget( QWidget *parent = nullptr );
     ~MainOpenglWidget() override = default;
@@ -35,24 +42,8 @@ public:
     void mouseMoveEvent( QMouseEvent *event ) override;
     void mouseReleaseEvent( QMouseEvent *event ) override;
 
-//    void setBodyObject( QSharedPointer<Object> object );
-    void setBodyMesh( QSharedPointer<Mesh> bodyMesh );
-    QSharedPointer<Object> getBodyObject() const;
-    void setBodyTexture( const QString &filename, size_t index );
+    void setModel( QSharedPointer<ProjectModel> newModel );
 
-    QSharedPointer<Object> getCollisionBodyObject() const;
-    std::optional<Model> getBodyCollisionModel() const;
-
-    std::optional<Model> getWheelCollisionModel() const;
-    QSharedPointer<Object> getLeftSteerWheel() const;
-    QSharedPointer<Object> getRightSteerWheel() const;
-    QSharedPointer<Object> getLeftEngWheel() const;
-    QSharedPointer<Object> getRightEngWheel() const;
-
-    void setWheelCollision( const Model& model );
-
-    QSharedPointer<Scene> getScene();
-    Renderer& getRenderer();
 private:
     QSharedPointer<Scene> m_scene;
     Renderer m_renderer;
@@ -64,10 +55,14 @@ private:
     QSharedPointer<Object> m_leftEngWheel;
     QSharedPointer<Object> m_rightEngWheel;
 
+    QSharedPointer<Camera> m_camera;
+
     QPoint leftClickPos;
     bool leftPressed;
     QPoint rightClickPos;
     bool rightPressed;
+
+    QSharedPointer<ProjectModel> m_model;
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

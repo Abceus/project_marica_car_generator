@@ -2,6 +2,7 @@
 
 #include "drawable.h"
 #include "resources/model.h"
+#include "resources/resource_pointer.h"
 
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
@@ -10,13 +11,9 @@
 class WireframeMesh : public Drawable
 {
 public:
-    WireframeMesh( Model model, QColor color = QColor( 0, 0, 0, 255 ) );
-    Model getModel();
-    void draw( const RenderInfo& renderInfo ) override;
+    WireframeMesh( ResourcePointer<Model> model, QColor color = QColor( 0, 0, 0, 255 ) );
+    QVector<DrawBuffer> getDrawBuffer() const override;
 private:
-    QOpenGLVertexArrayObject m_VAO;
-    QOpenGLBuffer m_VBO, m_EBO;
-    GLsizei m_VAOsize;
-    Model m_model;
+    QVector<DrawBuffer> m_submeshes;
     QColor m_color;
 };

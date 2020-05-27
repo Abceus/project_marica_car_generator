@@ -7,10 +7,16 @@
 #include "resources/model.h"
 #include "resources/unanimation.h"
 
-Model Model::readPSK( const QString &filename )
+Model::Model(const Model &copy)
 {
-    auto newModel = Model();
+    vertices = copy.vertices;
+    indices = copy.indices;
+    materials = copy.materials;
+    VAOsize = copy.VAOsize;
+}
 
+std::optional<Model> Model::readPSK( const QString &filename )
+{
     VChunkHeader GeneralHeader{};
     VChunkHeader PointsHeader{};
     std::vector<VPoint> PointsData;
@@ -25,7 +31,9 @@ Model Model::readPSK( const QString &filename )
 
     QFile file( filename );
     if ( !file.open( QIODevice::ReadOnly ) )
-        return newModel;
+        return std::nullopt;
+
+    auto newModel = Model();
 
     file.read( reinterpret_cast<char*>( &GeneralHeader ), sizeof( VChunkHeader ) );
     qDebug() << GeneralHeader.ChunkID << " " << GeneralHeader.DataCount << " " << GeneralHeader.DataSize << " " << GeneralHeader.TypeFlags;

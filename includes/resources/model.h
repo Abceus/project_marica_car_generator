@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <optional>
 
 #ifdef _WIN32
 #define NOMINMAX
@@ -25,9 +26,11 @@ struct Indice
 
 struct Model
 {
+    Model() = default;
+    Model( const Model& copy );
     std::vector<Vertex> vertices;
     std::vector<Indice> indices;
-    static Model readPSK( const QString& filename );
+    static std::optional<Model> readPSK( const QString& filename );
     std::vector<QString> materials;
-    unsigned VAOsize;
+    unsigned VAOsize = 0;
 };

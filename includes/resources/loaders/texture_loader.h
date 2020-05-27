@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QImage>
+#include <QOpenGLTexture>
 
 #include "resources/loaders/loader.h"
 
-class TextureLoader : public ILoader<QImage>
+class TextureLoader : public ILoader<QOpenGLTexture>
 {
 public:
-    QImage* load( const QString& path ) override;
-    void remove( QImage* path ) override;
+    QOpenGLTexture* load( const QString& path ) override;
+    void remove( QOpenGLTexture* object ) override;
 };

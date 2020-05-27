@@ -61,6 +61,10 @@ SOURCES += sources/main.cpp\
     sources/impl_errorsystem.cpp \
     sources/mainwindow.cpp \
     sources/mainopenglwidget.cpp \
+    sources/project_model.cpp \
+    sources/render_system/batching.cpp \
+    sources/resources/loaders/model_loader.cpp \
+    sources/resources/loaders/texture_loader.cpp \
     sources/resources/model.cpp \
     sources/render_system/scene.cpp \
     sources/resources/resource_manager.cpp \
@@ -76,19 +80,26 @@ SOURCES += sources/main.cpp\
     sources/updatable.cpp \
     sources/render_system/renderer.cpp \
     sources/render_system/wireframe.cpp \
-    sources/render_system/aabb.cpp \
     sources/render_system/box.cpp \
     sources/vector3d.cpp \
     sources/render_system/camera.cpp \
-    sources/resources/loaders/texture_loader.cpp \
-    sources/resources/loaders/file_loader.cpp
+    sources/resources/loaders/image_loader.cpp \
+    sources/resources/loaders/file_loader.cpp \
+    ui/edit_widget.cpp
 
 HEADERS  += includes/mainwindow.h \
-    sources/errorsystem.h \
-    sources/impl_errorsystem.h \
+    includes/project_config.h \
+    includes/project_model.h \
+    includes/render_system/batching.h \
+    includes/render_system/material.h \
+    includes/resources/loaders/image_loader.h \
+    includes/resources/loaders/model_loader.h \
+    includes/errorsystem.h \
+    includes/impl_errorsystem.h \
     includes/mainopenglwidget.h \
     includes/render_system/scene.h \
     includes/resources/loaders/loader.h \
+    includes/resources/loaders/texture_loader.h \
     includes/resources/model.h \
     includes/resources/resource_manager.h \
     includes/resources/resource_pointer.h \
@@ -100,18 +111,15 @@ HEADERS  += includes/mainwindow.h \
     includes/grid.h \
     includes/render_system/scene_node.h \
     includes/render_system/drawable.h \
-    includes/render_system/render_info.h \
     includes/updatable.h \
     includes/render_system/renderer.h \
     includes/render_system/wireframe.h \
-    includes/render_system/render_node.h \
-    includes/render_system/aabb.h \
-    includes/render_system/face.h \
     includes/render_system/box.h \
     includes/vector3d.h \
     includes/render_system/camera.h \
-    includes/resources/loaders/texture_loader.h \
-    sources/resources/loaders/file_loader.h
+    includes/version.h \
+    includes/resources/loaders/file_loader.h \
+    ui/edit_widget.h
 
 equals(WITHOUT_SIMULATION, 0) {
     SOURCES += sources/openglsimulationwidget.cpp \
@@ -123,7 +131,8 @@ equals(WITHOUT_SIMULATION, 0) {
         includes/physics/physicworld.h
 }
 
-FORMS    += ui/mainwindow.ui
+FORMS    += ui/mainwindow.ui \
+    ui/edit_widget.ui
 
 DISTFILES += \
     resources/shaders/colorfragmentshader.frag \

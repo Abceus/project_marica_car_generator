@@ -33,10 +33,10 @@ void ImplErrorSystem::update()
     {
         if(error.critical)
         {
-            QMessageBox::critical(m_parent, "Error", QString::fromStdString(error.message));
+//            QMessageBox::critical(m_parent, "Error", QString::fromStdString(error.message));
             if(m_criticalCallback)
             {
-               m_criticalCallback();
+//               m_criticalCallback();
             }
         } else
         {
