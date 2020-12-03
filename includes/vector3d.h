@@ -34,6 +34,7 @@ public:
 #endif
 
     friend Vector3D operator +(Vector3D const &v1, Vector3D const &v2);
+    friend Vector3D operator -(Vector3D const &v1, Vector3D const &v2);
     friend Vector3D operator *(Vector3D const &v1, Vector3D const &v2);
 
     friend Vector3D operator +(Vector3D const &v1, QVector3D const &v2);

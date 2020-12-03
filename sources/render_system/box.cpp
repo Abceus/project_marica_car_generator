@@ -41,7 +41,7 @@ Box::Box( Vector3D size, QColor color )
     };
 }
 
-QVector<DrawBuffer> Box::getDrawBuffer() const
+DrawBuffers Box::getDrawBuffers() const
 {
-    return QVector<DrawBuffer>();
+    return DrawBuffers();
 }

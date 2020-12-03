@@ -10,9 +10,8 @@
 Model::Model(const Model &copy)
 {
     vertices = copy.vertices;
-    indices = copy.indices;
+    triangles = copy.triangles;
     materials = copy.materials;
-    VAOsize = copy.VAOsize;
 }
 
 std::optional<Model> Model::readPSK( const QString &filename )
@@ -76,13 +75,13 @@ std::optional<Model> Model::readPSK( const QString &filename )
         newModel.vertices[i].MaterialIndex = WedgesData[i].MatIndex;
     }
 
-    newModel.indices.resize( static_cast<size_t>( FacesHeader.DataCount ) );
+    newModel.triangles.resize( static_cast<size_t>( FacesHeader.DataCount ) );
 
     for( size_t i=0; i<FacesHeader.DataCount; i++ )
     {
         for( size_t j=0; j<3u; j++ )
         {
-            newModel.indices[i].vertexes[j] = FacesData[i].WedgeIndex[j];
+            newModel.triangles[i].vertexes[j] = FacesData[i].WedgeIndex[j];
         }
     }
 
@@ -90,6 +89,5 @@ std::optional<Model> Model::readPSK( const QString &filename )
     {
         newModel.materials.emplace_back( QString( "./" ) + QString( MaterialsData[i].MaterialName ) );
     }
-    newModel.VAOsize = FacesHeader.DataCount * 3u;
     return newModel;
 }

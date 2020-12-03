@@ -12,25 +12,25 @@
 
 #include <QString>
 
-struct Vertex
-{
-    GLfloat X, Y, Z;
-    GLfloat U, V;
-    GLint MaterialIndex;
-};
-
-struct Indice
-{
-    GLuint vertexes[3];
-};
 
 struct Model
 {
+    struct Vertex
+    {
+        GLfloat X, Y, Z;
+        GLfloat U, V;
+        GLint MaterialIndex;
+    };
+
+    struct Triangle
+    {
+        GLuint vertexes[3];
+    };
+
     Model() = default;
     Model( const Model& copy );
     std::vector<Vertex> vertices;
-    std::vector<Indice> indices;
+    std::vector<Triangle> triangles;
     static std::optional<Model> readPSK( const QString& filename );
     std::vector<QString> materials;
-    unsigned VAOsize = 0;
 };

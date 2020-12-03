@@ -23,6 +23,7 @@
 #include "render_system/scene.h"
 #include "object.h"
 #include "render_system/renderer.h"
+#include "render_system/wireframe.h"
 #include "project_model.h"
 
 class MainOpenglWidget :public QOpenGLWidget
@@ -30,8 +31,8 @@ class MainOpenglWidget :public QOpenGLWidget
     Q_OBJECT
 public slots:
     void changeMeshModel( ResourcePointer<Model> model );
-    void changeBodyModel( ResourcePointer<Model> model );
-    void changeTireModel( ResourcePointer<Model> model );
+    void changeBodyModel( CollisionObject model );
+    void changeTireModel( CollisionObject model );
 
     void changeSkin( size_t index, ResourcePointer<QImage> texture );
 public:
@@ -47,13 +48,13 @@ public:
 private:
     QSharedPointer<Scene> m_scene;
     Renderer m_renderer;
-    QSharedPointer<Object> m_body;
-    QSharedPointer<Object> m_collisionBody;
+    Object m_body;
+    Object m_collisionBody;
 
-    QSharedPointer<Object> m_leftSteerWheel;
-    QSharedPointer<Object> m_rightSteerWheel;
-    QSharedPointer<Object> m_leftEngWheel;
-    QSharedPointer<Object> m_rightEngWheel;
+    Object m_leftSteerWheel;
+    Object m_rightSteerWheel;
+    Object m_leftEngWheel;
+    Object m_rightEngWheel;
 
     QSharedPointer<Camera> m_camera;
 

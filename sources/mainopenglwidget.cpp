@@ -17,15 +17,15 @@ MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     setCursor( Qt::CrossCursor );
 
     auto node = m_scene->addNode( QSharedPointer<SceneNode>( new SceneNode ) );
-    m_body = QSharedPointer<Object>( new Object( nullptr, node ) );
-    m_collisionBody = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+    m_body = Object( nullptr, node );
+    m_collisionBody = Object( nullptr, m_body.getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ).staticCast<SceneNode>() );
 
-    m_leftSteerWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
-    m_rightSteerWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
-    m_leftEngWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
-    m_rightEngWheel = QSharedPointer<Object>( new Object( nullptr, m_body->getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ) ) );
+    m_leftSteerWheel = Object( nullptr, m_body.getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ).staticCast<SceneNode>() );
+    m_rightSteerWheel = Object( nullptr, m_body.getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ).staticCast<SceneNode>() );
+    m_leftEngWheel = Object( nullptr, m_body.getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ).staticCast<SceneNode>() );
+    m_rightEngWheel = Object( nullptr, m_body.getNode()->addChild( QSharedPointer<SceneNode>( new SceneNode ) ).staticCast<SceneNode>() );
 
-//    m_body->getNode()->setLocation(QVector3D(0.0f, -150.0f, -400.0f));
+//    m_body.getNode()->setLocation(QVector3D(0.0f, -150.0f, -400.0f));
 //    m_body->getNode()->setRotation(Vector3D(0.0f, 0.0f, 90.0f));
 
     m_camera = QSharedPointer<Camera>( new Camera );
@@ -111,34 +111,34 @@ void MainOpenglWidget::changeMeshModel( ResourcePointer<Model> model )
 {
     makeCurrent();
 
-    auto drawable = m_renderer.makeDrawable<Mesh>( model );
-    m_body->setDrawable( drawable.staticCast<Mesh>() );
+    m_body.setDrawable( QSharedPointer<Mesh>( new Mesh( model ) ) );
 }
 
-void MainOpenglWidget::changeBodyModel( ResourcePointer<Model> model )
+void MainOpenglWidget::changeBodyModel( CollisionObject model )
 {
     makeCurrent();
 
-    auto drawable = m_renderer.makeDrawable<WireframeMesh>( model );
-    m_collisionBody->setDrawable( drawable.staticCast<WireframeMesh>() );
+    m_collisionBody.setDrawable( m_collisionBody.getNode()->addChild( QSharedPointer<WireframeMesh>( new WireframeMesh( model.model ) ) ) );
 }
 
-void MainOpenglWidget::changeTireModel( ResourcePointer<Model> model )
+void MainOpenglWidget::changeTireModel( CollisionObject model )
 {
     makeCurrent();
 
-    auto drawable = m_renderer.makeDrawable<WireframeMesh>( model );
-    m_leftSteerWheel->setDrawable( drawable.staticCast<WireframeMesh>() );
-    m_rightSteerWheel->setDrawable( drawable.staticCast<WireframeMesh>() );
-    m_leftEngWheel->setDrawable( drawable.staticCast<WireframeMesh>() );
-    m_rightEngWheel->setDrawable( drawable.staticCast<WireframeMesh>() );
+    m_leftSteerWheel.setDrawable( m_leftSteerWheel.getNode()->addChild( QSharedPointer<WireframeMesh>( new WireframeMesh( model.model ) ) ) );
+    m_rightSteerWheel.setDrawable( m_rightSteerWheel.getNode()->addChild( QSharedPointer<WireframeMesh>( new WireframeMesh( model.model ) ) ) );
+    m_rightSteerWheel.setDrawable( m_rightSteerWheel.getNode()->addChild( QSharedPointer<WireframeMesh>( new WireframeMesh( model.model ) ) ) );
+    m_rightEngWheel.setDrawable( m_rightEngWheel.getNode()->addChild( QSharedPointer<WireframeMesh>( new WireframeMesh( model.model ) ) ) );
 }
 
 void MainOpenglWidget::changeSkin( size_t index, ResourcePointer<QImage> texture )
 {
-    Material material;
-    material.texture = ResourceManager::Instance().getTextureManager().get(texture.getPath());
-    m_body->getDrawable().staticCast<Mesh>()->setMaterial( index, material );
+    if(m_body.getDrawable())
+    {
+        Material material;
+        material.texture = ResourceManager::Instance().getTextureManager().get(texture.getPath());
+        m_body.getDrawable().staticCast<Mesh>()->setMaterial( index, material );
+    }
 }
 
 void MainOpenglWidget::setModel( QSharedPointer<ProjectModel> newModel )

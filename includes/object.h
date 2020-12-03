@@ -8,7 +8,7 @@
 class Object
 {
 public:
-    Object( QSharedPointer<Drawable> model, QSharedPointer<SceneNode> node );
+    Object( QSharedPointer<Drawable> model = nullptr, QSharedPointer<SceneNode> node = nullptr );
     ~Object() = default;
 
     QSharedPointer<SceneNode> getNode();

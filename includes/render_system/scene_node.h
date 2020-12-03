@@ -9,50 +9,53 @@
 #include "drawable.h"
 #include "vector3d.h"
 
-class SceneNode
+class SceneNode : public Drawable
 {
 public:
     SceneNode();
+    ~SceneNode() = default;
 
-    Vector3D getLocation() const;
-    Vector3D getOriginLocation() const;
+    Vector3D getLocation() override;
+    Vector3D getOriginLocation() const override;
     void setLocation( const Vector3D& location );
 
-    Vector3D getRotation() const;
-    Vector3D getOriginRotation() const;
+    Vector3D getRotation() const override;
+    Vector3D getOriginRotation() const override;
 //    Vector3D getParentRotation() const;
     void setRotation( const Vector3D& rotation );
 
-    Scale3D getScale() const;
+    Scale3D getScale() const override;
+    Scale3D getOriginScale() const override;
     void setScale( const Scale3D& scale );
     void setScale( float scale );
 
-    void setParent( SceneNode* parent );
+    void setParent( SceneNode* parent ) override;
 
-    QSharedPointer<SceneNode> addChild( QSharedPointer<SceneNode> newChild );
-    void removeChild( SceneNode* removedChild );
-    void removeChild( QSharedPointer<SceneNode> removedChild );
-
-    QSharedPointer<Drawable> addDrawable( QSharedPointer<Drawable> newDrawable );
-    void removeDrawable( Drawable* removeDrawable );
+    QSharedPointer<Drawable> addChild( QSharedPointer<Drawable> newChild );
+    void removeChild( Drawable* removedChild );
+    void removeChild( QSharedPointer<Drawable> removedChild );
 
     bool isEmpty() const;
     void clear();
 
-    QVector<QSharedPointer<SceneNode>>::ConstIterator begin();
-    QVector<QSharedPointer<SceneNode>>::ConstIterator end();
+    QVector<QSharedPointer<Drawable>>::ConstIterator begin();
+    QVector<QSharedPointer<Drawable>>::ConstIterator end();
 
-    QVector<QSharedPointer<Drawable>>::ConstIterator drawableBegin();
-    QVector<QSharedPointer<Drawable>>::ConstIterator drawableEnd();
+    QMatrix4x4 getOriginMatrix() const override;
+    QMatrix4x4 getMatrix() const override;
+    
+    DrawBuffers getDrawBuffers() const override;
 
-    QMatrix4x4 getOriginMatrix() const;
-    QMatrix4x4 getMatrix() const;
+    void updateMatrix();
+    void updateBuffer();
 
 private:
     Vector3D m_location;
     Vector3D m_rotation;
     Scale3D m_scale;
-    SceneNode* m_parent;
-    QVector<QSharedPointer<SceneNode>> m_childrens;
-    QVector<QSharedPointer<Drawable>> m_drawables;
+    QVector<QSharedPointer<Drawable>> m_childrens;
+    mutable QMatrix4x4 m_cachedMatrix;
+    mutable DrawBuffers m_cachedBuffer;
+    mutable bool m_needMatrixUpdate;
+    mutable bool m_needBufferUpdate;
 };

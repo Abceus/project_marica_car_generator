@@ -11,7 +11,7 @@ PhysObject::PhysObject( QSharedPointer<Drawable> drawable, QSharedPointer<SceneN
 //    {
 //        static_cast<btConvexHullShape *>( colShape.get())->addPoint( btVector3( vert.X, vert.Y, vert.Z ) );
 //    }
-    auto indices = physModel.indices;
+    auto indices = physModel.triangles;
     for( const auto& indice: indices )
     {
         for( const auto& index: indice.vertexes )

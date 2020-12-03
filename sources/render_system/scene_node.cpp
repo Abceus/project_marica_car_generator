@@ -1,19 +1,43 @@
 #include "render_system/scene_node.h"
+#include "render_system/batching.h"
 
 #include <algorithm>
 #include <QtMath>
 
 SceneNode::SceneNode()
-    : m_location()
+    : Drawable()
+    , m_location()
     , m_rotation()
     , m_scale( 1.0f, 1.0f, 1.0f )
-    , m_parent(nullptr)
-    , m_drawables()
+    , m_needMatrixUpdate(true)
+    , m_needBufferUpdate(true)
 {
 
 }
 
-Vector3D SceneNode::getLocation() const
+void SceneNode::updateMatrix()
+{
+    m_needMatrixUpdate = true;
+    for(const auto& child: m_childrens)
+    {
+        auto sceneNodeChild = child.staticCast<SceneNode>();
+        if(sceneNodeChild)
+        {
+            sceneNodeChild->updateMatrix();
+        }
+    }
+}
+
+void SceneNode::updateBuffer()
+{
+    m_needBufferUpdate = true;
+    if(m_parent)
+    {
+        m_parent->updateBuffer();
+    }
+}
+
+Vector3D SceneNode::getLocation()
 {
     return getMatrix() * QVector3D();
 }
@@ -26,13 +50,15 @@ Vector3D SceneNode::getOriginLocation() const
 void SceneNode::setLocation(const Vector3D &location)
 {
     m_location = location;
+    updateMatrix();
 }
 
 Vector3D SceneNode::getRotation() const
 {
-    if( m_parent )
+    auto parentNode = static_cast<SceneNode*>(m_parent);
+    if( parentNode )
     {
-        return m_rotation + m_parent->getRotation();
+        return m_rotation + parentNode->getRotation();
     }
     return m_rotation;
 }
@@ -54,25 +80,34 @@ Vector3D SceneNode::getOriginRotation() const
 void SceneNode::setRotation(const Vector3D &rotation)
 {
     m_rotation = rotation;
+    updateMatrix();
 }
 
 Scale3D SceneNode::getScale() const
 {
-    if( m_parent )
+    auto parentNode = static_cast<SceneNode*>(m_parent);
+    if( parentNode )
     {
-        return m_scale * m_parent->getScale();
+        return m_scale * parentNode->getScale();
     }
+    return m_scale;
+}
+
+Scale3D SceneNode::getOriginScale() const
+{
     return m_scale;
 }
 
 void SceneNode::setScale(const Scale3D &scale)
 {
     m_scale = scale;
+    updateMatrix();
 }
 
 void SceneNode::setScale(float scale)
 {
     m_scale = { scale, scale, scale };
+    updateMatrix();
 }
 
 void SceneNode::setParent(SceneNode *parent)
@@ -88,19 +123,21 @@ void SceneNode::setParent(SceneNode *parent)
     }
 
     m_parent = parent;
+    updateMatrix();
 }
 
-QSharedPointer<SceneNode> SceneNode::addChild(QSharedPointer<SceneNode> newChild)
+QSharedPointer<Drawable> SceneNode::addChild(QSharedPointer<Drawable> newChild)
 {
     if( !m_childrens.contains(newChild) )
     {
         m_childrens.append(newChild);
         newChild->setParent(this);
+        updateBuffer();
     }
     return newChild;
 }
 
-void SceneNode::removeChild(SceneNode *removeChild)
+void SceneNode::removeChild(Drawable *removeChild)
 {
     auto found = std::find(m_childrens.begin(), m_childrens.end(), removeChild);
     if( found != m_childrens.end() )
@@ -108,72 +145,35 @@ void SceneNode::removeChild(SceneNode *removeChild)
         m_childrens.erase( found );
         removeChild->setParent(nullptr);
     }
+    updateBuffer();
 }
 
-void SceneNode::removeChild( QSharedPointer<SceneNode> removedChild )
+void SceneNode::removeChild( QSharedPointer<Drawable> removedChild )
 {
     removeChild(removedChild.get());
 }
 
-QSharedPointer<Drawable> SceneNode::addDrawable(QSharedPointer<Drawable> newDrawable)
-{
-    if( !m_drawables.contains(newDrawable) )
-    {
-        m_drawables.append(newDrawable);
-    }
-    return newDrawable;
-}
-
-void SceneNode::removeDrawable(Drawable *removeDrawable)
-{
-    auto found = std::find( m_drawables.begin(), m_drawables.end(), removeDrawable );
-    if( found != m_drawables.end() )
-    {
-        m_drawables.erase(found);
-    }
-}
-
 bool SceneNode::isEmpty() const
 {
-    if( !m_drawables.empty() )
-    {
-        return false;
-    }
-
-    for( const auto& child: m_childrens )
-    {
-        if( !child->isEmpty() )
-        {
-            return false;
-        }
-    }
-    return true;
+    return m_childrens.empty();
 }
 
 void SceneNode::clear()
 {
-    m_childrens.clear();
-    m_drawables.clear();
+    for(auto rbeginIt = m_childrens.rbegin(); rbeginIt != m_childrens.rend(); rbeginIt++)
+    {
+        removeChild(rbeginIt->get());
+    }
 }
 
-QVector<QSharedPointer<SceneNode>>::ConstIterator SceneNode::begin()
+QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::begin()
 {
     return m_childrens.begin();
 }
 
-QVector<QSharedPointer<SceneNode>>::ConstIterator SceneNode::end()
+QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::end()
 {
     return m_childrens.end();
-}
-
-QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableBegin()
-{
-    return m_drawables.begin();
-}
-
-QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableEnd()
-{
-    return m_drawables.end();
 }
 
 QMatrix4x4 SceneNode::getOriginMatrix() const
@@ -187,9 +187,32 @@ QMatrix4x4 SceneNode::getOriginMatrix() const
 
 QMatrix4x4 SceneNode::getMatrix() const
 {
-    if( m_parent )
+    if( m_needMatrixUpdate )
     {
-        return getOriginMatrix() * m_parent->getMatrix();
+        if( m_parent )
+        {
+            m_cachedMatrix = m_parent->getMatrix() * getOriginMatrix();
+        }
+        else
+        {
+            m_cachedMatrix = getOriginMatrix();
+        }
+        m_needMatrixUpdate = false;
     }
-    return getOriginMatrix();
+    return m_cachedMatrix;
+}
+
+DrawBuffers SceneNode::getDrawBuffers() const
+{
+    if( m_needBufferUpdate )
+    {
+        m_cachedBuffer.clear();
+        for(const auto& node: m_childrens)
+        {
+            m_cachedBuffer = m_cachedBuffer + node->getDrawBuffers() * getOriginMatrix();
+        }
+        m_needBufferUpdate = false;
+    }
+
+    return m_cachedBuffer;
 }

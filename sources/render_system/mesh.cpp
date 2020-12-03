@@ -34,18 +34,18 @@ Mesh::Mesh( ResourcePointer<Model> model )
         submeshe.elementType = ElementsType::PT_Vertex;
     }
 
-    for( size_t i = 0; i < model->indices.size(); i++ )
+    for( size_t i = 0; i < model->triangles.size(); i++ )
     {
-        auto materialIndex = static_cast<size_t>( model->vertices[model->indices[i].vertexes[0]].MaterialIndex );
+        auto materialIndex = static_cast<size_t>( model->vertices[model->triangles[i].vertexes[0]].MaterialIndex );
         for( auto j = 0; j < 3; j++ )
         {
             auto& submesh = m_submeshes[materialIndex];
-            submesh.indices.append( newVertIndexes[model->indices[i].vertexes[j]] );
+            submesh.indices.append( newVertIndexes[model->triangles[i].vertexes[j]] );
         }
     }
 }
 
-QVector<DrawBuffer> Mesh::getDrawBuffer() const
+DrawBuffers Mesh::getDrawBuffers() const
 {
     return m_submeshes;
 }

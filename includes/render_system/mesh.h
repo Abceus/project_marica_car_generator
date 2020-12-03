@@ -32,9 +32,9 @@ public:
     Mesh();
     Mesh( ResourcePointer<Model> model );
     ~Mesh() = default;
-    QVector<DrawBuffer> getDrawBuffer() const override;
+    DrawBuffers getDrawBuffers() const override;
 
     void setMaterial( size_t index, Material newMaterial );
 private:
-    QVector<DrawBuffer> m_submeshes;
+    DrawBuffers m_submeshes;
 };

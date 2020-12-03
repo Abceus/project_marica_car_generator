@@ -32,36 +32,50 @@ void Scene::drawNode( Batching& batching, QSharedPointer<SceneNode> node, QMatri
 {
     if(node->isEmpty()) return;
 
-    auto currentMatrix = matrix * node->getOriginMatrix();
-//    auto currentMatrix = matrix * node->getMatrix();
-
-    for(auto i = node->drawableBegin(); i != node->drawableEnd(); i++)
+    if(node->getEnable())
     {
-        if((*i)->getEnable())
+        auto buffers = node->getDrawBuffers();
+
+        for(auto& buffer: buffers)
         {
-            auto buffers = (*i)->getDrawBuffer();
-
-            for(auto& buffer: buffers)
+            for(auto& vertex: buffer.vertices)
             {
-                for(auto& vertex: buffer.vertices)
-                {
-//                    vertex = { currentMatrix.map(vertex.coords), vertex.textureCoords };
-//                    vertex = { currentMatrix * vertex.coords, vertex.textureCoords };
-                    vertex = { currentMatrix * vertex.coords, vertex.textureCoords };
-//                    std::cout << vertex.coords.x() << " " << vertex.coords.y() << " " << vertex.coords.z() << std::endl;
-                }
-
-                batching.addElements(buffer);
+                vertex.coords = matrix * vertex.coords;
             }
+            batching.addElements(buffer);
         }
     }
+
+//    auto currentMatrix = matrix * node->getOriginMatrix();
+////    auto currentMatrix = matrix * node->getMatrix();
+
+//    for(auto i = node->begin(); i != node->end(); i++)
+//    {
+//        if((*i)->getEnable())
+//        {
+//            auto buffers = (*i)->getDrawBuffers();
+
+//            for(auto& buffer: buffers)
+//            {
+////                for(auto& vertex: buffer.vertices)
+////                {
+//////                    vertex = { currentMatrix.map(vertex.coords), vertex.textureCoords };
+//////                    vertex = { currentMatrix * vertex.coords, vertex.textureCoords };
+////                    vertex = { currentMatrix * vertex.coords, vertex.textureCoords };
+//////                    std::cout << vertex.coords.x() << " " << vertex.coords.y() << " " << vertex.coords.z() << std::endl;
+////                }
+
+//                batching.addElements(buffer);
+//            }
+//        }
+//    }
 //    std::cout << "Node ended" << std::endl;
 
-    for(auto i = node->begin(); i != node->end(); i++)
-    {
-        drawNode(batching, *i, currentMatrix);
-//        drawNode(batching, *i, matrix);
-    }
+//    for(auto i = node->begin(); i != node->end(); i++)
+//    {
+//        drawNode(batching, i->staticCast<SceneNode>(), currentMatrix);
+////        drawNode(batching, *i, matrix);
+//    }
 }
 
 void Scene::resizeScreen(int w, int h)

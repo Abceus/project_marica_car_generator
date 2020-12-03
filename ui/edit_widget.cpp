@@ -227,7 +227,7 @@ void EditWidget::on_meshOpenButton_clicked()
 
 void EditWidget::on_collisionOpenButton_clicked()
 {
-    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.ASE)" ) );
     fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
     fileDialog.setFileMode( QFileDialog::ExistingFiles );
     fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );

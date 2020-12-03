@@ -57,10 +57,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += sources/main.cpp\
+    sources/collision_object.cpp \
+    sources/collision_parser.cpp \
     sources/errorsystem.cpp \
     sources/impl_errorsystem.cpp \
     sources/mainwindow.cpp \
     sources/mainopenglwidget.cpp \
+    sources/physics/shapes/box.cpp \
+    sources/physics/shapes/collection.cpp \
+    sources/physics/shapes/cylinder.cpp \
+    sources/physics/shapes/mesh.cpp \
+    sources/physics/shapes/offset.cpp \
+    sources/physics/shapes/sphere.cpp \
     sources/project_model.cpp \
     sources/render_system/batching.cpp \
     sources/resources/loaders/model_loader.cpp \
@@ -77,6 +85,7 @@ SOURCES += sources/main.cpp\
     sources/grid.cpp \
     sources/render_system/scene_node.cpp \
     sources/render_system/drawable.cpp \
+    sources/resources/wireframe_model.cpp \
     sources/updatable.cpp \
     sources/render_system/renderer.cpp \
     sources/render_system/wireframe.cpp \
@@ -88,6 +97,15 @@ SOURCES += sources/main.cpp\
     ui/edit_widget.cpp
 
 HEADERS  += includes/mainwindow.h \
+    includes/collision_object.h \
+    includes/collision_parser.h \
+    includes/physics/shapes/box.h \
+    includes/physics/shapes/collection.h \
+    includes/physics/shapes/cylinder.h \
+    includes/physics/shapes/mesh.h \
+    includes/physics/shapes/offset.h \
+    includes/physics/shapes/shape.h \
+    includes/physics/shapes/sphere.h \
     includes/project_config.h \
     includes/project_model.h \
     includes/render_system/batching.h \
@@ -111,6 +129,7 @@ HEADERS  += includes/mainwindow.h \
     includes/grid.h \
     includes/render_system/scene_node.h \
     includes/render_system/drawable.h \
+    includes/resources/wireframe_model.h \
     includes/updatable.h \
     includes/render_system/renderer.h \
     includes/render_system/wireframe.h \

@@ -5,6 +5,7 @@
 #include "resources/model.h"
 #include "resources/resource_pointer.h"
 #include "project_config.h"
+#include "collision_object.h"
 
 class ProjectModel : public QObject
 {
@@ -30,8 +31,8 @@ public:
     ProjectConfig getProjectConfig() const;
 signals:
     void bodyMeshChanged( ResourcePointer<Model> model );
-    void bodyCollisionChanged( ResourcePointer<Model> model );
-    void tireCollisionChanged( ResourcePointer<Model> model );
+    void bodyCollisionChanged( CollisionObject model );
+    void tireCollisionChanged( CollisionObject model );
 
     void bodyPathMeshChanged( const QString& path );
     void bodyPathCollisionChanged( const QString& path );
@@ -52,8 +53,8 @@ signals:
     void wheelsVerticalChanged( double value );
 private:
     ResourcePointer<Model> m_bodyModel;
-    ResourcePointer<Model> m_bodyCollision;
-    ResourcePointer<Model> m_tireCollision;
+    CollisionObject m_bodyCollision;
+    CollisionObject m_tireCollision;
 
     QVector<ResourcePointer<QImage>> m_skins;
 

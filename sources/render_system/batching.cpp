@@ -24,6 +24,41 @@ DrawBuffer operator+(DrawBuffer lhs, const DrawBuffer& rhs)
     return lhs;
 }
 
+DrawBuffer operator*(DrawBuffer lhs, const QMatrix4x4& rhs)
+{
+    for(auto& vert: lhs.vertices)
+    {
+        vert.coords = rhs * vert.coords;
+    }
+    return lhs;
+}
+
+DrawBuffers operator+(DrawBuffers lhs, const DrawBuffers& rhs)
+{
+    for(const auto& r: rhs)
+    {
+        auto found = lhs.indexOf(r);
+        if(found == -1)
+        {
+            lhs.append(r);
+        }
+        else
+        {
+            lhs[found] = lhs[found] + r;
+        }
+    }
+    return lhs;
+}
+
+DrawBuffers operator*(DrawBuffers lhs, const QMatrix4x4& rhs)
+{
+    for(auto& buffer: lhs)
+    {
+        buffer = buffer * rhs;
+    }
+    return lhs;
+}
+
 void Batching::init()
 {
     auto textureVertexShader = new QOpenGLShader( QOpenGLShader::Vertex );

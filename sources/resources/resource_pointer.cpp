@@ -2,6 +2,7 @@
 
 Counter::Counter(bool hasMaster)
     : m_createFinished(!hasMaster)
+    , m_hasMaster(hasMaster)
     , m_count(1)
 {
 
@@ -30,5 +31,10 @@ bool Counter::operator==(int other) const
 
 bool Counter::needRemove() const
 {
-    return m_createFinished && m_count == 1;
+    return m_createFinished && ((m_hasMaster && m_count == 1) || (!m_hasMaster && m_count == 0));
+}
+
+void Counter::unsetMaster()
+{
+    m_hasMaster = false;
 }

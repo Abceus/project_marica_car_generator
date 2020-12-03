@@ -21,8 +21,8 @@ public:
     void init();
     void draw( QSharedPointer<Scene> scene );
 
-    template<typename T, typename... Args>
-    QSharedPointer<T> makeDrawable( Args... args );
+//    template<typename T, typename... Args>
+//    QSharedPointer<T> makeDrawable( Args... args );
 
     QSharedPointer<Camera> getMainCamera() const;
     void setMainCamera( QSharedPointer<Camera> camera );
@@ -37,11 +37,11 @@ private:
     QSharedPointer<Camera> m_mainCamera;
 };
 
-template<typename T, typename... Args>
-QSharedPointer<T> Renderer::makeDrawable( Args... args )
-{
-    makeCurrent();
-    QSharedPointer<T> result( new T( args... ) );
-    done();
-    return result;
-}
+//template<typename T, typename... Args>
+//QSharedPointer<T> Renderer::makeDrawable( Args... args )
+//{
+//    makeCurrent();
+//    QSharedPointer<T> result( new T( args... ) );
+//    done();
+//    return result;
+//}

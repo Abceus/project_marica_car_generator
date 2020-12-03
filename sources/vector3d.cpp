@@ -84,6 +84,15 @@ Vector3D operator + (Vector3D const &v1, Vector3D const &v2)
     return result;
 }
 
+Vector3D operator - (Vector3D const &v1, Vector3D const &v2)
+{
+    Vector3D result;
+    result.setX( v1.x() - v2.x() );
+    result.setY( v1.y() - v2.y() );
+    result.setZ( v1.z() - v2.z() );
+    return result;
+}
+
 Vector3D operator * (Vector3D const &v1, Vector3D const &v2)
 {
     Vector3D result;

@@ -37,6 +37,11 @@ struct DrawBuffer
     void clear();
 };
 
+struct DrawBuffers : public QVector<DrawBuffer>{};
+
+DrawBuffers operator+(DrawBuffers lhs, const DrawBuffers& rhs);
+DrawBuffers operator*(DrawBuffers lhs, const QMatrix4x4& rhs);
+
 inline bool operator==(const DrawBuffer& lhs, const DrawBuffer& rhs)
 {
     return lhs.material.texture == rhs.material.texture && lhs.material.blendType == rhs.material.blendType && lhs.material.color == rhs.material.color &&
@@ -46,6 +51,7 @@ inline bool operator==(const DrawBuffer& lhs, const DrawBuffer& rhs)
 inline bool operator!=(const DrawBuffer& lhs, const DrawBuffer& rhs){ return !(lhs == rhs); }
 
 DrawBuffer operator+(DrawBuffer lhs, const DrawBuffer& rhs);
+DrawBuffer operator*(DrawBuffer lhs, const QMatrix4x4& rhs);
 
 class Batching
 {
@@ -55,8 +61,8 @@ public:
     void clear();
     void draw();
 private:
-    QVector<DrawBuffer> m_meshes;
-    QVector<DrawBuffer> m_transparentMeshes;
+    DrawBuffers m_meshes;
+    DrawBuffers m_transparentMeshes;
     DrawBuffer m_overlays;
     QSharedPointer<QOpenGLShaderProgram> m_textureShader;
     QSharedPointer<QOpenGLShaderProgram> m_lineShader;

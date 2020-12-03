@@ -26,7 +26,7 @@ void Object::setDrawable(QSharedPointer<Drawable> drawable)
 {
     if( m_drawable )
     {
-        m_node->removeDrawable( m_drawable.get() );
+        m_node->removeChild( m_drawable.get() );
     }
-    m_drawable = m_node->addDrawable( drawable );
+    m_drawable = m_node->addChild( drawable );
 }

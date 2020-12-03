@@ -11,7 +11,7 @@ class Box : public Drawable
 {
 public:
     Box( Vector3D size, QColor color = QColor( 0, 0, 0, 255 ) );
-    QVector<DrawBuffer> getDrawBuffer() const override;
+    DrawBuffers getDrawBuffers() const override;
 private:
     QColor m_color;
 };

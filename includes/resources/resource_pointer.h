@@ -22,9 +22,11 @@ public:
     Counter operator--(int);
     bool operator==(int other) const;
     bool needRemove() const;
+    void unsetMaster();
 private:
     bool m_createFinished;
     size_t m_count;
+    bool m_hasMaster;
 };
 
 template<typename T>
@@ -35,11 +37,13 @@ public:
     ~ResourcePointer();
     ResourcePointer( const ResourcePointer<T>& copy );
     ResourcePointer( ResourcePointer<T>&& copy );
-    ResourcePointer<T>& operator= ( const ResourcePointer<T>& copy );
-    ResourcePointer<T>& operator= ( ResourcePointer<T>&& copy );
+    ResourcePointer<T>& operator= ( ResourcePointer<T> copy );
+//    ResourcePointer<T>& operator= ( ResourcePointer<T>&& copy );
+    friend void swap(ResourcePointer<T>& first, ResourcePointer<T>& second);
     T* operator->();
     T* operator->() const;
     T *get();
+    T *get() const;
     QString getPath() const;
     void unsetMaster();
     bool operator== (ResourcePointer<T> rhs) const;
@@ -74,6 +78,17 @@ ResourcePointer<T>::ResourcePointer(IResourceMaster<T> *masterManager, T *resour
 }
 
 template<typename T>
+void swap(ResourcePointer<T>& first, ResourcePointer<T>& second)
+{
+    using std::swap;
+
+    swap(first.m_resource, second.m_resource);
+    swap(first.m_masterManager, second.m_masterManager);
+    swap(first.m_counter, second.m_counter);
+    swap(first.m_path, second.m_path);
+}
+
+template<typename T>
 T *ResourcePointer<T>::operator->()
 {
     return m_resource;
@@ -92,6 +107,12 @@ T *ResourcePointer<T>::get()
 }
 
 template<typename T>
+T *ResourcePointer<T>::get() const
+{
+    return m_resource;
+}
+
+template<typename T>
 QString ResourcePointer<T>::getPath() const
 {
     return m_path;
@@ -104,6 +125,7 @@ void ResourcePointer<T>::unsetMaster()
     {
         m_masterManager->value = nullptr;
     }
+    m_counter->unsetMaster();
 }
 
 template<typename T>
@@ -127,26 +149,25 @@ ResourcePointer<T>::operator bool() const
 template<typename T>
 ResourcePointer<T>::~ResourcePointer()
 {
-    if(!m_resource)
+    if(!m_counter)
     {
         return;
     }
     (*m_counter)--;
-    if(!m_masterManager->value)
+
+    if(m_counter->needRemove())
     {
-        if((*m_counter) == 0)
+        auto master = m_masterManager->value;
+        if(master)
         {
-//            delete m_resource;
-//            delete m_counter;
-//            delete m_masterManager;
-        }
-    } else
-    {
-        if(m_counter->needRemove())
-        {
-            auto master = m_masterManager->value;
             unsetMaster();
             master->remove(*this);
+        }
+        else
+        {
+            delete m_resource;
+            delete m_counter;
+            delete m_masterManager;
         }
     }
 }
@@ -159,46 +180,22 @@ ResourcePointer<T>::ResourcePointer( const ResourcePointer<T>& copy )
     m_masterManager = copy.m_masterManager;
     m_counter = copy.m_counter;
     m_path = copy.m_path;
-    (*m_counter)++;
+    if(m_counter)
+    {
+        (*m_counter)++;
+    }
 }
 
 template<typename T>
 ResourcePointer<T>::ResourcePointer( ResourcePointer<T>&& copy )
+    : ResourcePointer<T>()
 {
-    m_resource = copy.m_resource;
-    m_masterManager = copy.m_masterManager;
-    m_counter = copy.m_counter;
-    m_path = copy.m_path;
-    copy.m_resource = nullptr;
-    copy.m_masterManager = nullptr;
-    copy.m_counter = nullptr;
-    copy.m_path = "";
+    swap(*this, copy);
 }
 
 template<typename T>
-ResourcePointer<T>& ResourcePointer<T>::operator= ( const ResourcePointer<T>& copy )
+ResourcePointer<T>& ResourcePointer<T>::operator= ( ResourcePointer<T> copy )
 {
-    if( m_resource == copy.m_resource )
-    {
-        return *this;
-    }
-    m_resource = copy.m_resource;
-    m_masterManager = copy.m_masterManager;
-    m_counter = copy.m_counter;
-    m_path = copy.m_path;
-    return *this;
-}
-
-template<typename T>
-ResourcePointer<T>& ResourcePointer<T>::operator= ( ResourcePointer<T>&& copy )
-{
-    m_resource = copy.m_resource;
-    m_masterManager = copy.m_masterManager;
-    m_counter = copy.m_counter;
-    m_path = copy.m_path;
-    copy.m_resource = nullptr;
-    copy.m_masterManager = nullptr;
-    copy.m_counter = nullptr;
-    copy.m_path = "";
+    swap(*this, copy);
     return *this;
 }

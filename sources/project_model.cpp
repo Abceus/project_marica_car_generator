@@ -1,6 +1,7 @@
 #include "project_model.h"
 #include "resources/resource_manager.h"
 
+
 void ProjectModel::init( const ProjectConfig& newConfig )
 {
     clearSkin();
@@ -45,10 +46,10 @@ void ProjectModel::changeBodyCollision( const QString& path )
 {
     if( path == m_projectConfig.bodyCollisionPath ) return;
 
-    auto model = ResourceManager::Instance().getModelManager().get(path);
+    auto model = CollisionObject::readASE(path);
     if( model )
     {
-        m_bodyCollision = model;
+        m_bodyCollision = model.value();
 
         m_projectConfig.bodyCollisionPath = path;
 
@@ -61,10 +62,10 @@ void ProjectModel::changeTireCollision( const QString& path )
 {
     if( path == m_projectConfig.tireCollosionPath ) return;
 
-    auto model = ResourceManager::Instance().getModelManager().get(path);
+    auto model = CollisionObject::readASE(path);
     if( model )
     {
-        m_tireCollision = model;
+        m_tireCollision = model.value();
 
         m_projectConfig.tireCollosionPath = path;
 
