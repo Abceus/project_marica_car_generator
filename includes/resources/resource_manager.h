@@ -9,9 +9,16 @@ class ResourcesHolder
 public:
     template<typename... Args>
     QSharedPointer<Value> get( const Key& key, Args&&... args );
+
+    void setDefaultResource(const QSharedPointer<Value>& newDefaultResource);
+    QSharedPointer<Value> getDefaultResource() const;
 private:
     std::map<Key, QWeakPointer<Value>> resources;
+    QSharedPointer<Value> defaultResource;
 };
+
+template<typename Value>
+using FileResourceHolder = ResourcesHolder<QString, Value>;
 
 class ResourceManager
 {
@@ -20,11 +27,12 @@ public:
     ResourceManager( const ResourceManager& ) = delete;
     ResourceManager& operator= ( const ResourceManager& ) = delete;
 
-    template<typename Key, typename Value, typename... Args>
-    QSharedPointer<Value> get( const Key& key, Args&&... args );
+    FileResourceHolder<QImage>& getImageManager();
 private:
-    ResourceManager() = default;
+    ResourceManager();
     ~ResourceManager() = default;
+
+    FileResourceHolder<QImage> imageManager;
 };
 
 template<typename Key, typename Value>
@@ -41,9 +49,14 @@ QSharedPointer<Value> ResourcesHolder<Key, Value>::get( const Key& key, Args&&..
     return found->second.lock();
 }
 
-template<typename Key, typename Value, typename... Args>
-QSharedPointer<Value> ResourceManager::get( const Key& key, Args&&... args )
+template<typename Key, typename Value>
+void ResourcesHolder<Key, Value>::setDefaultResource(const QSharedPointer<Value>& newDefaultResource) 
 {
-    static ResourcesHolder<Key, Value> manager;
-    return manager.get(key, std::forward(args)...);
+    defaultResource = newDefaultResource;
+}
+
+template<typename Key, typename Value>
+QSharedPointer<Value> ResourcesHolder<Key, Value>::getDefaultResource() const 
+{
+    return defaultResource;
 }

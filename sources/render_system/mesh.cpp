@@ -52,10 +52,10 @@ Mesh::Mesh( const Model& model )
 
     for( auto& material: model.materials )
     {
-        auto image = ResourceManager::Instance().get<QString, QImage>( material );
+        auto image = ResourceManager::Instance().getImageManager().get( material );
         if(image->isNull()) 
         {
-            image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+            image = ResourceManager::Instance().getImageManager().getDefaultResource();
         }
         addTexture(Renderer::getCurrentRenderer()->makeDrawable<QOpenGLTexture>(*image));
     }

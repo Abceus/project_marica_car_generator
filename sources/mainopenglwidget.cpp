@@ -106,10 +106,10 @@ void MainOpenglWidget::setBodyMesh(QSharedPointer<Mesh> bodyMesh)
 
 void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
 {
-    auto image = ResourceManager::Instance().get<QString, QImage>( filename );
+    auto image = ResourceManager::Instance().getImageManager().get( filename );
     if(image->isNull()) 
     {
-        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+        image = ResourceManager::Instance().getImageManager().getDefaultResource();
     }
     m_body->getDrawable().staticCast<Mesh>()->setTexture( m_renderer.makeDrawable<QOpenGLTexture>(*image), index );
 }
