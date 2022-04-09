@@ -3,6 +3,7 @@
 
 #include "mainopenglwidget.h"
 #include "render_system/wireframe.h"
+#include "resources/resource_manager.h"
 
 MainOpenglWidget::MainOpenglWidget( QWidget *parent )
     : QOpenGLWidget( parent )
@@ -90,7 +91,7 @@ void MainOpenglWidget::resizeGL( int w, int h )
 
 void MainOpenglWidget::setBodyMesh(QSharedPointer<Mesh> bodyMesh)
 {
-
+    m_body->setDrawable(bodyMesh);
 }
 
  QSharedPointer<Object> MainOpenglWidget::getBodyObject() const
@@ -105,12 +106,17 @@ void MainOpenglWidget::setBodyMesh(QSharedPointer<Mesh> bodyMesh)
 
 void MainOpenglWidget::setBodyTexture( const QString &filename, size_t index )
 {
-    m_body->getDraweable().staticCast<Mesh>()->setTexture( filename, index );
+    auto image = ResourceManager::Instance().get<QString, QImage>( filename );
+    if(image->isNull()) 
+    {
+        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+    }
+    m_body->getDrawable().staticCast<Mesh>()->setTexture( m_renderer.makeDrawable<QOpenGLTexture>(*image), index );
 }
 
 Model MainOpenglWidget::getBodyCollisionModel() const
 {
-    return m_collisionBody->getDraweable().staticCast<WireframeMesh>()->getModel();
+    return m_collisionBody->getDrawable().staticCast<WireframeMesh>()->getModel();
 }
 
 QSharedPointer<Scene> MainOpenglWidget::getScene()

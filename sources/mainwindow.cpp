@@ -1,6 +1,6 @@
 #include <QFileDialog>
-#include <QDir>
 #include <QSharedPointer>
+#include <qfileinfo.h>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -30,7 +30,7 @@ void MainWindow::on_meshOpenButton_clicked()
     //                                                QDir::currentPath(),
     //                                                tr( "PSK (*.psk)" ) );
 
-    QFileDialog fileDialog( this, tr("Open File"), QDir::currentPath(), tr( "PSK (*.psk)" ) );
+    QFileDialog fileDialog( this, tr("Open File"), lastMeshPath, tr( "PSK (*.psk)" ) );
     fileDialog.setAcceptMode( QFileDialog::AcceptOpen );
     fileDialog.setFileMode( QFileDialog::ExistingFiles );
     fileDialog.setOption( QFileDialog::DontUseNativeDialog, true );
@@ -44,7 +44,7 @@ void MainWindow::on_meshOpenButton_clicked()
         fileName = fileDialog.selectedFiles()[0];
     }
 
-    if( fileName != "" )
+    if( !fileName.isEmpty() )
     {
         auto model = Model::readPSK( fileName );
         size_t textureSize = model.materials.size();
@@ -68,6 +68,8 @@ void MainWindow::on_meshOpenButton_clicked()
         {
             this->addButtonToArrayLayout();
         }
+
+        lastMeshPath = QFileInfo(fileName).absoluteDir().path();
     }
 }
 
@@ -76,7 +78,7 @@ void MainWindow::on_startSimulationButton_clicked()
     if( simulationWidget.isHidden() && ui->mainOpenGLWidget->getBodyObject() )
     {
         simulationWidget.show();
-        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDraweable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
+        simulationWidget.prepare( ui->mainOpenGLWidget->getBodyObject()->getDrawable().staticCast<Mesh>()->getModel(), ui->mainOpenGLWidget->getBodyCollisionModel(), ui->mainOpenGLWidget->getBodyObject()->getNode() );
         hide();
     }
 }
@@ -91,7 +93,7 @@ void MainWindow::skinOpenButton_clicked(int i)
     if( ui->mainOpenGLWidget->getBodyObject() )
     {
         QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                        QDir::currentPath(),
+                                                        lastTexturePath,
                                                         tr( "Image (*.png *.xpm *.jpg)" ) );
 
         if( fileName != "" )
@@ -103,6 +105,8 @@ void MainWindow::skinOpenButton_clicked(int i)
             }
 
             dynamic_cast<QPushButton*>( ui->skinButtonArrayLayout->itemAt( i + 1 )->widget() )->setText( fileName );
+        
+            lastTexturePath = QFileInfo(fileName).absoluteDir().path();
         }
     }
 }
@@ -137,7 +141,7 @@ void MainWindow::addButtonToArrayLayout()
 void MainWindow::on_pushButton_2_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName( this, tr( "Open File" ),
-                                                    QDir::currentPath(),
+                                                    lastCollisionPath,
                                                     tr( "PSK (*.psk)" ) );
 
     if( fileName != "" )
@@ -151,5 +155,7 @@ void MainWindow::on_pushButton_2_clicked()
             fileName = "..." + fileName.right( 47 );
         }
         ui->pushButton_2->setText( fileName );
+
+        lastCollisionPath = QFileInfo(fileName).absoluteDir().path();
     }
 }

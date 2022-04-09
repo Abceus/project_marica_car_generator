@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <qopenglcontext.h>
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -34,8 +35,8 @@ public:
     void bindVAO();
     void releaseVAO();
     void bindTexture( size_t index );
-    void setTexture( QString filename, size_t index );
-    void addTexture( QString filename );
+    void setTexture( const QSharedPointer<QOpenGLTexture>& texture, size_t index );
+    void addTexture( const QSharedPointer<QOpenGLTexture>& texture );
     size_t getTexturesSize();
     GLsizei getVAOsize();
     size_t getTextureQueue( size_t index );
@@ -49,6 +50,6 @@ private:
     std::vector<std::pair<size_t, float>> textureQueue;
     GLsizei VAOsize;
     void sortTextures();
-    float averageAlpha( QImage image );
+    float averageAlpha( const QSharedPointer<QImage>& image );
     Model m_model;
 };

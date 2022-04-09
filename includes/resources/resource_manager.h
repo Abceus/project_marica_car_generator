@@ -1,25 +1,27 @@
 #pragma once
 
 #include <map>
+#include <QSharedPointer>
 
 template<typename Key, typename Value>
 class ResourcesHolder
 {
 public:
     template<typename... Args>
-    Value get( const Key& key, Args... args );
+    QSharedPointer<Value> get( const Key& key, Args&&... args );
 private:
-    std::map<Key, Value> resources;
+    std::map<Key, QWeakPointer<Value>> resources;
 };
 
 class ResourceManager
 {
 public:
     static ResourceManager& Instance();
-    ResourceManager( ResourceManager const& ) = delete;
-    ResourceManager& operator= ( ResourceManager const& ) = delete;
+    ResourceManager( const ResourceManager& ) = delete;
+    ResourceManager& operator= ( const ResourceManager& ) = delete;
+
     template<typename Key, typename Value, typename... Args>
-    Value get( const Key& key, Args... args );
+    QSharedPointer<Value> get( const Key& key, Args&&... args );
 private:
     ResourceManager() = default;
     ~ResourceManager() = default;
@@ -27,20 +29,21 @@ private:
 
 template<typename Key, typename Value>
 template<typename... Args>
-Value ResourcesHolder<Key, Value>::get( const Key& key, Args... args )
+QSharedPointer<Value> ResourcesHolder<Key, Value>::get( const Key& key, Args&&... args )
 {
     auto found = resources.find(key);
-    if(found == resources.end())
+    if(found == resources.end() || !found->second.lock())
     {
-        resources.emplace(key, Value(key, args...));
-        found = resources.find(key);
+        auto result = QSharedPointer<Value>(new Value(key, std::forward(args)...));
+        resources.emplace(key, result);
+        return result;
     }
-    return found->second;
+    return found->second.lock();
 }
 
 template<typename Key, typename Value, typename... Args>
-Value ResourceManager::get( const Key& key, Args... args )
+QSharedPointer<Value> ResourceManager::get( const Key& key, Args&&... args )
 {
     static ResourcesHolder<Key, Value> manager;
-    return manager.get(key, args...);
+    return manager.get(key, std::forward(args)...);
 }

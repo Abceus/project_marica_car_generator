@@ -3,8 +3,10 @@
 
 #include <QFile>
 
+#include "render_system/drawable.h"
 #include "resources/resource_manager.h"
 #include "render_system/mesh.h"
+#include "render_system/renderer.h"
 
 Mesh::Mesh()
         : Drawable()
@@ -50,7 +52,12 @@ Mesh::Mesh( const Model& model )
 
     for( auto& material: model.materials )
     {
-        addTexture( material );
+        auto image = ResourceManager::Instance().get<QString, QImage>( material );
+        if(image->isNull()) 
+        {
+            image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
+        }
+        addTexture(Renderer::getCurrentRenderer()->makeDrawable<QOpenGLTexture>(*image));
     }
 
     m_model = model;
@@ -73,40 +80,20 @@ size_t Mesh::getTexturesSize()
     return this->textures.size();
 }
 
-void Mesh::setTexture( QString filename, size_t index )
+void Mesh::setTexture( const QSharedPointer<QOpenGLTexture>& texture, size_t index )
 {
-    QImage image = ResourceManager::Instance().get<QString, QImage>( filename );
-    if( !image.isNull() )
-    {
-        this->setTextureQueue( index, this->averageAlpha( image ) );
-        this->textures[index]->setData( image );
-    }
-    else
-    {
-        //TODO: Load default image from texture manager
-        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
-        this->setTextureQueue( index, this->averageAlpha( image ) );
-        this->textures[index]->setData( image );
-    }
-    this->sortTextures();
+    // setTextureQueue( index, averageAlpha( image ) );
+    setTextureQueue( index, 0 );
+    textures[index] = texture;
+    sortTextures();
 }
 
-void Mesh::addTexture( QString filename )
+void Mesh::addTexture( const QSharedPointer<QOpenGLTexture>& texture )
 {
-    QImage image = ResourceManager::Instance().get<QString, QImage>( filename );
-    if( !image.isNull() )
-    {
-        this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-//        this->textures.emplace_back( QOpenGLTexture( image ) );
-    }
-    else
-    {
-        //TODO: Load default image from texture manager
-        image = ResourceManager::Instance().get<QString, QImage>( "./resources/textures/test.jpg" );
-        this->textureQueue.emplace_back( this->textures.size(), this->averageAlpha( image ) );
-        this->textures.append( QSharedPointer<QOpenGLTexture>( new QOpenGLTexture( image ) ) );
-    }
-    this->sortTextures();
+    // textureQueue.emplace_back( textures.size(), averageAlpha( image ) );
+    textureQueue.emplace_back( textures.size(), 0 );
+    textures.append( texture );
+    sortTextures();
 }
 
 void Mesh::sortTextures()
@@ -124,17 +111,17 @@ size_t Mesh::getTextureQueue( size_t index )
     return this->textureQueue.at( index ).first;
 }
 
-float Mesh::averageAlpha( QImage image )
+float Mesh::averageAlpha( const QSharedPointer<QImage>& image )
 {
     float sum = 0;
-    for( int i=0; i<image.height(); i++ )
+    for( int i=0; i<image->height(); i++ )
     {
-        for( int j=0; j<image.width(); j++ )
+        for( int j=0; j<image->width(); j++ )
         {
-            sum += image.pixelColor( j, i ).alpha();
+            sum += image->pixelColor( j, i ).alpha();
         }
     }
-    return sum / ( image.height() * image.width() );
+    return sum / ( image->height() * image->width() );
 }
 
 void Mesh::setTextureQueue( size_t index, float average )
@@ -161,7 +148,7 @@ void Mesh::releaseVAO()
 
 void Mesh::bindTexture( size_t index )
 {
-    this->textures.at( index )->bind();
+    textures.at( index )->bind();
 }
 
 Model Mesh::getModel()
@@ -174,11 +161,14 @@ void Mesh::draw( const RenderInfo& renderInfo )
     bindVAO();
     for( size_t i=0; i<getTexturesSize(); i++ )
     {
-        size_t index = getTextureQueue( i );
-        bindTexture( i );
-        renderInfo.shader->setUniformValue( "texture", 0 );
-        renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
-        renderInfo.f->glDrawElements( GL_TRIANGLES, getVAOsize(), GL_UNSIGNED_INT, nullptr );
+        if(textures.at( i )) 
+        {
+            size_t index = getTextureQueue( i );
+            bindTexture( i );
+            renderInfo.shader->setUniformValue( "texture", 0 );
+            renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
+            renderInfo.f->glDrawElements( GL_TRIANGLES, getVAOsize(), GL_UNSIGNED_INT, nullptr );
+        }
     }
     releaseVAO();
 }

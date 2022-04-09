@@ -12,7 +12,12 @@ QSharedPointer<SceneNode> Object::getNode()
     return m_node;
 }
 
-QSharedPointer<Drawable> Object::getDraweable()
+QSharedPointer<Drawable> Object::getDrawable()
 {
     return m_model;
+}
+
+void Object::setDrawable(const QSharedPointer<Drawable>& newModel) 
+{
+    m_model = newModel;
 }

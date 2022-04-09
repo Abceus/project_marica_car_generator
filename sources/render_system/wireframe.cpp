@@ -28,7 +28,7 @@ WireframeMesh::WireframeMesh(Model model, QColor color)
 
     m_VAO.bind();
 
-    auto vertices = QVector<Vertex>::fromStdVector( m_model.vertices );
+    auto vertices = QVector<Vertex>( m_model.vertices.begin(), m_model.vertices.end() );
 
     std::sort( vertices.begin(), vertices.end(), []( const Vertex& a, const Vertex& b )
     {

@@ -37,6 +37,8 @@ add_executable( ProjectMaricaCarGenerator
         sources/render_system/drawable.cpp
         sources/render_system/scene_node.cpp
         sources/render_system/wireframe.cpp
+        sources/render_system/renderer.cpp
+        sources/render_system/garbage_collector.cpp
         ${MOC_FOR_UI})
 
 if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)

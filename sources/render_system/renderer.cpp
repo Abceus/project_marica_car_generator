@@ -1,5 +1,7 @@
 #include "render_system/renderer.h"
 
+Renderer* Renderer::currentRenderer = nullptr;
+
 Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
     : m_context( context )
     , m_surface( surface )
@@ -9,9 +11,11 @@ Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
 
 void Renderer::draw(QSharedPointer<Scene> scene)
 {
+    setCurrentRenderer(this);
     makeCurrent();
     scene->draw( m_context->functions(), m_context->extraFunctions() );
     done();
+    setCurrentRenderer(nullptr);
 }
 
 QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::ShaderTypeBit type)
@@ -64,4 +68,12 @@ void Renderer::makeCurrent()
 void Renderer::done()
 {
     m_context->doneCurrent();
+}
+
+void Renderer::setCurrentRenderer(Renderer* newRenderer) {
+    currentRenderer = newRenderer;
+}
+
+Renderer* Renderer::getCurrentRenderer() {
+    return currentRenderer;
 }

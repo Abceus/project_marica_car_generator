@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QDir>
 #include "openglsimulationwidget.h"
 
 namespace Ui {
@@ -25,4 +26,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     OpenglSimulationWidget simulationWidget;
+
+    QString lastMeshPath = QDir::currentPath();
+    QString lastTexturePath = QDir::currentPath();
+    QString lastCollisionPath = QDir::currentPath();
 };

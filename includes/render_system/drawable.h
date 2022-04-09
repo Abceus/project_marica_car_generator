@@ -6,4 +6,5 @@ class Drawable
 {
 public:
     virtual void draw( const RenderInfo& renderInfo ) = 0;
+    virtual ~Drawable() = default;
 };

@@ -13,6 +13,7 @@
 
 #include "drawable.h"
 #include "scene.h"
+#include "garbage_collector.h"
 
 class Renderer
 {
@@ -21,26 +22,37 @@ public:
     void draw( QSharedPointer<Scene> scene );
 
     template<typename T, typename... Args>
-    QSharedPointer<T> makeDrawable( Args... args );
+    QSharedPointer<T> makeDrawable( Args&&... args );
 
     QSharedPointer<QOpenGLShader> loadShader( QString path, QOpenGLShader::ShaderTypeBit type );
     QSharedPointer<QOpenGLShaderProgram> getShaderProgram( QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader );
+
+    static void setCurrentRenderer(Renderer* newRenderer);
+    static Renderer* getCurrentRenderer();
 private:
     void makeCurrent();
     void done();
     QOpenGLContext* m_context;
     QSurface* m_surface;
+    GarbageCollector gc;
 
     // TODO: rework
     QMap<QString, QSharedPointer<QOpenGLShader>> m_shaders;
     QMap<QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>, QSharedPointer<QOpenGLShaderProgram>> m_programs;
+
+    static Renderer* currentRenderer;
 };
 
 template<typename T, typename... Args>
-QSharedPointer<T> Renderer::makeDrawable( Args... args )
+QSharedPointer<T> Renderer::makeDrawable( Args&&... args )
 {
     makeCurrent();
-    QSharedPointer<T> result( new T( args... ) );
-    done();
+    setCurrentRenderer(this);
+    QSharedPointer<T> result( new T( std::forward<Args>(args)... ),
+        [this](T* obj)
+        {
+            makeCurrent();
+            gc.addResource(obj); 
+        } );
     return result;
 }
