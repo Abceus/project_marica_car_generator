@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.9 )
 
 project( ProjectMaricaCarGenerator )
 
-set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD 20 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -39,8 +39,9 @@ add_executable( ProjectMaricaCarGenerator
         sources/render_system/wireframe.cpp
         sources/render_system/renderer.cpp
         sources/render_system/garbage_collector.cpp
+        sources/utils/scope_guard.cpp
         ${MOC_FOR_UI})
-
+        
 if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)
     set(BULLET_INCLUDE_DIRECTORY /usr/include/bullet)
 endif()
@@ -49,6 +50,8 @@ target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes ${BULLET_INCLUDE_DIRECTORY})
 
 target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets BulletDynamics BulletCollision LinearMath)
+
+target_compile_options(ProjectMaricaCarGenerator PRIVATE -Werror=unused-result)
 
 # if (UNIX)
 # target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets

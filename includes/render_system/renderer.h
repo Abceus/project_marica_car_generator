@@ -14,6 +14,8 @@
 #include "drawable.h"
 #include "scene.h"
 #include "garbage_collector.h"
+#include <stack>
+#include "utils/scope_guard.h"
 
 class Renderer
 {
@@ -27,7 +29,10 @@ public:
     QSharedPointer<QOpenGLShader> loadShader( QString path, QOpenGLShader::ShaderTypeBit type );
     QSharedPointer<QOpenGLShaderProgram> getShaderProgram( QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader );
 
-    static void setCurrentRenderer(Renderer* newRenderer);
+    ScopeGuard pushContextScoped();
+
+    static void pushRenderer(Renderer* newRenderer);
+    static void popRenderer();
     static Renderer* getCurrentRenderer();
 private:
     void makeCurrent();
@@ -40,19 +45,18 @@ private:
     QMap<QString, QSharedPointer<QOpenGLShader>> m_shaders;
     QMap<QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>, QSharedPointer<QOpenGLShaderProgram>> m_programs;
 
-    static Renderer* currentRenderer;
+    static std::stack<Renderer*> rendererStack;
 };
 
 template<typename T, typename... Args>
 QSharedPointer<T> Renderer::makeDrawable( Args&&... args )
 {
-    makeCurrent();
-    setCurrentRenderer(this);
+    pushRenderer(this);
     QSharedPointer<T> result( new T( std::forward<Args>(args)... ),
         [this](T* obj)
         {
-            makeCurrent();
             gc.addResource(obj); 
-        } );
+        } 
+    );
     return result;
 }

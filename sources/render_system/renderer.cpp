@@ -1,6 +1,8 @@
 #include "render_system/renderer.h"
+#include "utils/scope_guard.h"
+#include <qopenglcontext.h>
 
-Renderer* Renderer::currentRenderer = nullptr;
+std::stack<Renderer*> Renderer::rendererStack;
 
 Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
     : m_context( context )
@@ -11,11 +13,10 @@ Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
 
 void Renderer::draw(QSharedPointer<Scene> scene)
 {
-    setCurrentRenderer(this);
-    makeCurrent();
+    pushRenderer(this);
+    gc.collect();
     scene->draw( m_context->functions(), m_context->extraFunctions() );
-    done();
-    setCurrentRenderer(nullptr);
+    popRenderer();
 }
 
 QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::ShaderTypeBit type)
@@ -70,10 +71,28 @@ void Renderer::done()
     m_context->doneCurrent();
 }
 
-void Renderer::setCurrentRenderer(Renderer* newRenderer) {
-    currentRenderer = newRenderer;
+ScopeGuard Renderer::pushContextScoped()
+{
+    return ScopeGuard([this](){ popRenderer(); });
 }
 
-Renderer* Renderer::getCurrentRenderer() {
-    return currentRenderer;
+void Renderer::pushRenderer(Renderer* newRenderer) 
+{
+    rendererStack.push(newRenderer);
+    newRenderer->makeCurrent();
+}
+
+void Renderer::popRenderer() 
+{
+    rendererStack.top()->done();
+    rendererStack.pop();
+    if(!rendererStack.empty()) 
+    {
+        rendererStack.top()->makeCurrent();
+    }
+}
+
+Renderer* Renderer::getCurrentRenderer() 
+{
+    return rendererStack.top();
 }
