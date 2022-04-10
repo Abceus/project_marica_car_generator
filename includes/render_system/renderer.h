@@ -12,8 +12,10 @@
 #include <QPair>
 
 #include "drawable.h"
+#include "resources/resource_manager.h"
 #include "scene.h"
 #include "garbage_collector.h"
+#include <qopengltexture.h>
 #include <stack>
 #include "utils/scope_guard.h"
 
@@ -51,7 +53,7 @@ private:
 template<typename T, typename... Args>
 QSharedPointer<T> Renderer::makeDrawable( Args&&... args )
 {
-    pushRenderer(this);
+    auto contextGuard = pushContextScoped();
     QSharedPointer<T> result( new T( std::forward<Args>(args)... ),
         [this](T* obj)
         {

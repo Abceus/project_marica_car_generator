@@ -1,9 +1,6 @@
 #pragma once
-#include <concepts>
 #include <functional>
-
-template<class T>
-concept CanCall = std::convertible_to<T, std::function<void()>>;
+#include "utils/concepts/can_call.h"
 
 class [[nodiscard]] ScopeGuard
 {

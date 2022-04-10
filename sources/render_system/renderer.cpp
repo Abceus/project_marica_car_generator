@@ -13,10 +13,9 @@ Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
 
 void Renderer::draw(QSharedPointer<Scene> scene)
 {
-    pushRenderer(this);
+    auto contextGuard = pushContextScoped();
     gc.collect();
     scene->draw( m_context->functions(), m_context->extraFunctions() );
-    popRenderer();
 }
 
 QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::ShaderTypeBit type)
@@ -73,6 +72,7 @@ void Renderer::done()
 
 ScopeGuard Renderer::pushContextScoped()
 {
+    pushRenderer(this);
     return ScopeGuard([this](){ popRenderer(); });
 }
 
