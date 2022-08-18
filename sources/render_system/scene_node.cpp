@@ -1,154 +1,132 @@
 #include "render_system/scene_node.h"
+#include "render_system/drawable.h"
 
 #include <algorithm>
 
 SceneNode::SceneNode()
-    : m_location()
-    , m_rotation()
-    , m_scale( 1.0f, 1.0f, 1.0f )
-    , m_parent(nullptr)
-    , m_drawables()
-    , m_shaderProgram(nullptr)
-{
+    : m_location(), m_rotation(), m_scale(1.0f, 1.0f, 1.0f), m_parent(nullptr),
+      m_drawables(), m_shaderProgram(nullptr) {}
 
-}
-
-QVector3D SceneNode::getLocation() const
-{
-    if( m_parent )
-    {
+glm::vec3 SceneNode::getLocation() const {
+    if (m_parent) {
         return m_location + m_parent->getLocation();
     }
     return m_location;
 }
 
-void SceneNode::setLocation(const QVector3D &location)
-{
+void SceneNode::setLocation(const glm::vec3& location) {
     m_location = location;
 }
 
-QVector3D SceneNode::getRotation() const
-{
-    if( m_parent )
-    {
+glm::vec3 SceneNode::getRotation() const {
+    if (m_parent) {
         return m_rotation + m_parent->getRotation();
     }
     return m_rotation;
 }
 
-void SceneNode::setRotation(const QVector3D &rotation)
-{
+void SceneNode::setRotation(const glm::vec3& rotation) {
     m_rotation = rotation;
 }
 
-QVector3D SceneNode::getScale() const
-{
-    if( m_parent )
-    {
+glm::vec3 SceneNode::getScale() const {
+    if (m_parent) {
         return m_scale * m_parent->getScale();
     }
     return m_scale;
 }
 
-void SceneNode::setScale(const QVector3D &scale)
-{
+void SceneNode::setScale(const glm::vec3& scale) {
     m_scale = scale;
 }
 
-void SceneNode::setScale(float scale)
-{
-    m_scale = { scale, scale, scale };
+void SceneNode::setScale(float scale) {
+    m_scale = {scale, scale, scale};
 }
 
-void SceneNode::setParent(SceneNode *parent)
-{
-    if( m_parent == parent )
-    {
+void SceneNode::setParent(SceneNode* parent) {
+    if (m_parent == parent) {
         return;
     }
 
-    if( m_parent )
-    {
+    if (m_parent) {
         m_parent->removeChild(this);
     }
     m_parent = parent;
 }
 
-QSharedPointer<SceneNode> SceneNode::addChild(QSharedPointer<SceneNode> newChild)
-{
-    if( !m_childrens.contains(newChild) )
-    {
-        m_childrens.append(newChild);
+std::shared_ptr<SceneNode>
+SceneNode::addChild(const std::shared_ptr<SceneNode>& newChild) {
+    if (std::find(std::begin(m_childrens), std::end(m_childrens), newChild) ==
+        std::end(m_childrens)) {
+        m_childrens.emplace_back(newChild);
         newChild->setParent(this);
     }
     return newChild;
 }
 
-void SceneNode::removeChild(SceneNode *removeChild)
-{
-    auto found = std::find(m_childrens.begin(), m_childrens.end(), removeChild);
-    if( found != m_childrens.end() )
-    {
-        m_childrens.erase( found );
+void SceneNode::removeChild(SceneNode* removeChild) {
+    auto found = std::find_if(std::begin(m_childrens), std::end(m_childrens),
+                              [removeChild](const auto& child) {
+                                  return child.get() == removeChild;
+                              });
+    if (found != m_childrens.end()) {
+        m_childrens.erase(found);
         removeChild->setParent(nullptr);
     }
 }
 
-QSharedPointer<Drawable> SceneNode::addDrawable(QSharedPointer<Drawable> newDrawable)
-{
-    if( !m_drawables.contains(newDrawable) )
-    {
-        m_drawables.append(newDrawable);
+std::shared_ptr<Drawable>
+SceneNode::addDrawable(const std::shared_ptr<Drawable>& newDrawable) {
+    if (std::find(std::begin(m_drawables), std::end(m_drawables),
+                  newDrawable) == std::end(m_drawables)) {
+        m_drawables.emplace_back(newDrawable);
     }
     return newDrawable;
 }
 
-void SceneNode::removeDrawable(Drawable *removeDrawable)
-{
-    auto found = std::find( m_drawables.begin(), m_drawables.end(), removeDrawable );
-    if( found != m_drawables.end() )
-    {
+void SceneNode::removeDrawable(Drawable* removeDrawable) {
+    auto found = std::find_if(m_drawables.begin(), m_drawables.end(),
+                              [removeDrawable](const auto& drawable) {
+                                  return drawable.get() == removeDrawable;
+                              });
+    if (found != m_drawables.end()) {
         m_drawables.erase(found);
     }
 }
 
-bool SceneNode::isEmpty() const
-{
+bool SceneNode::isEmpty() const {
     return m_childrens.empty();
 }
 
-void SceneNode::clear()
-{
+void SceneNode::clear() {
     m_childrens.clear();
     m_drawables.clear();
 }
 
-QVector<QSharedPointer<SceneNode>>::ConstIterator SceneNode::begin()
-{
+std::vector<std::shared_ptr<SceneNode>>::const_iterator SceneNode::begin() {
     return m_childrens.begin();
 }
 
-QVector<QSharedPointer<SceneNode>>::ConstIterator SceneNode::end()
-{
+std::vector<std::shared_ptr<SceneNode>>::const_iterator SceneNode::end() {
     return m_childrens.end();
 }
 
-QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableBegin()
-{
+std::vector<std::shared_ptr<Drawable>>::const_iterator
+SceneNode::drawableBegin() {
     return m_drawables.begin();
 }
 
-QVector<QSharedPointer<Drawable>>::ConstIterator SceneNode::drawableEnd()
-{
+std::vector<std::shared_ptr<Drawable>>::const_iterator
+SceneNode::drawableEnd() {
     return m_drawables.end();
 }
 
-void SceneNode::setShaderProgram(QSharedPointer<QOpenGLShaderProgram> newProgram)
-{
+void SceneNode::setShaderProgram(
+    const std::shared_ptr<ShaderProgram>& newProgram) {
     m_shaderProgram = newProgram;
 }
 
-QSharedPointer<QOpenGLShaderProgram> SceneNode::getShaderProgram() const
-{
+std::shared_ptr<ShaderProgram> SceneNode::getShaderProgram() const {
     return m_shaderProgram;
 }

@@ -1,53 +1,54 @@
 #pragma once
 
-#include <QVector3D>
-#include <QVector>
-#include <QSharedPointer>
-#include <QOpenGLShaderProgram>
-
 #include "drawable.h"
+#include "render_system/shader_program.h"
+#include <glm/glm.hpp>
+#include <memory>
+#include <vector>
 
-class SceneNode
-{
+
+class SceneNode {
 public:
     SceneNode();
 
-    QVector3D getLocation() const;
-    void setLocation( const QVector3D& location );
+    glm::vec3 getLocation() const;
+    void setLocation(const glm::vec3& location);
 
-    QVector3D getRotation() const;
-    void setRotation( const QVector3D& rotation );
+    glm::vec3 getRotation() const;
+    void setRotation(const glm::vec3& rotation);
 
-    QVector3D getScale() const;
-    void setScale( const QVector3D& scale );
-    void setScale( float scale );
+    glm::vec3 getScale() const;
+    void setScale(const glm::vec3& scale);
+    void setScale(float scale);
 
-    void setParent( SceneNode* parent );
+    void setParent(SceneNode* parent);
 
-    QSharedPointer<SceneNode> addChild( QSharedPointer<SceneNode> newChild );
-    void removeChild( SceneNode* removeChild );
+    std::shared_ptr<SceneNode> addChild(const std::shared_ptr<SceneNode>& newChild);
+    void removeChild(SceneNode* removeChild);
 
-    QSharedPointer<Drawable> addDrawable( QSharedPointer<Drawable> newDrawable );
-    void removeDrawable( Drawable* removeDrawable );
+    std::shared_ptr<Drawable>
+    addDrawable(const std::shared_ptr<Drawable>& newDrawable);
+    void removeDrawable(Drawable* removeDrawable);
 
     bool isEmpty() const;
     void clear();
 
-    QVector<QSharedPointer<SceneNode>>::ConstIterator begin();
-    QVector<QSharedPointer<SceneNode>>::ConstIterator end();
+    std::vector<std::shared_ptr<SceneNode>>::const_iterator begin();
+    std::vector<std::shared_ptr<SceneNode>>::const_iterator end();
 
-    QVector<QSharedPointer<Drawable>>::ConstIterator drawableBegin();
-    QVector<QSharedPointer<Drawable>>::ConstIterator drawableEnd();
+    std::vector<std::shared_ptr<Drawable>>::const_iterator
+    drawableBegin();
+    std::vector<std::shared_ptr<Drawable>>::const_iterator drawableEnd();
 
-    void setShaderProgram( QSharedPointer<QOpenGLShaderProgram> newProgram );
-    QSharedPointer<QOpenGLShaderProgram> getShaderProgram() const;
-
+    void setShaderProgram(const std::shared_ptr<ShaderProgram>& newProgram);
+    std::shared_ptr<ShaderProgram> getShaderProgram() const;
 private:
-    QVector3D m_location;
-    QVector3D m_rotation;
-    QVector3D m_scale;
+    glm::vec3 m_location;
+    glm::vec3 m_rotation;
+    glm::vec3 m_scale;
+
     SceneNode* m_parent;
-    QVector<QSharedPointer<SceneNode>> m_childrens;
-    QVector<QSharedPointer<Drawable>> m_drawables;
-    QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
+    std::vector<std::shared_ptr<SceneNode>> m_childrens;
+    std::vector<std::shared_ptr<Drawable>> m_drawables;
+    std::shared_ptr<ShaderProgram> m_shaderProgram;
 };

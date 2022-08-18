@@ -1,174 +1,68 @@
-#include <memory>
-#include <algorithm>
-
-#include <QFile>
-
-#include "render_system/drawable.h"
-#include "resources/resource_manager.h"
 #include "render_system/mesh.h"
-#include "render_system/renderer.h"
+#include <memory>
 
-Mesh::Mesh()
-        : Drawable()
-        , VAOsize( 0u )
-{
-}
+#include "render_system/element_buffer.h"
+#include "render_system/vertex_array.h"
+#include "render_system/vertex_buffer.h"
 
-Mesh::Mesh( const Model& model )
-{
-    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions* fe = QOpenGLContext::currentContext()->extraFunctions();
-    if(!f || !fe)
-        return;
+#include <wx/filefn.h>
 
-    VAO.create();
-    VBO = QOpenGLBuffer( QOpenGLBuffer::VertexBuffer );
-    VBO.create();
-    VBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    EBO = QOpenGLBuffer( QOpenGLBuffer::IndexBuffer );
-    EBO.create();
-    EBO.setUsagePattern( QOpenGLBuffer::StaticDraw );
+void Mesh::init(const Model& model) {
+    // batches.resize(model.materials.size());
+    // for(auto& batch: batches) {
+    //     batch = std::make_shared<Batch>();
+    // }
+    batches.clear();
 
-    VAO.bind();
+    auto vertexBuffer = std::make_shared<VertexBuffer>();
+    vertexBuffer->init(model.vertices);
 
-    VBO.bind();
-    VBO.allocate( model.vertices.data(), sizeof( Vertex )*model.vertices.size() );
+    std::vector<std::vector<Face>> elementBuffers;
+    elementBuffers.resize(model.materials.size());
+    // for(auto& elementBuffer: elementBuffers) {
+    //     elementBuffer = std::make_shared<ElementBuffer>();
+    // }
 
-    EBO.bind();
-    EBO.allocate( model.indices.data(), sizeof( Indice )*model.indices.size() );
-
-    f->glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), nullptr );
-    f->glEnableVertexAttribArray( 0 );
-    f->glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex ),
-            reinterpret_cast<GLvoid*>( offsetof( Vertex, U ) ) );
-    f->glEnableVertexAttribArray( 1 );
-    fe->glVertexAttribIPointer( 2, 1, GL_INT, sizeof( Vertex ),
-            reinterpret_cast<GLvoid*>( offsetof( Vertex, MaterialIndex ) ) );
-    fe->glEnableVertexAttribArray( 2 );
-
-    VAO.release();
-
-    VAOsize = model.VAOsize;
-
-    for( auto& material: model.materials )
-    {
-        auto image = ResourceManager::Instance().getImageManager().get( material );
-        if(image->isNull()) 
-        {
-            image = ResourceManager::Instance().getImageManager().getDefaultResource();
-        }
-        addTexture(Renderer::getCurrentRenderer()->makeDrawable<QOpenGLTexture>(*image));
+    for (const auto& face : model.faces) {
+        elementBuffers[model.vertices[face.vertexes[0]].MaterialIndex]
+            .push_back(face);
     }
 
-    m_model = model;
-}
+    // auto texture = std::make_shared<Texture>();
+    // texture->init(
+    //     wxImage("D:\\Documents\\gits\\project_marica_car_"
+    //             "generator\\example\\MaricaFlatoutTex\\Texture\\common.png"));
+    int i = 0;
+    for (const auto& elementBuffer : elementBuffers) {
+        auto vertexArray = std::make_shared<VertexArray>();
 
-Mesh::~Mesh()
-{
-    VAO.destroy();
-    VBO.destroy();
-    EBO.destroy();
-}
+        auto newElementBuffer = std::make_shared<ElementBuffer>();
+        newElementBuffer->init(elementBuffer);
 
-GLsizei Mesh::getVAOsize()
-{
-    return this->VAOsize;
-}
+        vertexArray->init(vertexBuffer, newElementBuffer);
 
-size_t Mesh::getTexturesSize()
-{
-    return this->textures.size();
-}
-
-void Mesh::setTexture( const QSharedPointer<QOpenGLTexture>& texture, size_t index )
-{
-    // setTextureQueue( index, averageAlpha( image ) );
-    setTextureQueue( index, 0 );
-    textures[index] = texture;
-    sortTextures();
-}
-
-void Mesh::addTexture( const QSharedPointer<QOpenGLTexture>& texture )
-{
-    // textureQueue.emplace_back( textures.size(), averageAlpha( image ) );
-    textureQueue.emplace_back( textures.size(), 0 );
-    textures.append( texture );
-    sortTextures();
-}
-
-void Mesh::sortTextures()
-{
-    std::sort( this->textureQueue.begin(), this->textureQueue.end(),
-                  []( const std::pair<int, float>& lhs, const std::pair<int, float>& rhs)
-                  {
-                        return lhs.second > rhs.second;
-                  }
-              );
-}
-
-size_t Mesh::getTextureQueue( size_t index )
-{
-    return this->textureQueue.at( index ).first;
-}
-
-float Mesh::averageAlpha( const QSharedPointer<QImage>& image )
-{
-    float sum = 0;
-    for( int i=0; i<image->height(); i++ )
-    {
-        for( int j=0; j<image->width(); j++ )
-        {
-            sum += image->pixelColor( j, i ).alpha();
+        auto texture = std::make_shared<Texture>();
+        wxImage image;
+        if (wxFileExists(model.materials[i])) {
+            image = wxImage(model.materials[i]);
+        } else {
+            image = wxImage(
+                "D:\\Documents\\gits\\project_marica_car_"
+                "generator\\example\\MaricaFlatoutTex\\Texture\\common.png");
         }
-    }
-    return sum / ( image->height() * image->width() );
-}
+        texture->init(image);
 
-void Mesh::setTextureQueue( size_t index, float average )
-{
-    for( auto& texture: textureQueue )
-    {
-        if( texture.first == index )
-        {
-            texture.second = average;
-            return;
-        }
+        batches.emplace_back(std::make_unique<Batch>(vertexArray, texture));
+        ++i;
     }
 }
 
-void Mesh::bindVAO()
-{
-    VAO.bind();
-}
+void Mesh::setTexture(const std::shared_ptr<Texture>& texture, size_t index) {}
 
-void Mesh::releaseVAO()
-{
-    VAO.release();
-}
+void Mesh::addTexture(const std::shared_ptr<Texture>& texture) {}
 
-void Mesh::bindTexture( size_t index )
-{
-    textures.at( index )->bind();
-}
-
-Model Mesh::getModel()
-{
-    return m_model;
-}
-
-void Mesh::draw( const RenderInfo& renderInfo )
-{
-    bindVAO();
-    for( size_t i=0; i<getTexturesSize(); i++ )
-    {
-        if(textures.at( i )) 
-        {
-            size_t index = getTextureQueue( i );
-            bindTexture( i );
-            renderInfo.shader->setUniformValue( "texture", 0 );
-            renderInfo.shader->setUniformValue( renderInfo.shader->uniformLocation( "nowTexture" ), static_cast<GLint>( index ) );
-            renderInfo.f->glDrawElements( GL_TRIANGLES, getVAOsize(), GL_UNSIGNED_INT, nullptr );
-        }
+void Mesh::draw() const {
+    for (const auto& batch : batches) {
+        batch->draw();
     }
-    releaseVAO();
 }

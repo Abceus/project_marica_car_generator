@@ -1,3 +1,4 @@
+// TODO!: remove qt, убрать наследование от объекта
 #pragma once
 
 #include <memory>

@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-
 //The chunk header structure. Length: 32 bytes.
 struct VChunkHeader
 {
@@ -24,7 +22,7 @@ struct VPoint
     VPoint operator+( VPoint op2 );
     VPoint operator-( VPoint op2 );
     VPoint operator+=( VPoint op2 );
-    friend ostream &operator<<(ostream &stream, VPoint o);
+    friend std::ostream &operator<<(std::ostream &stream, VPoint o);
     VPoint( float vX = 0.f, float vY = 0.f, float vZ = 0.f );
 };
 
@@ -70,7 +68,7 @@ struct VQuat
     VQuat operator+( VQuat op2 );
     VQuat operator-( VQuat op2 );
     VQuat operator+=( VQuat op2 );
-    friend ostream& operator<<( ostream& stream, VQuat o );
+    friend std::ostream& operator<<( std::ostream& stream, VQuat o );
     VQuat( float vX = 0.f, float vY = 0.f, float vZ = 0.f, float vW = 0.f );
 };
 
@@ -88,7 +86,7 @@ struct VJointPos
     VJointPos operator-( VJointPos op2 );
     VJointPos operator+=( VJointPos op2 );
     VJointPos& operator=( VJointPos op2 );
-    friend ostream& operator<<( ostream& stream, VJointPos o );
+    friend std::ostream& operator<<( std::ostream& stream, VJointPos o );
 };
 
 //Specifies a node in the skeletal bone tree for both the skeletal mesh and its animations.Length: 120 bytes.

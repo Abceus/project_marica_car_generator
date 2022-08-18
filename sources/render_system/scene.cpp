@@ -1,153 +1,97 @@
 #include "render_system/scene.h"
-#include <QOpenGLShader>
+#include "glm/fwd.hpp"
+#include "glm/trigonometric.hpp"
+#include "render_system/camera.h"
+#include "render_system/camera_manager.h"
+#include <memory>
 
 Scene::Scene()
-    : camera_scale( 1.f )
-    , m_shaderProgram(nullptr)
-    , m_defaultShaderProgram(nullptr)
-    , m_rootNode( QSharedPointer<SceneNode>( new SceneNode ) )
-{
+    : m_rootNode(std::make_shared<SceneNode>()),
+      cameraManager(std::make_unique<CameraManager>()) {
+    cameraManager->addCamera("main", std::make_shared<Camera>());
+    cameraManager->setActiveCamera("main");
+    cameraManager->getActiveCamera()->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
 }
 
-void Scene::init( QSharedPointer<QOpenGLShaderProgram> shaderProgram )
-{
+void Scene::init(const std::shared_ptr<ShaderProgram>& shaderProgram) {
     m_defaultShaderProgram = shaderProgram;
-
-    camera_location = QVector3D( 0, 0, 0 );
-    camera_rotation = QVector3D( 0, 0, 0 );
-    camera_scale = 1;
 }
 
-void Scene::clear()
-{
-    camera_location = QVector3D( 0, 0, 0 );
-    camera_rotation = QVector3D( 0, 0, 0 );
-    camera_scale = 1;
+void Scene::clear() {
+    cameraManager->getActiveCamera()->setLocation(glm::vec3());
+    cameraManager->getActiveCamera()->setRotation(glm::vec3());
+    cameraManager->getActiveCamera()->setScale(1.0f);
 
     m_rootNode->clear();
 }
 
-QVector3D Scene::getCameraLocation()
-{
-    return camera_location;
+void Scene::draw() {
+    drawNode(m_rootNode);
+    m_shaderProgram->unbind();
 }
 
-void Scene::setCameraLocation( QVector3D value )
-{
-    camera_location = value;
-}
-
-QVector3D Scene::getCameraRotation()
-{
-    return camera_rotation;
-}
-
-void Scene::setCameraRotation( QVector3D value )
-{
-    camera_rotation = value;
-}
-
-float Scene::getCameraScale()
-{
-    return camera_scale;
-}
-
-void Scene::setCameraScale( float value )
-{
-    camera_scale = value;
-}
-
-//QSharedPointer<Object> Scene::addObject(QSharedPointer<Object> newObject)
-//{
-//    if( m_objects.indexOf(newObject) == -1 )
-//    {
-//        m_objects.append( newObject );
-//    }
-//    return newObject;
-//}
-
-//void Scene::removeObject(QSharedPointer<Object> removeObject)
-//{
-//    m_objects.removeOne( removeObject );
-//}
-
-void Scene::draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef )
-{
-    drawNode( m_rootNode, f, ef );
-    m_shaderProgram->release();
-}
-
-void Scene::resizeScreen(int w, int h)
-{
+void Scene::resizeScreen(int w, int h) {
     // Calculate aspect ratio
-    const float aspect = static_cast<float>( w ) / static_cast<float>( h ? h : 1 );
-    const float zNear = 1.f, zFar = 10000.f, fov = 90.f;
+    const float aspect = static_cast<float>(w) / h;
+    const float zNear = 1.0f, zFar = 10000.f, fov = 90.f;
 
     // Reset projection
-    m_projection.setToIdentity();
-
-    // Set perspective projection
-    m_projection.perspective( fov, aspect, zNear, zFar );
+    m_projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+    // m_projection = glm::mat4(1);
 }
 
-QSharedPointer<SceneNode> Scene::addNode(QSharedPointer<SceneNode> newNode)
-{
-    m_rootNode->addChild( newNode );
+std::shared_ptr<SceneNode>
+Scene::addNode(const std::shared_ptr<SceneNode>& newNode) {
+    m_rootNode->addChild(newNode);
     return newNode;
 }
 
-void Scene::drawNode(QSharedPointer<SceneNode> node, QOpenGLFunctions *f, QOpenGLExtraFunctions *ef)
-{
-    bool shaderChanged = false;
-    if( node->getShaderProgram() )
-    {
-        if( m_shaderProgram != node->getShaderProgram() )
-        {
-            if( m_shaderProgram )
-            {
-                m_shaderProgram->release();
+void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
+    bool shaderChanged = true;
+    if (node->getShaderProgram()) {
+        if (m_shaderProgram != node->getShaderProgram()) {
+            if (m_shaderProgram) {
+                m_shaderProgram->unbind();
             }
             m_shaderProgram = node->getShaderProgram();
             shaderChanged = true;
         }
-    } else if( m_shaderProgram != m_defaultShaderProgram )
-    {
-        if( m_shaderProgram )
-        {
-            m_shaderProgram->release();
+    } else if (m_shaderProgram != m_defaultShaderProgram) {
+        if (m_shaderProgram) {
+            m_shaderProgram->unbind();
         }
         m_shaderProgram = m_defaultShaderProgram;
         shaderChanged = true;
     }
 
-    if( shaderChanged )
-    {
+    if (shaderChanged) {
         m_shaderProgram->bind();
 
-        QMatrix4x4 view;
-        QQuaternion rotation = QQuaternion::fromEulerAngles( getCameraRotation() );
-        view.rotate( rotation );
-        view.translate( getCameraLocation() );
+        auto view = cameraManager->getActiveCamera()->getProjectionMatrix();
 
-        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "view" ), view );
-        m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "projection" ), m_projection );
+        m_shaderProgram->setUniform("view", view);
+        m_shaderProgram->setUniform("projection", m_projection);
     }
 
-    QMatrix4x4 model;
-    model.translate( node->getLocation() );
-    model.rotate( QQuaternion::fromEulerAngles( node->getRotation() ) );
-    model.scale( node->getScale() );
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
+    model = glm::rotate(model, glm::radians(node->getRotation().x), glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().y), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().z), glm::vec3(0, 0, 1));
+    model = glm::scale(model, node->getScale());
 
-    m_shaderProgram->setUniformValue( m_shaderProgram->uniformLocation( "model" ), model );
+    m_shaderProgram->setUniform("model", model);
 
-    for( auto i = node->drawableBegin(); i != node->drawableEnd(); i++ )
-    {
-        (*i)->draw({f, ef, m_shaderProgram.get()});
+    for (auto i = node->drawableBegin(); i != node->drawableEnd(); i++) {
+        (*i)->draw();
     }
 
-    for( const auto& childNode: *node )
-    {
+    for (const auto& childNode : *node) {
         //        drawNode( childNode, parentMatrix, f, ef );
-        drawNode( childNode, f, ef );
+        drawNode(childNode);
     }
+}
+
+std::shared_ptr<SceneNode> Scene::getActiveCamera() const {
+    return cameraManager->getActiveCamera();
 }

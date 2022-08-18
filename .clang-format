@@ -1,0 +1,10 @@
+﻿---
+BasedOnStyle: LLVM
+IndentWidth: '4'
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+AccessModifierOffset: -4
+
+...

@@ -1,10 +1,7 @@
 #pragma once
 
-#include "render_system/render_info.h"
-
-class Drawable
-{
+class Drawable {
 public:
-    virtual void draw( const RenderInfo& renderInfo ) = 0;
+    virtual void draw() const = 0;
     virtual ~Drawable() = default;
 };

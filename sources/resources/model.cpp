@@ -1,80 +1,72 @@
+#include <ios>
 #include <memory>
-
-#include <QFile>
-#include <QOpenGLContext>
-#include <QDebug>
+#include <fstream>
 
 #include "resources/model.h"
 #include "resources/unanimation.h"
 
-Model Model::readPSK( const QString &filename )
+Model Model::readPSK( const std::string &filename )
 {
     auto newModel = Model();
 
-    VChunkHeader GeneralHeader{};
-    VChunkHeader PointsHeader{};
-    std::vector<VPoint> PointsData;
-    VChunkHeader WedgesHeader{};
-    std::vector<VVertex> WedgesData;
-    VChunkHeader FacesHeader{};
-    std::vector<VTriangle> FacesData;
-    VChunkHeader MaterialsHeader{};
-    std::vector<VMaterial> MaterialsData;
+    // VChunkHeader GeneralHeader{};
+    // VChunkHeader PointsHeader{};
+    // std::vector<VPoint> PointsData;
+    // VChunkHeader WedgesHeader{};
+    // std::vector<VVertex> WedgesData;
+    // VChunkHeader FacesHeader{};
+    // std::vector<VTriangle> FacesData;
+    // VChunkHeader MaterialsHeader{};
+    // std::vector<VMaterial> MaterialsData;
 
-    QFile file( filename );
-    if ( !file.open( QIODevice::ReadOnly ) )
-        return newModel;
+    // ifstream file( filename, std::ios_base::in | std::ios_base::binary );
+    // if ( !file.is_open() )
+    //     return newModel;
 
-    file.read( reinterpret_cast<char*>( &GeneralHeader ), sizeof( VChunkHeader ) );
-    qDebug() << GeneralHeader.ChunkID << " " << GeneralHeader.DataCount << " " << GeneralHeader.DataSize << " " << GeneralHeader.TypeFlags;
-    file.read( reinterpret_cast<char*>( &PointsHeader ), sizeof( VChunkHeader ) );
-    qDebug() << PointsHeader.ChunkID << " " << PointsHeader.DataCount << " " << PointsHeader.DataSize << " " << PointsHeader.TypeFlags;
-    PointsData.resize( static_cast<size_t>( PointsHeader.DataCount ) );
-    file.read( reinterpret_cast<char*>( PointsData.data() ), PointsHeader.DataSize * PointsHeader.DataCount );
+    // file.read( reinterpret_cast<char*>( &GeneralHeader ), sizeof( VChunkHeader ) );
+    // file.read( reinterpret_cast<char*>( &PointsHeader ), sizeof( VChunkHeader ) );
+    // PointsData.resize( static_cast<size_t>( PointsHeader.DataCount ) );
+    // file.read( reinterpret_cast<char*>( PointsData.data() ), PointsHeader.DataSize * PointsHeader.DataCount );
 
-    file.read( reinterpret_cast<char*>( &WedgesHeader ), sizeof( VChunkHeader ) );
-    qDebug() << WedgesHeader.ChunkID << " " << WedgesHeader.DataCount << " " << WedgesHeader.DataSize << " " << WedgesHeader.TypeFlags;
-    WedgesData.resize( static_cast<size_t>( WedgesHeader.DataCount ) );
-    file.read( reinterpret_cast<char*>( WedgesData.data() ), WedgesHeader.DataSize * WedgesHeader.DataCount );
+    // file.read( reinterpret_cast<char*>( &WedgesHeader ), sizeof( VChunkHeader ) );
+    // WedgesData.resize( static_cast<size_t>( WedgesHeader.DataCount ) );
+    // file.read( reinterpret_cast<char*>( WedgesData.data() ), WedgesHeader.DataSize * WedgesHeader.DataCount );
 
-    file.read( reinterpret_cast<char*>( &FacesHeader ), sizeof( VChunkHeader ) );
-    qDebug() << FacesHeader.ChunkID << " " << FacesHeader.DataCount << " " << FacesHeader.DataSize << " " << FacesHeader.TypeFlags;
-    FacesData.resize( static_cast<size_t>( FacesHeader.DataCount ) );
-    file.read( reinterpret_cast<char*>( FacesData.data() ), FacesHeader.DataSize * FacesHeader.DataCount );
+    // file.read( reinterpret_cast<char*>( &FacesHeader ), sizeof( VChunkHeader ) );
+    // FacesData.resize( static_cast<size_t>( FacesHeader.DataCount ) );
+    // file.read( reinterpret_cast<char*>( FacesData.data() ), FacesHeader.DataSize * FacesHeader.DataCount );
 
-    file.read( reinterpret_cast<char*>( &MaterialsHeader ), sizeof( VChunkHeader ) );
-    qDebug() << MaterialsHeader.ChunkID << " " << MaterialsHeader.DataCount << " " << MaterialsHeader.DataSize << " " << MaterialsHeader.TypeFlags;
-    MaterialsData.resize( static_cast<size_t>( MaterialsHeader.DataCount ) );
-    file.read( reinterpret_cast<char*>( MaterialsData.data() ), MaterialsHeader.DataSize * MaterialsHeader.DataCount );
+    // file.read( reinterpret_cast<char*>( &MaterialsHeader ), sizeof( VChunkHeader ) );
+    // MaterialsData.resize( static_cast<size_t>( MaterialsHeader.DataCount ) );
+    // file.read( reinterpret_cast<char*>( MaterialsData.data() ), MaterialsHeader.DataSize * MaterialsHeader.DataCount );
 
-    file.close();
+    // file.close();
 
-    newModel.vertices.resize( static_cast<size_t>( WedgesHeader.DataCount ) );
+    // newModel.vertices.resize( static_cast<size_t>( WedgesHeader.DataCount ) );
 
-    for( size_t i=0; i<WedgesHeader.DataCount; i++ )
-    {
-        newModel.vertices[i].X = PointsData[WedgesData[i].PointIndex].X;
-        newModel.vertices[i].Y = PointsData[WedgesData[i].PointIndex].Y;
-        newModel.vertices[i].Z = PointsData[WedgesData[i].PointIndex].Z;
-        newModel.vertices[i].U = WedgesData[i].U;
-        newModel.vertices[i].V = WedgesData[i].V;
-        newModel.vertices[i].MaterialIndex = WedgesData[i].MatIndex;
-    }
+    // for( size_t i=0; i<WedgesHeader.DataCount; i++ )
+    // {
+    //     newModel.vertices[i].X = PointsData[WedgesData[i].PointIndex].X;
+    //     newModel.vertices[i].Y = PointsData[WedgesData[i].PointIndex].Y;
+    //     newModel.vertices[i].Z = PointsData[WedgesData[i].PointIndex].Z;
+    //     newModel.vertices[i].U = WedgesData[i].U;
+    //     newModel.vertices[i].V = WedgesData[i].V;
+    //     newModel.vertices[i].MaterialIndex = WedgesData[i].MatIndex;
+    // }
 
-    newModel.indices.resize( static_cast<size_t>( FacesHeader.DataCount ) );
+    // newModel.faces.resize( static_cast<size_t>( FacesHeader.DataCount ) );
 
-    for( size_t i=0; i<FacesHeader.DataCount; i++ )
-    {
-        for( size_t j=0; j<3u; j++ )
-        {
-            newModel.indices[i].vertexes[j] = FacesData[i].WedgeIndex[j];
-        }
-    }
+    // for( size_t i=0; i<FacesHeader.DataCount; i++ )
+    // {
+    //     for( size_t j=0; j<3u; j++ )
+    //     {
+    //         newModel.faces[i].vertexes[j] = FacesData[i].WedgeIndex[j];
+    //     }
+    // }
 
-    for( size_t i=0, i_max=static_cast<unsigned>( MaterialsHeader.DataCount ); i<i_max; i++ )
-    {
-        newModel.materials.emplace_back( QString( "./" ) + QString( MaterialsData[i].MaterialName ) );
-    }
-    newModel.VAOsize = FacesHeader.DataCount * 3u;
+    // for( size_t i=0, i_max=static_cast<unsigned>( MaterialsHeader.DataCount ); i<i_max; i++ )
+    // {
+    //     newModel.materials.emplace_back( std::string( "./" ) + std::string( MaterialsData[i].MaterialName ) );
+    // }
     return newModel;
 }

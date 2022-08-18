@@ -1,3 +1,4 @@
+// TODO: remove qt, remove makes to context class
 #pragma once
 
 #include <QOpenGLContext>

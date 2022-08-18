@@ -4,70 +4,56 @@ project( ProjectMaricaCarGenerator )
 
 set( CMAKE_CXX_STANDARD 20 )
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
+set(BUILD_SHARED_LIBS OFF)
+set(wxUSE_STL ON)
+set(_CRT_SECURE_NO_WARNINGS ON)
+add_subdirectory(3rd_party/wxWidgets)
 
-find_package(Qt5Widgets CONFIG REQUIRED)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+set(SOURCES sources/main.cpp
 
-qt5_wrap_cpp(MOC_FOR_UI
-        includes/mainwindow.h
-        includes/mainopenglwidget.h
-        includes/openglsimulationwidget.h)
+        sources/widgets/app.cpp
+        sources/widgets/mainwindow.cpp
+        sources/widgets/openglview.cpp
+        sources/widgets/configurationWidget.cpp
 
-if(DEFINED BULLET_LIBRARY_DIRECTORY)
-    link_directories(${BULLET_LIBRARY_DIRECTORY})
-endif()
-
-add_executable( ProjectMaricaCarGenerator
-        ui/mainwindow.ui
-        sources/main.cpp
-        sources/mainwindow.cpp
-        sources/mainopenglwidget.cpp
-        sources/resources/model.cpp
-        sources/render_system/scene.cpp
-        sources/resources/unanimation.cpp
-        sources/object.cpp
-        sources/resources/resource_manager.cpp
+        sources/render_system/texture.cpp
+        sources/render_system/batch.cpp
+        sources/render_system/element_buffer.cpp
+        sources/render_system/fragment_shader.cpp
+        sources/render_system/vertex_array.cpp
+        sources/render_system/vertex_buffer.cpp
+        sources/render_system/vertex_shader.cpp
+        sources/render_system/shader_program.cpp
         sources/render_system/mesh.cpp
-        sources/openglsimulationwidget.cpp
-        sources/physics/physobject.cpp
-        sources/physics/physicworld.cpp
-        sources/render_system/drawable.cpp
+        sources/render_system/camera.cpp
+        sources/render_system/camera_manager.cpp
+        sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        sources/render_system/wireframe.cpp
-        sources/render_system/renderer.cpp
-        sources/render_system/garbage_collector.cpp
-        sources/utils/scope_guard.cpp
-        ${MOC_FOR_UI})
-        
-if(NOT DEFINED BULLET_INCLUDE_DIRECTORY)
-    set(BULLET_INCLUDE_DIRECTORY /usr/include/bullet)
+
+        sources/resources/model.cpp
+        sources/resources/unanimation.cpp)
+
+if(WIN32)
+        add_executable( ProjectMaricaCarGenerator WIN32
+                ${SOURCES})
+else()
+        add_executable( ProjectMaricaCarGenerator
+                ${SOURCES})
 endif()
+
+find_package(OpenGL REQUIRED)
+
+set(GLEW_USE_STATIC_LIBS TRUE)
+add_subdirectory(3rd_party/glew)
+
+add_subdirectory(3rd_party/glm)
 
 target_include_directories( ProjectMaricaCarGenerator
-        PRIVATE includes ${BULLET_INCLUDE_DIRECTORY})
+        PRIVATE includes)
 
-target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets BulletDynamics BulletCollision LinearMath)
+target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl glew_s glm::glm OpenGL::GL)
 
-target_compile_options(ProjectMaricaCarGenerator PRIVATE -Werror=unused-result)
-
-# if (UNIX)
-# target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletDynamics/libBulletDynamics.a
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/BulletCollision/libBulletCollision.a
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/LinearMath/libLinearMath.a)
-# endif (UNIX)
-
-# if (MSVC)
-# target_link_libraries(ProjectMaricaCarGenerator Qt5::Widgets
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/BulletDynamics_Debug.lib
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/BulletCollision_Debug.lib
-#         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/bullet/libs/Windows/Debug/LinearMath_Debug.lib)
-# endif (MSVC)
-
-set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
-install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )
-install( TARGETS ProjectMaricaCarGenerator
-        DESTINATION ${INSTALL_PATH} )
+# set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
+# install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )
+# install( TARGETS ProjectMaricaCarGenerator
+#         DESTINATION ${INSTALL_PATH} )

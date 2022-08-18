@@ -1,49 +1,34 @@
 #pragma once
 
-#include "resources/model.h"
-#include "object.h"
-#include "physics/physobject.h"
 #include "render_system/scene_node.h"
+#include "render_system/shader_program.h"
+#include "render_system/camera_manager.h"
+#include <memory>
 
-#include <QSharedPointer>
-#include <QVector>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
-
-class Scene
-{
+class Scene {
 public:
     Scene();
     ~Scene() = default;
 
-    void init( QSharedPointer<QOpenGLShaderProgram> shaderProgram );
+    void init(const std::shared_ptr<ShaderProgram>& shaderProgram);
 
     void clear();
 
-    QVector3D getCameraLocation();
-    void setCameraLocation( QVector3D value );
+    void draw();
+    void resizeScreen(int w, int h);
 
-    QVector3D getCameraRotation();
-    void setCameraRotation( QVector3D value );
+    std::shared_ptr<SceneNode>
+    addNode(const std::shared_ptr<SceneNode>& newNode);
 
-    float getCameraScale();
-    void setCameraScale( float value );
-
-    void draw( QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
-    void resizeScreen( int w, int h );
-
-    QSharedPointer<SceneNode> addNode( QSharedPointer<SceneNode> newNode );
-
+    std::shared_ptr<SceneNode> getActiveCamera() const;
 private:
-    void drawNode( QSharedPointer<SceneNode> node, QOpenGLFunctions* f, QOpenGLExtraFunctions* ef );
-    QVector3D camera_location;
-    QVector3D camera_rotation;
-    float camera_scale;
+    void drawNode(const std::shared_ptr<SceneNode>& node);
 
-    QSharedPointer<SceneNode> m_rootNode;
+    std::shared_ptr<SceneNode> m_rootNode;
 
-    QSharedPointer<QOpenGLShaderProgram> m_shaderProgram;
-    QSharedPointer<QOpenGLShaderProgram> m_defaultShaderProgram;
-    QMatrix4x4 m_projection;
+    std::shared_ptr<ShaderProgram> m_shaderProgram;
+    std::shared_ptr<ShaderProgram> m_defaultShaderProgram;
+    glm::mat4 m_projection;
+
+    std::unique_ptr<CameraManager> cameraManager;
 };

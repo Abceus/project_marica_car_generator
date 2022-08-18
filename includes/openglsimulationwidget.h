@@ -1,13 +1,14 @@
+// TODO!: move to wxwidget
 #pragma once
 
 #include <vector>
 #include <memory>
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-#include <GL/glu.h>
-#include <GL/gl.h>
+// #ifdef _WIN32
+// #include <Windows.h>
+// #endif
+// #include <GL/glu.h>
+// #include <GL/gl.h>
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>

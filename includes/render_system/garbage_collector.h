@@ -1,3 +1,4 @@
+// TODO!: remove qt, rework
 #pragma once
 #include <QObject>
 #include <QOpenGLTexture>
