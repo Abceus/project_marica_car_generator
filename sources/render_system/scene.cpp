@@ -4,13 +4,15 @@
 #include "render_system/camera.h"
 #include "render_system/camera_manager.h"
 #include <memory>
+#include "utils/math/vec3.h"
+#include "utils/math/rot3.h"
 
 Scene::Scene()
     : m_rootNode(std::make_shared<SceneNode>()),
       cameraManager(std::make_unique<CameraManager>()) {
     cameraManager->addCamera("main", std::make_shared<Camera>());
     cameraManager->setActiveCamera("main");
-    cameraManager->getActiveCamera()->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+    cameraManager->getActiveCamera()->setRotation(Rotor3(0.0f, 0.0f, -90.0f));
 }
 
 void Scene::init(const std::shared_ptr<ShaderProgram>& shaderProgram) {
@@ -18,8 +20,8 @@ void Scene::init(const std::shared_ptr<ShaderProgram>& shaderProgram) {
 }
 
 void Scene::clear() {
-    cameraManager->getActiveCamera()->setLocation(glm::vec3());
-    cameraManager->getActiveCamera()->setRotation(glm::vec3());
+    cameraManager->getActiveCamera()->setLocation({});
+    cameraManager->getActiveCamera()->setRotation({});
     cameraManager->getActiveCamera()->setScale(1.0f);
 
     m_rootNode->clear();
@@ -75,10 +77,10 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
-    model = glm::rotate(model, glm::radians(node->getRotation().x), glm::vec3(1, 0, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().y), glm::vec3(0, 1, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().z), glm::vec3(0, 0, 1));
-    model = glm::scale(model, node->getScale());
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().x), glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().y), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().z), glm::vec3(0, 0, 1));
+    model = glm::scale(model, node->getScale().toGLVec3());
 
     m_shaderProgram->setUniform("model", model);
 

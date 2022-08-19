@@ -3,6 +3,7 @@
 #include "render_system/mesh.h"
 #include "render_system/scene_node.h"
 #include "render_system/vertex_array.h"
+#include "utils/math/utils.h"
 #include "wx/dcclient.h"
 #include "wx/event.h"
 #include "wx/image.h"
@@ -193,16 +194,16 @@ void OpenglView::InitGL() {
         "generator\\example\\MaricaFlatoutTex\\Texture\\skin1.png");
 
     mesh = std::make_shared<Mesh>();
-    mesh->init(model);
+    // mesh->init(model);
 
     // mesh = std::make_shared<Mesh>();
-    // mesh->init(Model::readPSK("D:\\Documents\\gits\\project_marica_car_"
-    //                           "generator\\example\\MaricaFlatoutModels\\Skeleta"
-    //                           "lMesh\\pm_speedevil_model01.psk"));
+    mesh->init(Model::readPSK("D:\\Documents\\gits\\project_marica_car_"
+                              "generator\\example\\MaricaFlatoutModels\\Skeleta"
+                              "lMesh\\pm_speedevil_model01.psk"));
 
     newNode = std::make_shared<SceneNode>();
     newNode->addDrawable(mesh);
-    newNode->setLocation(glm::vec3(0.0f, 0.0f, -2.0f));
+    newNode->setLocation(Vec3f(2.0f, 0.0f, 0.0f));
 
     scene->init(shaderProgram);
     scene->addNode(newNode);
@@ -231,14 +232,20 @@ void OpenglView::onTimer(wxTimerEvent& event) {
 }
 
 void OpenglView::onMouseEvent(wxMouseEvent& event) {
-    auto shiftHold = wxGetKeyState(WXK_SHIFT);
-
-    const auto NoneState = 0b00;
-    const auto LeftButtonState = 0b01;
-    const auto RightButtonState = 0b10;
+    const auto NoneState = 0b000;
+    const auto LeftButtonState = 0b001;
+    const auto RightButtonState = 0b010;
     const auto BothButtonState = LeftButtonState | RightButtonState;
 
+    const auto ShiftState = 0b100;
+    const auto ShiftLeftButtonState = ShiftState | LeftButtonState;
+    const auto ShiftRightButtonState = ShiftState | RightButtonState;
+    const auto ShiftBothButtonState = ShiftState | BothButtonState;
+
     auto controlState = NoneState;
+    if (wxGetKeyState(WXK_SHIFT)) {
+        controlState |= ShiftState;
+    }
     if (event.LeftIsDown()) {
         controlState |= LeftButtonState;
     }
@@ -255,48 +262,55 @@ void OpenglView::onMouseEvent(wxMouseEvent& event) {
             auto currentMousePosition = glm::vec2{event.GetX(), event.GetY()};
             if (prevMousePosition) {
                 delta = currentMousePosition - prevMousePosition.value();
+            } else {
+                prevMousePosition = currentMousePosition;
             }
-            prevMousePosition = currentMousePosition;
-            auto moveSpeed = 0.01f;
+            WarpPointer(prevMousePosition->x, prevMousePosition->y);
+            auto moveSpeed = 5.0f;
             auto rotateSpeed = 1.0f;
 
-            if (shiftHold) {
-                switch (controlState) {
-                case LeftButtonState: {
-                    currentCameraLocation.x += delta.x * moveSpeed;
-                    break;
-                }
-                case RightButtonState: {
-                    currentCameraLocation.y += delta.x * moveSpeed;
-                    break;
-                }
-                case BothButtonState: {
-                    currentCameraLocation.z += delta.y * moveSpeed;
-                    break;
-                }
-                }
-            } else {
-                switch (controlState) {
-                case LeftButtonState: {
-                    currentCameraRotation.y -= delta.x * rotateSpeed;
-                    currentCameraLocation.z +=
-                        std::cos(glm::radians(currentCameraRotation.y)) *
-                        (delta.y * moveSpeed);
-                    currentCameraLocation.x +=
-                        std::sin(glm::radians(currentCameraRotation.y)) *
-                        (delta.y * moveSpeed);
-                    // wxLogDebug(std::to_string(currentCameraRotation.y).c_str());
-                    break;
-                }
-                case RightButtonState: {
-                    wxLogDebug("Right");
-                    break;
-                }
-                case BothButtonState: {
-                    wxLogDebug("Both");
-                    break;
-                }
-                }
+            switch (controlState) {
+            case ShiftLeftButtonState: {
+                currentCameraLocation.setX(currentCameraLocation.getX() +
+                                           delta.x * moveSpeed);
+                break;
+            }
+            case ShiftRightButtonState: {
+                currentCameraLocation.setY(currentCameraLocation.getY() +
+                                           delta.x * moveSpeed);
+                break;
+            }
+            case ShiftBothButtonState: {
+                currentCameraLocation.setZ(currentCameraLocation.getZ() +
+                                           delta.x * moveSpeed);
+                break;
+            }
+            case LeftButtonState: {
+                currentCameraRotation.setRoll(
+                    currentCameraRotation.getRoll() +
+                    Angle::fromDegrees(delta.x * rotateSpeed));
+                currentCameraLocation =
+                    currentCameraLocation +
+                    rotate(Vec3f(-delta.y * moveSpeed, 0.0f, 0.0f),
+                           currentCameraRotation);
+                break;
+            }
+            case RightButtonState: {
+                currentCameraRotation.setRoll(
+                    currentCameraRotation.getRoll() +
+                    Angle::fromDegrees(delta.x * rotateSpeed));
+                currentCameraRotation.setYaw(
+                    currentCameraRotation.getYaw() +
+                    Angle::fromDegrees(delta.y * rotateSpeed));
+                break;
+            }
+            case BothButtonState: {
+                currentCameraLocation = currentCameraLocation +
+                                        rotate(Vec3f(0.0f, delta.x * moveSpeed,
+                                                     -delta.y * moveSpeed),
+                                               currentCameraRotation);
+                break;
+            }
             }
             currentCamera->setLocation(currentCameraLocation);
             currentCamera->setRotation(currentCameraRotation);

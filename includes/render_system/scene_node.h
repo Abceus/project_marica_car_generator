@@ -2,7 +2,8 @@
 
 #include "drawable.h"
 #include "render_system/shader_program.h"
-#include <glm/glm.hpp>
+#include "utils/math/vec3.h"
+#include "utils/math/rot3.h"
 #include <memory>
 #include <vector>
 
@@ -11,14 +12,14 @@ class SceneNode {
 public:
     SceneNode();
 
-    glm::vec3 getLocation() const;
-    void setLocation(const glm::vec3& location);
+    Vec3f getLocation() const;
+    void setLocation(const Vec3f& location);
 
-    glm::vec3 getRotation() const;
-    void setRotation(const glm::vec3& rotation);
+    Rotor3 getRotation() const;
+    void setRotation(const Rotor3& rotation);
 
-    glm::vec3 getScale() const;
-    void setScale(const glm::vec3& scale);
+    Vec3f getScale() const;
+    void setScale(const Vec3f& scale);
     void setScale(float scale);
 
     void setParent(SceneNode* parent);
@@ -43,9 +44,9 @@ public:
     void setShaderProgram(const std::shared_ptr<ShaderProgram>& newProgram);
     std::shared_ptr<ShaderProgram> getShaderProgram() const;
 private:
-    glm::vec3 m_location;
-    glm::vec3 m_rotation;
-    glm::vec3 m_scale;
+    Vec3f m_location;
+    Rotor3 m_rotation;
+    Vec3f m_scale;
 
     SceneNode* m_parent;
     std::vector<std::shared_ptr<SceneNode>> m_childrens;

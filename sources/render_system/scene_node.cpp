@@ -7,36 +7,36 @@ SceneNode::SceneNode()
     : m_location(), m_rotation(), m_scale(1.0f, 1.0f, 1.0f), m_parent(nullptr),
       m_drawables(), m_shaderProgram(nullptr) {}
 
-glm::vec3 SceneNode::getLocation() const {
+Vec3f SceneNode::getLocation() const {
     if (m_parent) {
         return m_location + m_parent->getLocation();
     }
     return m_location;
 }
 
-void SceneNode::setLocation(const glm::vec3& location) {
+void SceneNode::setLocation(const Vec3f& location) {
     m_location = location;
 }
 
-glm::vec3 SceneNode::getRotation() const {
+Rotor3 SceneNode::getRotation() const {
     if (m_parent) {
         return m_rotation + m_parent->getRotation();
     }
     return m_rotation;
 }
 
-void SceneNode::setRotation(const glm::vec3& rotation) {
+void SceneNode::setRotation(const Rotor3& rotation) {
     m_rotation = rotation;
 }
 
-glm::vec3 SceneNode::getScale() const {
+Vec3f SceneNode::getScale() const {
     if (m_parent) {
         return m_scale * m_parent->getScale();
     }
     return m_scale;
 }
 
-void SceneNode::setScale(const glm::vec3& scale) {
+void SceneNode::setScale(const Vec3f& scale) {
     m_scale = scale;
 }
 

@@ -31,7 +31,11 @@ set(SOURCES sources/main.cpp
         sources/render_system/scene_node.cpp
 
         sources/resources/model.cpp
-        sources/resources/unanimation.cpp)
+        sources/resources/unanimation.cpp
+
+        sources/utils/math/angle.cpp
+        sources/utils/math/rot3.cpp
+        sources/utils/math/utils.cpp)
 
 if(WIN32)
         add_executable( ProjectMaricaCarGenerator WIN32
