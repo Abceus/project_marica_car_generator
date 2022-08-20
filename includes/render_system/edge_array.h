@@ -5,7 +5,7 @@
 #include <memory>
 
 
-class VertexArray {
+class EdgeArray {
 public:
     void init(const std::shared_ptr<VertexBuffer>& vertexBuffer,
               const std::shared_ptr<ElementBuffer>& elementBuffer);

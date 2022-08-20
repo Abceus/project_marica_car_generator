@@ -8,6 +8,7 @@
 #include <optional>
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
+#include "render_system/renderer.h"
 
 
 class OpenglView : public wxGLCanvas {
@@ -25,23 +26,28 @@ public:
     void onMouseEvent(wxMouseEvent& event);
     void onMouseFocusEvent(wxMouseEvent& event);
 
+    std::weak_ptr<Scene> getScene() const;
+    Renderer& getRenderer();
 private:
+    Renderer m_renderer;
+
     void InitGL();
     void ResetProjectionMode();
 
     bool inited = false;
 
-    wxGLContext* m_glRC;
+    wxGLContext* m_glRC = nullptr;
 
-    std::shared_ptr<ShaderProgram> shaderProgram;
-    std::shared_ptr<Mesh> mesh;
-    std::unique_ptr<Scene> scene;
+    // std::shared_ptr<ShaderProgram> shaderProgram;
+    // std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Scene> scene;
 
     wxTimer redrawTimer;
 
-    glm::mat4 projectionMatrix;
+    // glm::mat4 projectionMatrix;
 
-    std::shared_ptr<SceneNode> newNode;
+    // std::shared_ptr<SceneNode> newNode;
 
     std::optional<glm::vec2> prevMousePosition;
+
 };

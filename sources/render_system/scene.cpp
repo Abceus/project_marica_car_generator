@@ -3,9 +3,10 @@
 #include "glm/trigonometric.hpp"
 #include "render_system/camera.h"
 #include "render_system/camera_manager.h"
-#include <memory>
-#include "utils/math/vec3.h"
 #include "utils/math/rot3.h"
+#include "utils/math/vec3.h"
+#include <memory>
+
 
 Scene::Scene()
     : m_rootNode(std::make_shared<SceneNode>()),
@@ -77,15 +78,18 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().x), glm::vec3(1, 0, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().y), glm::vec3(0, 1, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().z), glm::vec3(0, 0, 1));
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().x),
+                        glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().y),
+                        glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().z),
+                        glm::vec3(0, 0, 1));
     model = glm::scale(model, node->getScale().toGLVec3());
 
     m_shaderProgram->setUniform("model", model);
 
     for (auto i = node->drawableBegin(); i != node->drawableEnd(); i++) {
-        (*i)->draw();
+        (*i)->draw(m_shaderProgram.get());
     }
 
     for (const auto& childNode : *node) {

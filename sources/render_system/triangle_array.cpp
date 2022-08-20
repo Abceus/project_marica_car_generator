@@ -1,8 +1,8 @@
-#include "render_system/vertex_array.h"
+#include "render_system/triangle_array.h"
 #include "render_system/vertex_buffer.h"
 #include <memory>
 
-void VertexArray::init(const std::shared_ptr<VertexBuffer>& vertexBuffer_,
+void TriangleArray::init(const std::shared_ptr<VertexBuffer>& vertexBuffer_,
               const std::shared_ptr<ElementBuffer>& elementBuffer_) {
     if (isValid()) {
         destroy();
@@ -33,7 +33,7 @@ void VertexArray::init(const std::shared_ptr<VertexBuffer>& vertexBuffer_,
     unbind();
 }
 
-void VertexArray::destroy() {
+void TriangleArray::destroy() {
     if (elementBuffer) {
         // elementBuffer->destroy();
         elementBuffer.reset();
@@ -50,32 +50,32 @@ void VertexArray::destroy() {
     }
 }
 
-void VertexArray::bind() const {
+void TriangleArray::bind() const {
     glBindVertexArray(arrayIndex);
 }
 
-void VertexArray::unbind() const {
+void TriangleArray::unbind() const {
     glBindVertexArray(INVALID_ARRAY_INDEX);
 }
 
-bool VertexArray::isValid() const {
+bool TriangleArray::isValid() const {
     return arrayIndex != INVALID_ARRAY_INDEX;
 }
 
-size_t VertexArray::getSize() const {
+size_t TriangleArray::getSize() const {
     if (elementBuffer) {
         return elementBuffer->getSize();
     }
     return 0;
 }
 
-void VertexArray::draw() const {
+void TriangleArray::draw() const {
     if (isValid()) {
         draw(0, getSize());
     }
 }
 
-void VertexArray::draw(size_t firstIndex, size_t count) const {
+void TriangleArray::draw(size_t firstIndex, size_t count) const {
     if (isValid()) {
         bind();
         glDrawElements( GL_TRIANGLES, count*3, GL_UNSIGNED_INT, reinterpret_cast<void*>(sizeof(GLuint) * firstIndex * 3) );

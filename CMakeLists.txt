@@ -20,15 +20,20 @@ set(SOURCES sources/main.cpp
         sources/render_system/batch.cpp
         sources/render_system/element_buffer.cpp
         sources/render_system/fragment_shader.cpp
-        sources/render_system/vertex_array.cpp
+        sources/render_system/triangle_array.cpp
+        sources/render_system/edge_array.cpp
         sources/render_system/vertex_buffer.cpp
         sources/render_system/vertex_shader.cpp
         sources/render_system/shader_program.cpp
         sources/render_system/mesh.cpp
+        sources/render_system/wireframe.cpp
         sources/render_system/camera.cpp
         sources/render_system/camera_manager.cpp
         sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
+        sources/render_system/renderer.cpp
+        sources/render_system/garbage_collector.cpp
+        sources/render_system/color.cpp
 
         sources/resources/model.cpp
         sources/resources/unanimation.cpp

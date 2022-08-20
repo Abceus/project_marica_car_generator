@@ -1,65 +1,64 @@
-// TODO: remove qt, remove makes to context class
 #pragma once
 
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
-#include <QSurface>
-#include <QSharedPointer>
-#include <QMap>
-#include <QString>
-#include <QOpenGLShader>
-#include <QOpenGLShaderProgram>
-#include <QPair>
-
 #include "drawable.h"
-#include "resources/resource_manager.h"
-#include "scene.h"
 #include "garbage_collector.h"
-#include <qopengltexture.h>
-#include <stack>
+#include "render_system/fragment_shader.h"
+#include "render_system/shader_program.h"
+#include "render_system/vertex_shader.h"
+#include "scene.h"
 #include "utils/scope_guard.h"
+#include <map>
+#include <stack>
+#include <wx/glcanvas.h>
 
-class Renderer
-{
+
+class Renderer {
 public:
-    Renderer( QOpenGLContext* context = nullptr, QSurface* surface = nullptr );
-    void draw( QSharedPointer<Scene> scene );
+    Renderer(wxGLContext* context = nullptr, wxGLCanvas* surface = nullptr);
+    void draw(const std::shared_ptr<Scene>& scene);
 
-    template<typename T, typename... Args>
-    QSharedPointer<T> makeDrawable( Args&&... args );
+    template <typename T, typename... Args>
+    std::shared_ptr<T> makeDrawable(Args&&... args);
 
-    QSharedPointer<QOpenGLShader> loadShader( QString path, QOpenGLShader::ShaderTypeBit type );
-    QSharedPointer<QOpenGLShaderProgram> getShaderProgram( QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader );
+    // std::shared_ptr<VertexShader> loadVertexShader(const std::string& path);
+    // std::shared_ptr<FragmentShader> loadFragmentShader(const std::string& path);
+    // std::shared_ptr<ShaderProgram>
+    // getShaderProgram(const std::shared_ptr<VertexShader>& vertexShader,
+    //                  const std::shared_ptr<FragmentShader>& fragmentShader);
+    std::shared_ptr<ShaderProgram>
+    getShaderProgram(const std::string& vertexShaderPath,
+                     const std::string& fragmentShaderPath);
 
     ScopeGuard pushContextScoped();
 
     static void pushRenderer(Renderer* newRenderer);
     static void popRenderer();
     static Renderer* getCurrentRenderer();
+
+    void setContext(wxGLContext* context);
+    void setSurface(wxGLCanvas* surface);
 private:
     void makeCurrent();
     void done();
-    QOpenGLContext* m_context;
-    QSurface* m_surface;
+    wxGLContext* m_context;
+    wxGLCanvas* m_surface;
     GarbageCollector gc;
 
     // TODO: rework
-    QMap<QString, QSharedPointer<QOpenGLShader>> m_shaders;
-    QMap<QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>, QSharedPointer<QOpenGLShaderProgram>> m_programs;
+    // std::map<std::string, std::shared_ptr<VertexShader>> m_vertexShaders;
+    // std::map<std::string, std::shared_ptr<FragmentShader>> m_fragmentShaders;
+    // std::map<std::pair<std::shared_ptr<VertexShader>,
+    //                    std::shared_ptr<FragmentShader>>,
+    //          std::shared_ptr<ShaderProgram>>
+    //     m_programs;
 
     static std::stack<Renderer*> rendererStack;
 };
 
-template<typename T, typename... Args>
-QSharedPointer<T> Renderer::makeDrawable( Args&&... args )
-{
+template <typename T, typename... Args>
+std::shared_ptr<T> Renderer::makeDrawable(Args&&... args) {
     auto contextGuard = pushContextScoped();
-    QSharedPointer<T> result( new T( std::forward<Args>(args)... ),
-        [this](T* obj)
-        {
-            gc.addResource(obj); 
-        } 
-    );
+    std::shared_ptr<T> result(new T(std::forward<Args>(args)...),
+                              [this](T* obj) { gc.addResource(obj); });
     return result;
 }

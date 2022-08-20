@@ -2,7 +2,7 @@
 #include "render_system/element_buffer.h"
 #include "render_system/mesh.h"
 #include "render_system/scene_node.h"
-#include "render_system/vertex_array.h"
+#include "render_system/triangle_array.h"
 #include "utils/math/utils.h"
 #include "wx/dcclient.h"
 #include "wx/event.h"
@@ -34,7 +34,7 @@ OpenglView::OpenglView(wxWindow* parent) : wxGLCanvas(parent) {
 
     SetWindowStyleFlag(GetWindowStyleFlag() | wxWANTS_CHARS);
 
-    scene = std::make_unique<Scene>();
+    scene = std::make_shared<Scene>();
 }
 
 void OpenglView::OnSize(wxSizeEvent& WXUNUSED(event)) {
@@ -59,7 +59,6 @@ void OpenglView::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     }
 
     // Clear
-    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Transformations
@@ -97,10 +96,11 @@ void OpenglView::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     // shaderProgram->setUniform("projection", projectionMatrix);
 
     // mesh->draw();
-    for (auto i = newNode->drawableBegin(); i != newNode->drawableEnd(); i++) {
-        // (*i)->draw();
-    }
-    scene->draw();
+    // for (auto i = newNode->drawableBegin(); i != newNode->drawableEnd(); i++)
+    // {
+    // (*i)->draw();
+    // }
+    m_renderer.draw(scene);
 
     // Flush
     glFlush();
@@ -140,34 +140,54 @@ void OpenglView::ResetProjectionMode() {
 void OpenglView::InitGL() {
     glewInit();
 
-    std::ifstream fragmentStream(
-        "D:\\Documents\\gits\\project_marica_car_"
-        "generator\\resources\\shaders\\meshfragmentshader.frag");
-    std::stringstream fragmentBuffer;
-    fragmentBuffer << fragmentStream.rdbuf();
+    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
 
-    std::ifstream vertexStream(
-        "D:\\Documents\\gits\\project_marica_car_"
-        "generator\\resources\\shaders\\meshvertexshader.vert");
-    std::stringstream vertexShaderBuffer;
-    vertexShaderBuffer << vertexStream.rdbuf();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    shaderProgram = std::make_shared<ShaderProgram>();
-    shaderProgram->init(vertexShaderBuffer.str(), fragmentBuffer.str());
+    m_renderer.setContext(m_glRC);
+    m_renderer.setSurface(this);
 
-    auto vertexArray = std::make_shared<VertexArray>();
-    std::vector<Vertex> vertices = {Vertex{-0.5f, -0.5f, 0.f, 0.f, 0.f, 0},
-                                    Vertex{0.5f, -0.5f, 0.f, 1.f, 0.f, 0},
-                                    Vertex{0.5f, 0.5f, 0.f, 1.f, 1.f, 0},
-                                    Vertex{-0.5f, 0.5f, 0.f, 0.f, 1.f, 0},
+    // std::ifstream fragmentStream(
+    //     "D:\\Documents\\gits\\project_marica_car_"
+    //     "generator\\resources\\shaders\\meshfragmentshader.frag");
+    // std::stringstream fragmentBuffer;
+    // fragmentBuffer << fragmentStream.rdbuf();
 
-                                    Vertex{0.5f, 0.5f, 0.f, 0.f, 0.f, 1},
-                                    Vertex{1.0f, 0.5f, 0.f, 1.f, 0.f, 1},
-                                    Vertex{1.0f, 1.0f, 0.f, 1.f, 1.f, 1},
-                                    Vertex{0.5f, 1.0f, 0.f, 0.f, 1.f, 1}};
+    // std::ifstream vertexStream(
+    //     "D:\\Documents\\gits\\project_marica_car_"
+    //     "generator\\resources\\shaders\\meshvertexshader.vert");
+    // std::stringstream vertexShaderBuffer;
+    // vertexShaderBuffer << vertexStream.rdbuf();
 
-    std::vector<Face> faces = {Face{{0, 1, 2}}, Face{{0, 3, 2}},
-                               Face{{4, 5, 6}}, Face{{4, 7, 6}}};
+    // auto shaderProgram = std::make_shared<ShaderProgram>();
+    // shaderProgram->init(vertexShaderBuffer.str(), fragmentBuffer.str());
+
+    // auto vertexShader =
+    // m_renderer.loadVertexShader("D:\\Documents\\gits\\project_marica_car_"
+    //     "generator\\resources\\shaders\\meshvertexshader.vert");
+    // auto fragmentShader =
+    // m_renderer.loadFragmentShader("D:\\Documents\\gits\\project_marica_car_"
+    // //     "generator\\resources\\shaders\\meshfragmentshader.frag");
+
+    auto shaderProgram = m_renderer.getShaderProgram(
+        ".\\resources\\shaders\\defaultvertexshader.vert",
+        ".\\resources\\shaders\\defaultfragmentshader.frag");
+
+    // auto vertexArray = std::make_shared<TriangleArray>();
+    // std::vector<Vertex> vertices = {Vertex{-0.5f, -0.5f, 0.f, 0.f, 0.f, 0},
+    //                                 Vertex{0.5f, -0.5f, 0.f, 1.f, 0.f, 0},
+    //                                 Vertex{0.5f, 0.5f, 0.f, 1.f, 1.f, 0},
+    //                                 Vertex{-0.5f, 0.5f, 0.f, 0.f, 1.f, 0},
+
+    //                                 Vertex{0.5f, 0.5f, 0.f, 0.f, 0.f, 1},
+    //                                 Vertex{1.0f, 0.5f, 0.f, 1.f, 0.f, 1},
+    //                                 Vertex{1.0f, 1.0f, 0.f, 1.f, 1.f, 1},
+    //                                 Vertex{0.5f, 1.0f, 0.f, 0.f, 1.f, 1}};
+
+    // std::vector<Face> faces = {Face{{0, 1, 2}}, Face{{0, 3, 2}},
+    //                            Face{{4, 5, 6}}, Face{{4, 7, 6}}};
 
     // auto vertexBuffer = std::make_shared<VertexBuffer>();
     // vertexBuffer->init(vertices);
@@ -182,31 +202,31 @@ void OpenglView::InitGL() {
     //     wxImage("D:\\Documents\\gits\\project_marica_car_"
     //             "generator\\example\\MaricaFlatoutTex\\Texture\\common.png"));
 
-    Model model;
+    // Model model;
 
-    model.vertices = vertices;
-    model.faces = faces;
-    model.materials.emplace_back(
-        "D:\\Documents\\gits\\project_marica_car_"
-        "generator\\example\\MaricaFlatoutTex\\Texture\\common.png");
-    model.materials.emplace_back(
-        "D:\\Documents\\gits\\project_marica_car_"
-        "generator\\example\\MaricaFlatoutTex\\Texture\\skin1.png");
-
-    mesh = std::make_shared<Mesh>();
-    // mesh->init(model);
+    // model.vertices = vertices;
+    // model.faces = faces;
+    // model.materials.emplace_back(
+    //     "D:\\Documents\\gits\\project_marica_car_"
+    //     "generator\\example\\MaricaFlatoutTex\\Texture\\common.png");
+    // model.materials.emplace_back(
+    //     "D:\\Documents\\gits\\project_marica_car_"
+    //     "generator\\example\\MaricaFlatoutTex\\Texture\\skin1.png");
 
     // mesh = std::make_shared<Mesh>();
-    mesh->init(Model::readPSK("D:\\Documents\\gits\\project_marica_car_"
-                              "generator\\example\\MaricaFlatoutModels\\Skeleta"
-                              "lMesh\\pm_speedevil_model01.psk"));
+    // // mesh->init(model);
 
-    newNode = std::make_shared<SceneNode>();
-    newNode->addDrawable(mesh);
-    newNode->setLocation(Vec3f(2.0f, 0.0f, 0.0f));
+    // // mesh = std::make_shared<Mesh>();
+    // mesh->init(Model::readPSK("D:\\Documents\\gits\\project_marica_car_"
+    //                           "generator\\example\\MaricaFlatoutModels\\Skeleta"
+    //                           "lMesh\\pm_speedevil_model01.psk"));
+
+    // newNode = std::make_shared<SceneNode>();
+    // newNode->addDrawable(mesh);
+    // newNode->setLocation(Vec3f(2.0f, 0.0f, 0.0f));
 
     scene->init(shaderProgram);
-    scene->addNode(newNode);
+    // scene->addNode(newNode);
 
     // batch = std::make_unique<Batch>(vertexArray, texture);
 
@@ -327,4 +347,12 @@ void OpenglView::onMouseFocusEvent(wxMouseEvent& event) {
     } else if (event.Entering()) {
         SetCursor(*wxCROSS_CURSOR);
     }
+}
+
+std::weak_ptr<Scene> OpenglView::getScene() const {
+    return scene;
+}
+
+Renderer& OpenglView::getRenderer() {
+    return m_renderer;
 }

@@ -2,7 +2,7 @@
 #include <memory>
 
 #include "render_system/element_buffer.h"
-#include "render_system/vertex_array.h"
+#include "render_system/triangle_array.h"
 #include "render_system/vertex_buffer.h"
 
 #include <wx/filefn.h>
@@ -34,7 +34,7 @@ void Mesh::init(const Model& model) {
     //             "generator\\example\\MaricaFlatoutTex\\Texture\\common.png"));
     int i = 0;
     for (const auto& elementBuffer : elementBuffers) {
-        auto vertexArray = std::make_shared<VertexArray>();
+        auto vertexArray = std::make_shared<TriangleArray>();
 
         auto newElementBuffer = std::make_shared<ElementBuffer>();
         newElementBuffer->init(elementBuffer);
@@ -61,7 +61,7 @@ void Mesh::setTexture(const std::shared_ptr<Texture>& texture, size_t index) {}
 
 void Mesh::addTexture(const std::shared_ptr<Texture>& texture) {}
 
-void Mesh::draw() const {
+void Mesh::draw(ShaderProgram* shaderProgram) const {
     for (const auto& batch : batches) {
         batch->draw();
     }

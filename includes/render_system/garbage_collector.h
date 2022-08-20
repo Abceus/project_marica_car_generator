@@ -1,18 +1,17 @@
-// TODO!: remove qt, rework
 #pragma once
-#include <QObject>
-#include <QOpenGLTexture>
 #include <set>
 #include "render_system/drawable.h"
+#include "render_system/texture.h"
 
 class GarbageCollector 
 {
 public:
+    ~GarbageCollector();
     void collect();
 
     void addResource(Drawable* resource);
-    void addResource(QOpenGLTexture* resource); // TODO: rework
+    void addResource(Texture* resource); // TODO: rework
 private:
     std::set<Drawable*> garbage;
-    std::set<QOpenGLTexture*> textureGarbage;
+    std::set<Texture*> textureGarbage;
 };

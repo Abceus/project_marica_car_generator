@@ -2,22 +2,17 @@
 #pragma once
 
 #include "drawable.h"
+#include "render_system/color.h"
+#include "render_system/edge_array.h"
+#include "render_system/shader_program.h"
 #include "resources/model.h"
 
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
-#include <QColor>
-
-class WireframeMesh : public Drawable
-{
+class WireframeMesh : public Drawable {
 public:
-    WireframeMesh( Model model, QColor color = QColor( 0, 0, 0, 255 ) );
-    Model getModel();
-    void draw( const RenderInfo& renderInfo ) override;
+    void init(const Model& model, const Color& color = Color());
+    void draw(ShaderProgram* shader) const override;
+
 private:
-    QOpenGLVertexArrayObject m_VAO;
-    QOpenGLBuffer m_VBO, m_EBO;
-    GLsizei m_VAOsize;
-    Model m_model;
-    QColor m_color;
+    std::shared_ptr<EdgeArray> edgeArray;
+    Color m_color;
 };

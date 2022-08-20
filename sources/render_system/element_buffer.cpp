@@ -15,6 +15,21 @@ void ElementBuffer::init(const std::vector<Face>& faces) {
     unbind();
 }
 
+void ElementBuffer::init(const std::vector<Edge>& edges) {
+    if (isValid()) {
+        destroy();
+    }
+
+    glGenBuffers(1, &bufferIndex);
+    size = edges.size();
+    bind();
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Edge) * edges.size(),
+                 edges.data(), GL_STATIC_DRAW);
+
+    unbind();
+}
+
 void ElementBuffer::destroy() {
     if (isValid()) {
         glDeleteBuffers(1, &bufferIndex);

@@ -1,98 +1,144 @@
 #include "render_system/renderer.h"
 #include "utils/scope_guard.h"
-#include <qopenglcontext.h>
+#include <fstream>
+#include <sstream>
 
 std::stack<Renderer*> Renderer::rendererStack;
 
-Renderer::Renderer(QOpenGLContext *context, QSurface *surface)
-    : m_context( context )
-    , m_surface( surface )
-{
+Renderer::Renderer(wxGLContext* context, wxGLCanvas* surface)
+    : m_context(context), m_surface(surface) {}
 
-}
-
-void Renderer::draw(QSharedPointer<Scene> scene)
-{
+void Renderer::draw(const std::shared_ptr<Scene>& scene) {
     auto contextGuard = pushContextScoped();
     gc.collect();
-    scene->draw( m_context->functions(), m_context->extraFunctions() );
+    scene->draw();
 }
 
-QSharedPointer<QOpenGLShader> Renderer::loadShader(QString path, QOpenGLShader::ShaderTypeBit type)
-{
-    auto found = m_shaders.find( path );
+// std::shared_ptr<VertexShader>
+// Renderer::loadVertexShader(const std::string& path) {
+//     auto found = m_vertexShaders.find(path);
 
-    if( found == m_shaders.end() )
-    {
-        makeCurrent();
-        QSharedPointer<QOpenGLShader> shader( new QOpenGLShader( type ) );
+//     if (found == m_vertexShaders.end()) {
+//         makeCurrent();
+//         std::shared_ptr<VertexShader> shader(new VertexShader());
 
-        bool success = shader->compileSourceFile( path );
-        if( !success )
-        {
-            qDebug() << "The vertex shader wasn't compiled";
-            return nullptr;
-        }
-        m_shaders.insert( path, shader );
-        return shader;
-    }
+//         std::ifstream shaderStream(path);
+//         std::stringstream shaderBuffer;
+//         shaderBuffer << shaderStream.rdbuf();
 
-    return *found;
+//         // bool success =
+//         shader->init(shaderBuffer.str());
+//         // if (!success) {
+//         //     qDebug() << "The vertex shader wasn't compiled";
+//         //     return nullptr;
+//         // }
+//         m_vertexShaders.emplace(path, shader);
+//         return shader;
+//     }
+
+//     return found->second;
+// }
+
+// std::shared_ptr<FragmentShader>
+// Renderer::loadFragmentShader(const std::string& path) {
+//     auto found = m_fragmentShaders.find(path);
+
+//     if (found == m_fragmentShaders.end()) {
+//         makeCurrent();
+//         std::shared_ptr<FragmentShader> shader(new FragmentShader());
+
+//         std::ifstream shaderStream(path);
+//         std::stringstream shaderBuffer;
+//         shaderBuffer << shaderStream.rdbuf();
+
+//         // bool success =
+//         shader->init(shaderBuffer.str());
+
+//         // if (!success) {
+//         //     qDebug() << "The vertex shader wasn't compiled";
+//         //     return nullptr;
+//         // }
+//         m_fragmentShaders.emplace(path, shader);
+//         return shader;
+//     }
+
+//     return found->second;
+// }
+
+// std::shared_ptr<ShaderProgram> Renderer::getShaderProgram(
+//     const std::shared_ptr<VertexShader>& vertexShader,
+//     const std::shared_ptr<FragmentShader>& fragmentShader) {
+//     makeCurrent();
+//     auto found = m_programs.find(std::pair<std::shared_ptr<VertexShader>,
+//                                            std::shared_ptr<FragmentShader>>(
+//         vertexShader, fragmentShader));
+//     if (found == m_programs.end()) {
+//         std::shared_ptr<ShaderProgram> shaderProgram(new ShaderProgram);
+//         shaderProgram->init(vertexShader, fragmentShader);
+//         // if (!shaderProgram->link()) {
+//         //     qDebug() << "The shader program wasn't linked";
+//         //     return nullptr;
+//         // }
+//         m_programs.emplace(std::pair<std::shared_ptr<VertexShader>,
+//                                      std::shared_ptr<FragmentShader>>(
+//                                vertexShader, fragmentShader),
+//                            shaderProgram);
+//         return shaderProgram;
+//     }
+//     return *found;
+// }
+
+std::shared_ptr<ShaderProgram>
+Renderer::getShaderProgram(const std::string& vertexShaderPath,
+                           const std::string& fragmentShaderPath) {
+    std::shared_ptr<ShaderProgram> shaderProgram(new ShaderProgram);
+
+    std::ifstream vertexShaderStream(vertexShaderPath);
+    std::stringstream vertexShaderBuffer;
+    vertexShaderBuffer << vertexShaderStream.rdbuf();
+
+    std::ifstream fragmentShaderStream(fragmentShaderPath);
+    std::stringstream fragmentShaderBuffer;
+    fragmentShaderBuffer << fragmentShaderStream.rdbuf();
+
+    shaderProgram->init(vertexShaderBuffer.str(), fragmentShaderBuffer.str());
+    return shaderProgram;
 }
 
-QSharedPointer<QOpenGLShaderProgram> Renderer::getShaderProgram(QSharedPointer<QOpenGLShader> vertexShader, QSharedPointer<QOpenGLShader> fragmentShader)
-{
-    makeCurrent();
-    auto found = m_programs.find( QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>( vertexShader, fragmentShader ) );
-    if( found == m_programs.end() )
-    {
-        QSharedPointer<QOpenGLShaderProgram> shaderProgram( new QOpenGLShaderProgram );
-        shaderProgram->addShader( vertexShader.get() );
-        shaderProgram->addShader( fragmentShader.get() );
-        if( !shaderProgram->link() )
-        {
-            qDebug() << "The shader program wasn't linked";
-            return nullptr;
-        }
-        m_programs.insert( QPair<QSharedPointer<QOpenGLShader>, QSharedPointer<QOpenGLShader>>( vertexShader, fragmentShader ), shaderProgram );
-        return shaderProgram;
-    }
-    return *found;
+void Renderer::makeCurrent() {
+    m_context->SetCurrent(*m_surface);
 }
 
-void Renderer::makeCurrent()
-{
-    m_context->makeCurrent( m_surface );
+void Renderer::done() {
+    // m_context->doneCurrent();
 }
 
-void Renderer::done()
-{
-    m_context->doneCurrent();
-}
-
-ScopeGuard Renderer::pushContextScoped()
-{
+ScopeGuard Renderer::pushContextScoped() {
     pushRenderer(this);
-    return ScopeGuard([this](){ popRenderer(); });
+    return ScopeGuard([this]() { popRenderer(); });
 }
 
-void Renderer::pushRenderer(Renderer* newRenderer) 
-{
+void Renderer::pushRenderer(Renderer* newRenderer) {
     rendererStack.push(newRenderer);
     newRenderer->makeCurrent();
 }
 
-void Renderer::popRenderer() 
-{
+void Renderer::popRenderer() {
     rendererStack.top()->done();
     rendererStack.pop();
-    if(!rendererStack.empty()) 
-    {
+    if (!rendererStack.empty()) {
         rendererStack.top()->makeCurrent();
     }
 }
 
-Renderer* Renderer::getCurrentRenderer() 
-{
+Renderer* Renderer::getCurrentRenderer() {
     return rendererStack.top();
+}
+
+void Renderer::setContext(wxGLContext* context) {
+    m_context = context;
+}
+
+void Renderer::setSurface(wxGLCanvas* surface) {
+    m_surface = surface;
 }

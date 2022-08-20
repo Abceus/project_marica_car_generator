@@ -1,10 +1,10 @@
 #include "render_system/batch.h"
 
-Batch::Batch(const std::shared_ptr<VertexArray>& vertexArray,
+Batch::Batch(const std::shared_ptr<TriangleArray>& vertexArray,
              const std::shared_ptr<Texture>& texture)
     : Batch(vertexArray, texture, 0, vertexArray->getSize()) {}
 
-Batch::Batch(const std::shared_ptr<VertexArray>& vertexArray,
+Batch::Batch(const std::shared_ptr<TriangleArray>& vertexArray,
              const std::shared_ptr<Texture>& texture, size_t firstIndex,
              size_t count)
     : vertexArray(vertexArray), texture(texture), firstIndex(firstIndex),

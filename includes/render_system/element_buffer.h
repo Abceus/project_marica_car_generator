@@ -1,9 +1,14 @@
 #pragma once
 #include "resources/model.h"
 
+struct Edge {
+    GLuint vertexes[2];
+};
+
 class ElementBuffer {
 public:
     void init(const std::vector<Face>& faces);
+    void init(const std::vector<Edge>& edges);
     void destroy();
 
     void bind() const;
