@@ -14,12 +14,12 @@ public:
     PhysicWorld();
     void init();
     std::shared_ptr<btRigidBody> addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo );
-    void update( float dt ) override;
+    void update( const std::chrono::milliseconds& dt ) override;
 private:
+    std::vector<std::shared_ptr<btRigidBody>> bodies;
     std::unique_ptr<btDefaultCollisionConfiguration> m_collisionConfiguration;
     std::unique_ptr<btCollisionDispatcher> m_dispatcher;
     std::unique_ptr<btDbvtBroadphase> m_broadphase;
     std::unique_ptr<btSequentialImpulseConstraintSolver> m_solver;
     std::unique_ptr<btDiscreteDynamicsWorld> m_dynamicsWorld;
-    std::vector<std::shared_ptr<btRigidBody>> bodies;
 };

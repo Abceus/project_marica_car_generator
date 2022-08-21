@@ -1,7 +1,9 @@
 #pragma once
 
+#include <chrono>
+
 class IUpdatable
 {
 public:
-    virtual void update( float dt ) = 0;
+    virtual void update( const std::chrono::milliseconds& dt ) = 0;
 };

@@ -20,14 +20,14 @@ void PhysicWorld::init()
     bodies.clear();
 }
 
-QSharedPointer<btRigidBody> PhysicWorld::addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo )
+std::shared_ptr<btRigidBody> PhysicWorld::addBody( btRigidBody::btRigidBodyConstructionInfo rbInfo )
 {
-    bodies.append( QSharedPointer<btRigidBody>( new btRigidBody ( rbInfo ) ) );
-    m_dynamicsWorld->addRigidBody( bodies.last().get() );
-    return bodies.last();
+    bodies.emplace_back( std::make_shared<btRigidBody>( rbInfo ) );
+    m_dynamicsWorld->addRigidBody( bodies.back().get() );
+    return bodies.back();
 }
 
-void PhysicWorld::update( float dt )
+void PhysicWorld::update( const std::chrono::milliseconds& dt )
 {
-    m_dynamicsWorld->stepSimulation( dt );
+    m_dynamicsWorld->stepSimulation( dt.count() / 1000.0f );
 }

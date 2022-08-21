@@ -9,6 +9,7 @@
 #include "wx/image.h"
 #include "wx/log.h"
 #include "wx/utils.h"
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <fstream>
@@ -28,13 +29,11 @@ OpenglView::OpenglView(wxWindow* parent) : wxGLCanvas(parent) {
 
     Bind(wxEVT_TIMER, &OpenglView::onTimer, this);
 
-    Bind(wxEVT_MOTION, &OpenglView::onMouseEvent, this);
-    Bind(wxEVT_ENTER_WINDOW, &OpenglView::onMouseFocusEvent, this);
-    Bind(wxEVT_LEAVE_WINDOW, &OpenglView::onMouseFocusEvent, this);
-
     SetWindowStyleFlag(GetWindowStyleFlag() | wxWANTS_CHARS);
 
     scene = std::make_shared<Scene>();
+    m_renderer.setContext(m_glRC);
+    m_renderer.setSurface(this);
 }
 
 void OpenglView::OnSize(wxSizeEvent& WXUNUSED(event)) {
@@ -146,8 +145,8 @@ void OpenglView::InitGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m_renderer.setContext(m_glRC);
-    m_renderer.setSurface(this);
+    // m_renderer.setContext(m_glRC);
+    // m_renderer.setSurface(this);
 
     // std::ifstream fragmentStream(
     //     "D:\\Documents\\gits\\project_marica_car_"
@@ -237,6 +236,11 @@ void OpenglView::InitGL() {
 
     redrawTimer.SetOwner(this);
     redrawTimer.Start(1000.0f / 60.0f);
+
+    updateTimer.SetOwner(this);
+    updateTimer.Start(1000.0f / 60.0f);
+
+    lastUpdate = std::chrono::steady_clock::now();
 }
 
 void OpenglView::onKeyDown(wxKeyEvent& event) {
@@ -248,104 +252,17 @@ void OpenglView::onKeyUp(wxKeyEvent& event) {
 }
 
 void OpenglView::onTimer(wxTimerEvent& event) {
-    Refresh();
-}
-
-void OpenglView::onMouseEvent(wxMouseEvent& event) {
-    const auto NoneState = 0b000;
-    const auto LeftButtonState = 0b001;
-    const auto RightButtonState = 0b010;
-    const auto BothButtonState = LeftButtonState | RightButtonState;
-
-    const auto ShiftState = 0b100;
-    const auto ShiftLeftButtonState = ShiftState | LeftButtonState;
-    const auto ShiftRightButtonState = ShiftState | RightButtonState;
-    const auto ShiftBothButtonState = ShiftState | BothButtonState;
-
-    auto controlState = NoneState;
-    if (wxGetKeyState(WXK_SHIFT)) {
-        controlState |= ShiftState;
-    }
-    if (event.LeftIsDown()) {
-        controlState |= LeftButtonState;
-    }
-    if (event.RightIsDown()) {
-        controlState |= RightButtonState;
-    }
-    if (controlState != NoneState) {
-        SetCursor(wxCursor(wxImage(1, 1)));
-        if (event.Dragging()) {
-            auto currentCamera = scene->getActiveCamera();
-            auto currentCameraLocation = currentCamera->getLocation();
-            auto currentCameraRotation = currentCamera->getRotation();
-            auto delta = glm::vec2();
-            auto currentMousePosition = glm::vec2{event.GetX(), event.GetY()};
-            if (prevMousePosition) {
-                delta = currentMousePosition - prevMousePosition.value();
-            } else {
-                prevMousePosition = currentMousePosition;
-            }
-            WarpPointer(prevMousePosition->x, prevMousePosition->y);
-            auto moveSpeed = 5.0f;
-            auto rotateSpeed = 1.0f;
-
-            switch (controlState) {
-            case ShiftLeftButtonState: {
-                currentCameraLocation.setX(currentCameraLocation.getX() +
-                                           delta.x * moveSpeed);
-                break;
-            }
-            case ShiftRightButtonState: {
-                currentCameraLocation.setY(currentCameraLocation.getY() +
-                                           delta.x * moveSpeed);
-                break;
-            }
-            case ShiftBothButtonState: {
-                currentCameraLocation.setZ(currentCameraLocation.getZ() +
-                                           delta.x * moveSpeed);
-                break;
-            }
-            case LeftButtonState: {
-                currentCameraRotation.setRoll(
-                    currentCameraRotation.getRoll() +
-                    Angle::fromDegrees(delta.x * rotateSpeed));
-                currentCameraLocation =
-                    currentCameraLocation +
-                    rotate(Vec3f(-delta.y * moveSpeed, 0.0f, 0.0f),
-                           currentCameraRotation);
-                break;
-            }
-            case RightButtonState: {
-                currentCameraRotation.setRoll(
-                    currentCameraRotation.getRoll() +
-                    Angle::fromDegrees(delta.x * rotateSpeed));
-                currentCameraRotation.setYaw(
-                    currentCameraRotation.getYaw() +
-                    Angle::fromDegrees(delta.y * rotateSpeed));
-                break;
-            }
-            case BothButtonState: {
-                currentCameraLocation = currentCameraLocation +
-                                        rotate(Vec3f(0.0f, delta.x * moveSpeed,
-                                                     -delta.y * moveSpeed),
-                                               currentCameraRotation);
-                break;
-            }
-            }
-            currentCamera->setLocation(currentCameraLocation);
-            currentCamera->setRotation(currentCameraRotation);
+    if (event.GetTimer().GetId() == updateTimer.GetId()) {
+        auto currentTime = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            currentTime - lastUpdate);
+        for (auto& updatable : updatables) {
+            updatable->update(elapsed);
         }
-    } else {
-        prevMousePosition = std::nullopt;
-        SetCursor(*wxCROSS_CURSOR);
+        lastUpdate = currentTime;
     }
-}
-
-void OpenglView::onMouseFocusEvent(wxMouseEvent& event) {
-    if (event.Leaving()) {
-        SetCursor(*wxSTANDARD_CURSOR);
-    } else if (event.Entering()) {
-        SetCursor(*wxCROSS_CURSOR);
+    else if (event.GetTimer().GetId() == redrawTimer.GetId()) {
+        Refresh();
     }
 }
 
@@ -355,4 +272,16 @@ std::weak_ptr<Scene> OpenglView::getScene() const {
 
 Renderer& OpenglView::getRenderer() {
     return m_renderer;
+}
+
+void OpenglView::addUpdatable(const std::shared_ptr<IUpdatable>& updatable) {
+    updatables.emplace(updatable);
+}
+
+void OpenglView::removeUpdatable(const std::shared_ptr<IUpdatable>& updatable) {
+    updatables.erase(updatable);
+}
+
+void OpenglView::clearUpdatables() {
+    updatables.clear();
 }

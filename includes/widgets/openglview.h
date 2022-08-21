@@ -1,15 +1,17 @@
 #pragma once
 #include "render_system/batch.h"
 #include "render_system/mesh.h"
+#include "render_system/renderer.h"
 #include "render_system/scene.h"
 #include "render_system/shader_program.h"
+#include "updatable.h"
 #include "utils/gl.h"
+#include <chrono>
 #include <memory>
 #include <optional>
+#include <set>
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
-#include "render_system/renderer.h"
-
 
 class OpenglView : public wxGLCanvas {
 public:
@@ -23,11 +25,13 @@ public:
 
     void onTimer(wxTimerEvent& event);
 
-    void onMouseEvent(wxMouseEvent& event);
-    void onMouseFocusEvent(wxMouseEvent& event);
-
     std::weak_ptr<Scene> getScene() const;
     Renderer& getRenderer();
+
+    void addUpdatable(const std::shared_ptr<IUpdatable>& updatable);
+    void removeUpdatable(const std::shared_ptr<IUpdatable>& updatable);
+    void clearUpdatables();
+
 private:
     Renderer m_renderer;
 
@@ -43,11 +47,15 @@ private:
     std::shared_ptr<Scene> scene;
 
     wxTimer redrawTimer;
+    wxTimer updateTimer;
 
     // glm::mat4 projectionMatrix;
 
     // std::shared_ptr<SceneNode> newNode;
 
-    std::optional<glm::vec2> prevMousePosition;
+    // std::optional<glm::vec2> prevMousePosition;
 
+    std::set<std::shared_ptr<IUpdatable>> updatables;
+
+    std::chrono::time_point<std::chrono::steady_clock> lastUpdate;
 };

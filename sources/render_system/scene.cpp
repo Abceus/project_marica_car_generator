@@ -77,7 +77,7 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
     }
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f));
+    model = glm::translate(model, node->getLocation().toGLVec3());
     model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().x),
                         glm::vec3(1, 0, 0));
     model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().y),

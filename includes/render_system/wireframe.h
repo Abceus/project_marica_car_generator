@@ -1,4 +1,3 @@
-// TODO!: remove qt
 #pragma once
 
 #include "drawable.h"
