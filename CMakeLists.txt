@@ -39,6 +39,7 @@ set(SOURCES sources/main.cpp
 
         sources/resources/model.cpp
         sources/resources/unanimation.cpp
+        sources/resources/resource_manager.cpp
 
         sources/physics/physicworld.cpp
         sources/physics/physobject.cpp

@@ -1,18 +1,15 @@
 #include "resources/resource_manager.h"
-#include <QImage>
 
-ResourceManager& ResourceManager::Instance()
-{
+ResourceManager& ResourceManager::Instance() {
     static ResourceManager instance;
     return instance;
 }
 
-FileResourceHolder<QImage>& ResourceManager::getImageManager() 
-{
+FileResourceHolder<wxImage>& ResourceManager::getImageManager() {
     return imageManager;
 }
 
-ResourceManager::ResourceManager()
-{
-    imageManager.setDefaultResource(QSharedPointer<QImage>(new QImage("./resources/textures/test.jpg")));
+ResourceManager::ResourceManager() {
+    imageManager.setDefaultResource(
+        std::make_shared<wxImage>("./resources/textures/test.jpg"));
 }
