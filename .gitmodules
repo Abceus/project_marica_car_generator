@@ -1,9 +1,9 @@
-[submodule ".\\3rd_party\\wxWidgets"]
-	path = .\\3rd_party\\wxWidgets
+[submodule "3rd_party/wxWidgets"]
+	path = 3rd_party/wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets.git
-[submodule ".\\3rd_party\\glm"]
-	path = .\\3rd_party\\glm
+[submodule "3rd_party/glm"]
+	path = 3rd_party/glm
 	url = https://github.com/g-truc/glm.git
-[submodule ".\\3rd_party\\bullet-physics"]
-	path = .\\3rd_party\\bullet-physics
+[submodule "3rd_party/bullet-physics"]
+	path = 3rd_party/bullet-physics
 	url = https://github.com/bulletphysics/bullet3.git
