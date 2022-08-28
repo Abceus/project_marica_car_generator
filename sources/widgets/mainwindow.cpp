@@ -2,6 +2,8 @@
 #include "render_system/scene_node.h"
 #include "utils/math/utils.h"
 #include "utils/math/vec3.h"
+#include "utils/shapes/convex_hull.h"
+#include "utils/shapes/shape.h"
 #include "widgets/configurationWidget.h"
 #include "widgets/openglview.h"
 #include "wx/button.h"
@@ -152,40 +154,16 @@ void MainWindow::openEmulationWindow() {
         });
 
         auto physicWorld = std::make_shared<PhysicWorld>();
-        m_body = std::make_shared<PhysObject>(simMainMeshNode, mainModel, 10.f,
-                                              Vec3f(10.f, 3.f, 10.f));
+        m_body = std::make_shared<PhysObject>(simMainMeshNode, std::make_shared<ConvexHull>(mainModel), 10.f);
 
         m_body->setPhysic(physicWorld->addBody(m_body->getConstructionInfo()));
 
         simulateWidget->addUpdatable(physicWorld);
         simulateWidget->addUpdatable(m_body);
 
-        Box box({500.0f, 500.0f, 10.0f});
-        auto colShapeGround = box.createPhysicShape();
+        auto box = std::make_shared<Box>(Vec3f{500.0f, 500.0f, 10.0f});
 
-        auto groundModel = box.getModel();
-
-        btTransform startTransformGround;
-        startTransformGround.setIdentity();
-        btScalar massGround(0.f);
-        bool isDynamicGround = (massGround != 0.f);
-
-        btVector3 localInertiaGround(0, 0, 0);
-        if (isDynamicGround) {
-            colShapeGround->calculateLocalInertia(massGround,
-                                                  localInertiaGround);
-        }
-
-        // startTransformGround.setOrigin(
-        //     btVector3(btScalar(0.0), btScalar(-150.0), btScalar(300.0)));
-        startTransformGround.setOrigin(Vec3f(0.0f, 0.0f, -150.0f).toBtVec3());
-
-        auto myMotionStateGround =
-            new btDefaultMotionState(startTransformGround);
-
-        btRigidBody::btRigidBodyConstructionInfo rbInfoGround(
-            massGround, myMotionStateGround, colShapeGround,
-            localInertiaGround);
+        auto groundModel = box->getModel();
 
         auto groundMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
         groundMesh->init(groundModel);
@@ -194,49 +172,24 @@ void MainWindow::openEmulationWindow() {
         groundMeshNode->setShaderProgram(shaderProgram);
         groundMeshNode->setLocation(Vec3f(0.0f, 0.0f, -150.0f));
         auto ground = std::make_shared<PhysObject>(
-            groundMeshNode, groundModel, 0.f, Vec3f(10.f, 3.f, 10.f));
-        ground->setPhysic(physicWorld->addBody(rbInfoGround));
-        // ground->setPhysic(physicWorld->addBody(ground->getConstructionInfo()));
+            groundMeshNode, box, 0.f);
+        ground->setPhysic(physicWorld->addBody(ground->getConstructionInfo()));
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(groundMeshNode);
         }
         simulateWidget->addUpdatable(ground);
 
-        Sphere sphere(10.0f);
+        auto sphere = std::make_shared<Sphere>(10.0f);
         auto sphereMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        sphereMesh->init(sphere.getModel());
+        sphereMesh->init(sphere->getModel());
         auto sphereMeshNode = std::make_shared<SceneNode>();
         sphereMeshNode->setShaderProgram(shaderProgram);
         sphereMeshNode->addDrawable(sphereMesh);
-        sphereMeshNode->setLocation({0.0f, 0.0f, 300.0f});
+        sphereMeshNode->setLocation({0.0f, 0.0f, 400.0f});
         auto spherePhys = std::make_shared<PhysObject>(
-            sphereMeshNode, sphere.getModel(), 10.f, Vec3f(10.f, 3.f, 10.f));
+            sphereMeshNode, sphere, 10.f);
 
-        btTransform startSphereTransform;
-        startSphereTransform.setIdentity();
-        btScalar massSphere(10.f);
-        bool isDynamicSphere = (massSphere != 0.f);
-
-        auto colShapeSphere = sphere.createPhysicShape();
-        btVector3 localInertiaSphere(0, 0, 0);
-        if (isDynamicSphere) {
-            colShapeSphere->calculateLocalInertia(massSphere,
-                                                  localInertiaSphere);
-        }
-
-        // startTransformGround.setOrigin(
-        //     btVector3(btScalar(0.0), btScalar(-150.0), btScalar(300.0)));
-        startSphereTransform.setOrigin(
-            btVector3(btScalar(0.0), btScalar(400.0), btScalar(0.0)));
-
-        auto myMotionStateSphere =
-            new btDefaultMotionState(startSphereTransform);
-
-        btRigidBody::btRigidBodyConstructionInfo rbInfoSphere(
-            massSphere, myMotionStateSphere, colShapeSphere,
-            localInertiaSphere);
-
-        spherePhys->setPhysic(physicWorld->addBody(rbInfoSphere));
+        spherePhys->setPhysic(physicWorld->addBody(spherePhys->getConstructionInfo()));
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(sphereMeshNode);
         }

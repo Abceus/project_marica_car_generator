@@ -39,6 +39,7 @@ set(SOURCES sources/main.cpp
         sources/render_system/camera/free_camera_controller.cpp
         
         sources/resources/model.cpp
+        sources/resources/wireframe_model.cpp
         sources/resources/unanimation.cpp
         sources/resources/resource_manager.cpp
         
@@ -51,7 +52,8 @@ set(SOURCES sources/main.cpp
         sources/utils/math/quaternion.cpp
 
         sources/utils/shapes/box.cpp
-        sources/utils/shapes/sphere.cpp)
+        sources/utils/shapes/sphere.cpp
+        sources/utils/shapes/convex_hull.cpp)
 
 if(WIN32)
         add_executable( ProjectMaricaCarGenerator WIN32

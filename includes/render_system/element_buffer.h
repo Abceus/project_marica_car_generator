@@ -1,9 +1,6 @@
 #pragma once
 #include "resources/model.h"
-
-struct Edge {
-    GLuint vertexes[2];
-};
+#include "resources/wireframe_model.h"
 
 class ElementBuffer {
 public:

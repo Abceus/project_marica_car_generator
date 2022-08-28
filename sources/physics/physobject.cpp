@@ -3,17 +3,13 @@
 #include "utils/math/rot3.h"
 #include "utils/math/vec3.h"
 #include "wx/log.h"
+#include <memory>
 
 PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,
-                       const Model& physModel, float mass, Vec3f size) {
-    m_node = node;
-    colShape = std::make_unique<btConvexHullShape>();
+                       const std::shared_ptr<IShape>& shape, float mass)
+    : m_node(node), shape(shape) {
+    colShape = std::unique_ptr<btCollisionShape>(shape->createPhysicShape());
 
-    auto verts = physModel.vertices;
-    for (auto& vert : verts) {
-        static_cast<btConvexHullShape*>(colShape.get())
-            ->addPoint(Vec3f(vert.X, vert.Y, vert.Z).toBtVec3());
-    }
     btTransform startTransform;
     startTransform.setIdentity();
     m_mass = mass;
@@ -29,44 +25,17 @@ void PhysObject::update(const std::chrono::milliseconds& dt) {
     physic->getMotionState()->getWorldTransform(transform);
     m_node->setLocation(Vec3f::fromBtVec3(transform.getOrigin()));
 
-    wxLogDebug((std::string("x: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getX())).c_str());
-    wxLogDebug((std::string("y: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getY())).c_str());
-    wxLogDebug((std::string("z: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getZ())).c_str());
-
-    btQuaternion rotation = physic->getWorldTransform().getRotation();
-    // btScalar yawZ;
-    // btScalar pitchY;
-    // btScalar rollX;
-    // rotation.getEulerZYX(yawZ, pitchY, rollX);
-    // Rotor3 rot;
-    // rot.setPitch(Angle::fromRadians(-yawZ));
-    // rot.setYaw(Angle::fromRadians(rollX));
-    // rot.setRoll(Angle::fromRadians(pitchY));
-    m_node->setRotation(Quaternion::fromBtQuat(rotation));
+    m_node->setRotation(
+        Quaternion::fromBtQuat(physic->getWorldTransform().getRotation()));
 }
 
 void PhysObject::setPhysic(const std::shared_ptr<btRigidBody>& newBody) {
     physic = newBody;
-    //    physic->getWorldTransform().setOrigin(btVector3(position.x(),
-    //    position.y(), position.z()));
 }
 
 std::shared_ptr<btRigidBody> PhysObject::getPhysics() const {
     return physic;
 }
-
-// QVector3D PhysObject::getPosition() const
-//{
-//     btTransform transform;
-//     physic->getMotionState()->getWorldTransform( transform );
-//     return QVector3D( transform.getOrigin().x(), transform.getOrigin().y(),
-//     transform.getOrigin().z() );
-// }
-
-// QQuaternion PhysObject::getRotation() const {
-//     btQuaternion rotation = physic->getWorldTransform().getRotation();
-//     return {rotation.w(), rotation.x(), rotation.y(), rotation.z()};
-// }
 
 btRigidBody::btRigidBodyConstructionInfo PhysObject::getConstructionInfo() {
     bool isDynamic = (m_mass != 0.f);
