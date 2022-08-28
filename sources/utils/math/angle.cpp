@@ -42,6 +42,10 @@ Angle Angle::operator/(const Angle& other) const {
     return Angle::fromDegrees(degrees / other.degrees);
 }
 
+Angle Angle::operator/(int other) const {
+    return Angle::fromDegrees(degrees / other);
+}
+
 bool Angle::operator==(const Angle& other) const {
     return degrees == other.degrees;
 }

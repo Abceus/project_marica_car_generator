@@ -2,8 +2,10 @@
 
 #include "drawable.h"
 #include "render_system/shader_program.h"
+#include "render_system/transform.h"
+#include "utils/math/matrix.h"
 #include "utils/math/vec3.h"
-#include "utils/math/rot3.h"
+#include "utils/math/quaternion.h"
 #include <memory>
 #include <vector>
 
@@ -13,14 +15,28 @@ public:
     SceneNode();
 
     Vec3f getLocation() const;
+    Vec3f getGlobalLocation() const;
+    Matrixf44 getLocationMatrix() const;
+    Matrixf44 getGlobalLocationMatrix() const;
     void setLocation(const Vec3f& location);
 
-    Rotor3 getRotation() const;
-    void setRotation(const Rotor3& rotation);
+    Quaternion getRotation() const;
+    Quaternion getGlobalRotation() const;
+    Matrixf44 getRotationMatrix() const;
+    Matrixf44 getGlobalRotationMatrix() const;
+    void setRotation(const Quaternion& rotation);
 
     Vec3f getScale() const;
+    Vec3f getGlobalScale() const;
+    Matrixf44 getScaleMatrix() const;
+    Matrixf44 getGlobalScaleMatrix() const;
     void setScale(const Vec3f& scale);
     void setScale(float scale);
+
+    Matrixf44 getTransformMatrix() const;
+    Matrixf44 getGlobalTransformMatrix() const;
+
+    Transform getTransform() const;
 
     void setParent(SceneNode* parent);
 
@@ -44,9 +60,7 @@ public:
     void setShaderProgram(const std::shared_ptr<ShaderProgram>& newProgram);
     std::shared_ptr<ShaderProgram> getShaderProgram() const;
 private:
-    Vec3f m_location;
-    Rotor3 m_rotation;
-    Vec3f m_scale;
+    Transform transform;
 
     SceneNode* m_parent;
     std::vector<std::shared_ptr<SceneNode>> m_childrens;

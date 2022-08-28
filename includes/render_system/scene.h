@@ -1,9 +1,11 @@
 #pragma once
 
+#include "render_system/camera_manager.h"
 #include "render_system/scene_node.h"
 #include "render_system/shader_program.h"
-#include "render_system/camera_manager.h"
+#include "render_system/transform.h"
 #include <memory>
+
 
 class Scene {
 public:
@@ -21,8 +23,10 @@ public:
     addNode(const std::shared_ptr<SceneNode>& newNode);
 
     std::shared_ptr<SceneNode> getActiveCamera() const;
+
 private:
-    void drawNode(const std::shared_ptr<SceneNode>& node);
+    void drawNode(const std::shared_ptr<SceneNode>& node,
+                  const Transform& parentTransform = Transform());
 
     std::shared_ptr<SceneNode> m_rootNode;
 

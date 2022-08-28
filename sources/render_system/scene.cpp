@@ -1,19 +1,19 @@
 #include "render_system/scene.h"
+#include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "glm/trigonometric.hpp"
 #include "render_system/camera.h"
 #include "render_system/camera_manager.h"
+#include "utils/math/matrix.h"
 #include "utils/math/rot3.h"
 #include "utils/math/vec3.h"
 #include <memory>
-
 
 Scene::Scene()
     : m_rootNode(std::make_shared<SceneNode>()),
       cameraManager(std::make_unique<CameraManager>()) {
     cameraManager->addCamera("main", std::make_shared<Camera>());
     cameraManager->setActiveCamera("main");
-    cameraManager->getActiveCamera()->setRotation(Rotor3(0.0f, 0.0f, -90.0f));
 }
 
 void Scene::init(const std::shared_ptr<ShaderProgram>& shaderProgram) {
@@ -49,7 +49,8 @@ Scene::addNode(const std::shared_ptr<SceneNode>& newNode) {
     return newNode;
 }
 
-void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
+void Scene::drawNode(const std::shared_ptr<SceneNode>& node,
+                     const Transform& parentTransform) {
     bool shaderChanged = true;
     if (node->getShaderProgram()) {
         if (m_shaderProgram != node->getShaderProgram()) {
@@ -76,17 +77,16 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
         m_shaderProgram->setUniform("projection", m_projection);
     }
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, node->getLocation().toGLVec3());
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().x),
-                        glm::vec3(1, 0, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().y),
-                        glm::vec3(0, 1, 0));
-    model = glm::rotate(model, glm::radians(node->getRotation().toGLVec3().z),
-                        glm::vec3(0, 0, 1));
-    model = glm::scale(model, node->getScale().toGLVec3());
+    Matrixf44 model(1.0f);
+    model = model.translate(model, node->getGlobalLocation());
+    model = model.rotate(model, node->getGlobalRotation());
+    model = model.scale(model, node->getGlobalScale());
+    m_shaderProgram->setUniform("model", model.getGLMat());
 
-    m_shaderProgram->setUniform("model", model);
+    // glm::mat4 m(1.0f);
+
+    // m = glm::translate(m, node->getLocation().toGLVec3());
+    // m_shaderProgram->setUniform("model", m);
 
     for (auto i = node->drawableBegin(); i != node->drawableEnd(); i++) {
         (*i)->draw(m_shaderProgram.get());

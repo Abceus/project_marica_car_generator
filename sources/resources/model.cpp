@@ -46,9 +46,9 @@ Model Model::readPSK( const std::string &filename )
 
     for( size_t i=0; i<WedgesHeader.DataCount; i++ )
     {
-        newModel.vertices[i].X = PointsData[WedgesData[i].PointIndex].Y;
-        newModel.vertices[i].Y = PointsData[WedgesData[i].PointIndex].Z;
-        newModel.vertices[i].Z = -PointsData[WedgesData[i].PointIndex].X;
+        newModel.vertices[i].X = PointsData[WedgesData[i].PointIndex].X;
+        newModel.vertices[i].Y = PointsData[WedgesData[i].PointIndex].Y;
+        newModel.vertices[i].Z = PointsData[WedgesData[i].PointIndex].Z;
         newModel.vertices[i].U = WedgesData[i].U;
         newModel.vertices[i].V = WedgesData[i].V;
         newModel.vertices[i].MaterialIndex = WedgesData[i].MatIndex;

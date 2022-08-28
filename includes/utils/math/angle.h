@@ -10,6 +10,7 @@ public:
     Angle operator-(const Angle& other) const;
     Angle operator*(const Angle& other) const;
     Angle operator/(const Angle& other) const;
+    Angle operator/(int other) const;
 
     bool operator==(const Angle& other) const;
     bool operator>(const Angle& other) const;

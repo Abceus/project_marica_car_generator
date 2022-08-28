@@ -34,19 +34,24 @@ set(SOURCES sources/main.cpp
         sources/render_system/renderer.cpp
         sources/render_system/garbage_collector.cpp
         sources/render_system/color.cpp
+        sources/render_system/transform.cpp
 
         sources/render_system/camera/free_camera_controller.cpp
-
+        
         sources/resources/model.cpp
         sources/resources/unanimation.cpp
         sources/resources/resource_manager.cpp
-
+        
         sources/physics/physicworld.cpp
         sources/physics/physobject.cpp
-
+        
         sources/utils/math/angle.cpp
         sources/utils/math/rot3.cpp
-        sources/utils/math/utils.cpp)
+        sources/utils/math/utils.cpp
+        sources/utils/math/quaternion.cpp
+
+        sources/utils/shapes/box.cpp
+        sources/utils/shapes/sphere.cpp)
 
 if(WIN32)
         add_executable( ProjectMaricaCarGenerator WIN32

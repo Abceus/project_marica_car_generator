@@ -1,5 +1,8 @@
 #include "physics/physobject.h"
+#include "utils/math/quaternion.h"
+#include "utils/math/rot3.h"
 #include "utils/math/vec3.h"
+#include "wx/log.h"
 
 PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,
                        const Model& physModel, float mass, Vec3f size) {
@@ -9,18 +12,14 @@ PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,
     auto verts = physModel.vertices;
     for (auto& vert : verts) {
         static_cast<btConvexHullShape*>(colShape.get())
-            ->addPoint(btVector3(vert.X, vert.Y, vert.Z));
+            ->addPoint(Vec3f(vert.X, vert.Y, vert.Z).toBtVec3());
     }
     btTransform startTransform;
     startTransform.setIdentity();
     m_mass = mass;
     auto location = node->getLocation();
-    startTransform.setOrigin(
-        btVector3(location.getX(), location.getY(), location.getZ()));
-    // auto rotationQuaternion = QQuaternion::fromEulerAngles(node->getRotation());
-    // startTransform.setRotation(
-    //     btQuaternion(rotationQuaternion.x(), rotationQuaternion.y(),
-    //                  rotationQuaternion.z(), rotationQuaternion.length()));
+    startTransform.setOrigin(location.toBtVec3());
+    startTransform.setRotation(node->getRotation().toBtQuat());
 
     myMotionState = std::make_unique<btDefaultMotionState>(startTransform);
 }
@@ -28,19 +27,32 @@ PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,
 void PhysObject::update(const std::chrono::milliseconds& dt) {
     btTransform transform;
     physic->getMotionState()->getWorldTransform(transform);
-    m_node->setLocation(Vec3f(transform.getOrigin().x(),
-                                  transform.getOrigin().y(),
-                                  transform.getOrigin().z()));
+    m_node->setLocation(Vec3f::fromBtVec3(transform.getOrigin()));
 
-    // btQuaternion rotation = physic->getWorldTransform().getRotation();
-    // m_node->setRotation( QQuaternion( rotation.w(), rotation.x(),
-    // rotation.y(), rotation.z() ).toEulerAngles() );
+    wxLogDebug((std::string("x: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getX())).c_str());
+    wxLogDebug((std::string("y: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getY())).c_str());
+    wxLogDebug((std::string("z: ") + std::to_string(Vec3f::fromBtVec3(transform.getOrigin()).getZ())).c_str());
+
+    btQuaternion rotation = physic->getWorldTransform().getRotation();
+    // btScalar yawZ;
+    // btScalar pitchY;
+    // btScalar rollX;
+    // rotation.getEulerZYX(yawZ, pitchY, rollX);
+    // Rotor3 rot;
+    // rot.setPitch(Angle::fromRadians(-yawZ));
+    // rot.setYaw(Angle::fromRadians(rollX));
+    // rot.setRoll(Angle::fromRadians(pitchY));
+    m_node->setRotation(Quaternion::fromBtQuat(rotation));
 }
 
 void PhysObject::setPhysic(const std::shared_ptr<btRigidBody>& newBody) {
     physic = newBody;
     //    physic->getWorldTransform().setOrigin(btVector3(position.x(),
     //    position.y(), position.z()));
+}
+
+std::shared_ptr<btRigidBody> PhysObject::getPhysics() const {
+    return physic;
 }
 
 // QVector3D PhysObject::getPosition() const

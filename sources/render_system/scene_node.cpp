@@ -1,47 +1,92 @@
 #include "render_system/scene_node.h"
 #include "render_system/drawable.h"
+#include "render_system/transform.h"
+#include "utils/math/matrix.h"
+#include "utils/math/utils.h"
 
 #include <algorithm>
 
 SceneNode::SceneNode()
-    : m_location(), m_rotation(), m_scale(1.0f, 1.0f, 1.0f), m_parent(nullptr),
-      m_drawables(), m_shaderProgram(nullptr) {}
+    : transform(), m_parent(nullptr), m_drawables(), m_shaderProgram(nullptr) {}
 
 Vec3f SceneNode::getLocation() const {
+    return transform.getLocation();
+}
+
+Vec3f SceneNode::getGlobalLocation() const {
     if (m_parent) {
-        return m_location + m_parent->getLocation();
+        return Matrixf44::apply(m_parent->getGlobalTransformMatrix(),
+                                getLocation());
     }
-    return m_location;
+    return getLocation();
 }
 
 void SceneNode::setLocation(const Vec3f& location) {
-    m_location = location;
+    transform.setLocation(location);
 }
 
-Rotor3 SceneNode::getRotation() const {
+Quaternion SceneNode::getRotation() const {
+    return transform.getRotation();
+}
+
+Quaternion SceneNode::getGlobalRotation() const {
     if (m_parent) {
-        return m_rotation + m_parent->getRotation();
+        auto matrix = m_parent->getGlobalRotationMatrix() * getRotationMatrix();
+        return getQuaternionFromMatrix(matrix);
     }
-    return m_rotation;
+    return getRotation();
 }
 
-void SceneNode::setRotation(const Rotor3& rotation) {
-    m_rotation = rotation;
+Matrixf44 SceneNode::getRotationMatrix() const {
+    return transform.getRotationMatrix();
+}
+
+Matrixf44 SceneNode::getGlobalRotationMatrix() const {
+    if (m_parent) {
+        return m_parent->getGlobalRotationMatrix() * getRotationMatrix();
+    }
+    return getRotationMatrix();
+}
+
+void SceneNode::setRotation(const Quaternion& rotation) {
+    transform.setRotation(rotation);
 }
 
 Vec3f SceneNode::getScale() const {
+    return transform.getScale();
+}
+
+Vec3f SceneNode::getGlobalScale() const {
     if (m_parent) {
-        return m_scale * m_parent->getScale();
+        auto tm = getGlobalTransformMatrix();
+        return {Vec3f(tm[0][0], tm[1][0], tm[2][0]).length(),
+                Vec3f(tm[0][1], tm[1][1], tm[2][1]).length(),
+                Vec3f(tm[0][2], tm[1][2], tm[2][2]).length()};
     }
-    return m_scale;
+    return getScale();
 }
 
 void SceneNode::setScale(const Vec3f& scale) {
-    m_scale = scale;
+    transform.setScale(scale);
 }
 
 void SceneNode::setScale(float scale) {
-    m_scale = {scale, scale, scale};
+    transform.setScale(scale);
+}
+
+Matrixf44 SceneNode::getTransformMatrix() const {
+    return transform.getMatrix();
+}
+
+Matrixf44 SceneNode::getGlobalTransformMatrix() const {
+    if (m_parent) {
+        return m_parent->getGlobalTransformMatrix() * getTransformMatrix();
+    }
+    return getTransformMatrix();
+}
+
+Transform SceneNode::getTransform() const {
+    return transform;
 }
 
 void SceneNode::setParent(SceneNode* parent) {

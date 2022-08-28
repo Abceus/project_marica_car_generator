@@ -245,6 +245,7 @@ void OpenglView::InitGL() {
 
 void OpenglView::onKeyDown(wxKeyEvent& event) {
     wxLogDebug("Key down");
+    event.Skip();
 }
 
 void OpenglView::onKeyUp(wxKeyEvent& event) {

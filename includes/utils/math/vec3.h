@@ -1,6 +1,12 @@
 #pragma once
+#include "LinearMath/btVector3.h"
 #include <cmath>
 #include <glm/glm.hpp>
+
+enum class Vec3Type {
+    Coords,
+    Size
+};
 
 template <typename T>
 class Vec3 {
@@ -22,8 +28,11 @@ public:
     template <typename Y>
     operator Vec3<Y>() const;
 
-    glm::vec3 toGLVec3() const;
+    glm::vec3 toGLVec3(Vec3Type type = Vec3Type::Coords) const;
     static Vec3<T> fromGLVec3(const glm::vec3& other);
+
+    btVector3 toBtVec3(Vec3Type type = Vec3Type::Coords) const;
+    static Vec3<T> fromBtVec3(const btVector3& other);
 
     Vec3<T> operator+(const Vec3<T>& other) const;
     Vec3<T> operator-(const Vec3<T>& other) const;
@@ -35,7 +44,7 @@ public:
     Vec3<T> operator*(T factor) const;
     Vec3<T> operator/(T factor) const;
 
-    bool operator ==(const Vec3<T>& other) const;
+    bool operator==(const Vec3<T>& other) const;
 
     T length() const;
 
@@ -73,13 +82,33 @@ Vec3<T>::operator Vec3<Y>() const {
 }
 
 template <typename T>
-glm::vec3 Vec3<T>::toGLVec3() const {
-    return {static_cast<float>(y), static_cast<float>(z), static_cast<float>(-x)};
+glm::vec3 Vec3<T>::toGLVec3(Vec3Type type) const {
+    glm::vec3 result{static_cast<float>(y), static_cast<float>(z),
+                static_cast<float>(-x)};
+    if(type == Vec3Type::Size) {
+        result = glm::abs(result); 
+    }
+    return result;
 }
 
 template <typename T>
 Vec3<T> Vec3<T>::fromGLVec3(const glm::vec3& other) {
     return {-other.z, other.x, other.y};
+}
+
+template <typename T>
+btVector3 Vec3<T>::toBtVec3(Vec3Type type) const {
+    btVector3 result{static_cast<float>(y), static_cast<float>(z),
+            static_cast<float>(-x)};
+    if(type == Vec3Type::Size) {
+        result = result.absolute();
+    }
+    return result;
+}
+
+template <typename T>
+Vec3<T> Vec3<T>::fromBtVec3(const btVector3& other) {
+    return {-other.z(), other.x(), other.y()};
 }
 
 template <typename T>
@@ -123,13 +152,13 @@ Vec3<T> Vec3<T>::operator/(T factor) const {
 }
 
 template <typename T>
-bool Vec3<T>::operator ==(const Vec3<T>& other) const {
+bool Vec3<T>::operator==(const Vec3<T>& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
 
 template <typename T>
 T Vec3<T>::length() const {
-    return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+    return sqrt(pow(x, static_cast<T>(2)) + pow(y, static_cast<T>(2)) + pow(z, static_cast<T>(2)));
 }
 
 template <typename T>

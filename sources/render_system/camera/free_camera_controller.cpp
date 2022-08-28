@@ -1,4 +1,6 @@
 #include "render_system/camera/free_camera_controller.h"
+#include "utils/math/matrix.h"
+#include "utils/math/quaternion.h"
 #include "utils/math/utils.h"
 
 FreeCameraController::FreeCameraController(OpenglView* openglView)
@@ -35,7 +37,8 @@ void FreeCameraController::onMouseEvent(wxMouseEvent& event) {
             auto currentCamera =
                 openglView->getScene().lock()->getActiveCamera();
             auto currentCameraLocation = currentCamera->getLocation();
-            auto currentCameraRotation = currentCamera->getRotation();
+            auto currentCameraRotation =
+                currentCamera->getRotation().toEulerAngles();
             auto delta = glm::vec2();
             auto currentMousePosition = glm::vec2{event.GetX(), event.GetY()};
             if (prevMousePosition) {
@@ -64,34 +67,34 @@ void FreeCameraController::onMouseEvent(wxMouseEvent& event) {
                 break;
             }
             case LeftButtonState: {
-                currentCameraRotation.setRoll(
-                    currentCameraRotation.getRoll() +
+                currentCameraRotation.setYaw(
+                    currentCameraRotation.getYaw() +
                     Angle::fromDegrees(delta.x * rotateSpeed));
                 currentCameraLocation =
                     currentCameraLocation +
-                    rotate(Vec3f(-delta.y * moveSpeed, 0.0f, 0.0f),
-                           currentCameraRotation);
+                    Matrixf44::apply(currentCamera->getRotationMatrix(),
+                                     Vec3f(-delta.y * moveSpeed, 0.0f, 0.0f));
                 break;
             }
             case RightButtonState: {
-                currentCameraRotation.setRoll(
-                    currentCameraRotation.getRoll() +
-                    Angle::fromDegrees(delta.x * rotateSpeed));
                 currentCameraRotation.setYaw(
                     currentCameraRotation.getYaw() +
+                    Angle::fromDegrees(delta.x * rotateSpeed));
+                currentCameraRotation.setPitch(
+                    currentCameraRotation.getPitch() +
                     Angle::fromDegrees(delta.y * rotateSpeed));
                 break;
             }
             case BothButtonState: {
                 currentCameraLocation = currentCameraLocation +
-                                        rotate(Vec3f(0.0f, delta.x * moveSpeed,
-                                                     -delta.y * moveSpeed),
-                                               currentCameraRotation);
+                                        Matrixf44::apply(currentCamera->getRotationMatrix(),
+                                     Vec3f(0.0f, 0.0f, -delta.y * moveSpeed));
                 break;
             }
             }
             currentCamera->setLocation(currentCameraLocation);
-            currentCamera->setRotation(currentCameraRotation);
+            currentCamera->setRotation(
+                Quaternion::fromEulerAngles(currentCameraRotation));
         }
     } else {
         prevMousePosition = std::nullopt;

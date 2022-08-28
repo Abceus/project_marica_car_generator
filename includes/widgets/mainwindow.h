@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <wx/frame.h>
+#include "physics/physobject.h"
 #include "render_system/scene_node.h"
 #include "widgets/openglview.h"
 #include "wx/msw/window.h"
@@ -23,4 +24,6 @@ private:
 
     std::unique_ptr<CameraController> mainEditorCameraController;
     std::unique_ptr<CameraController> simulationEditorCameraController;
+
+    std::shared_ptr<PhysObject> m_body;
 };

@@ -16,6 +16,7 @@ public:
                float mass, Vec3f size = Vec3f());
     void update(const std::chrono::milliseconds& dt) override;
     void setPhysic(const std::shared_ptr<btRigidBody>& newBody);
+    std::shared_ptr<btRigidBody> getPhysics() const;
     //    QVector3D getPosition() const override;
     // QQuaternion getRotation() const;
     btRigidBody::btRigidBodyConstructionInfo getConstructionInfo();

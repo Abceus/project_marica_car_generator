@@ -6,15 +6,15 @@ class Rotor3 {
 public:
     Rotor3(float pitchDegrees, float yawDegrees, float rollDegrees);
 
-    Rotor3(Angle pitch = Angle(), Angle yaw = Angle(), Angle roll = Angle());
+    Rotor3(Angle roll = Angle(), Angle pitch = Angle(), Angle yaw = Angle());
 
+    Angle getRoll() const;
     Angle getPitch() const;
     Angle getYaw() const;
-    Angle getRoll() const;
 
+    void setRoll(Angle roll);
     void setPitch(Angle pitch);
     void setYaw(Angle yaw);
-    void setRoll(Angle roll);
 
     glm::vec3 toGLVec3() const;
     static Rotor3 fromGLVec3(const glm::vec3& other);
@@ -37,7 +37,7 @@ public:
     // Vec3<T> rotate(const Vec3<T>& origin) const;
 
 private:
+    Angle roll;
     Angle pitch;
     Angle yaw;
-    Angle roll;
 };

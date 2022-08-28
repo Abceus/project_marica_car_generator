@@ -1,8 +1,11 @@
 #pragma once
 
 #include <array>
+#include <glm/glm.hpp>
+#include <vcruntime.h>
 
 #include "utils/math/angle.h"
+#include "utils/math/quaternion.h"
 #include "utils/math/vec3.h"
 
 template <typename T, size_t rowsAmount, size_t columnsAmount>
@@ -11,6 +14,10 @@ public:
     Matrix();
 
     Matrix(T defaultValue);
+
+    Matrix(const std::array<std::array<T, columnsAmount>, rowsAmount>& data);
+
+    Matrix(std::initializer_list<std::array<T, columnsAmount>> l);
 
     template <size_t otherRowsAmount, size_t otherColumnsAmount,
               typename Enabled = typename std::enable_if<
@@ -53,7 +60,15 @@ public:
     static Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>& origin,
                                   const Vec3<T>& axis, Angle angle);
 
+    static Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>& origin,
+                                  const Quaternion& quaternion);
+
     static Vec3<T> apply(const Matrix<T, 4, 4>& matrix, const Vec3<T>& origin);
+
+    glm::mat<columnsAmount, rowsAmount, float, glm::defaultp> getGLMat() const;
+
+    static Matrix<T, rowsAmount, columnsAmount> fromGLMat(
+        const glm::mat<columnsAmount, rowsAmount, float, glm::defaultp>& value);
 
 private:
     std::array<std::array<T, columnsAmount>, rowsAmount> m_data;
@@ -78,6 +93,22 @@ Matrix<T, rowsAmount, columnsAmount>::Matrix(T defaultValue) {
 
     for (size_t i = 0; i < std::min(rowsAmount, columnsAmount); i++) {
         m_data[i][i] = defaultValue;
+    }
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+Matrix<T, rowsAmount, columnsAmount>::Matrix(
+    const std::array<std::array<T, columnsAmount>, rowsAmount>& data)
+    : m_data(data) {}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+Matrix<T, rowsAmount, columnsAmount>::Matrix(
+    std::initializer_list<std::array<T, columnsAmount>> list) {
+    // static_assert(l.size() == rowsAmount);
+    size_t i = 0;
+    for (const auto& l : list) {
+        m_data[i] = l;
+        ++i;
     }
 }
 
@@ -198,9 +229,9 @@ Matrix<T, 4, 4>
 Matrix<T, rowsAmount, columnsAmount>::scale(const Matrix<T, 4, 4>& origin,
                                             const Vec3<T>& factor) {
     Matrix<T, 4, 4> result(1);
-    result[0][0] = factor.x;
-    result[1][1] = factor.y;
-    result[2][3] = factor.z;
+    result[0][0] = factor.getX();
+    result[1][1] = factor.getY();
+    result[2][2] = factor.getZ();
     return origin * result;
 }
 
@@ -229,7 +260,30 @@ Matrix<T, rowsAmount, columnsAmount>::rotate(const Matrix<T, 4, 4>& origin,
 }
 
 template <typename T, size_t rowsAmount, size_t columnsAmount>
-Vec3<T> Matrix<T, rowsAmount, columnsAmount>::apply(const Matrix<T, 4, 4>& matrix, const Vec3<T>& origin) {
+Matrix<T, 4, 4>
+Matrix<T, rowsAmount, columnsAmount>::rotate(const Matrix<T, 4, 4>& origin,
+                                             const Quaternion& quaternion) {
+    auto x = quaternion.getX();
+    auto y = quaternion.getY();
+    auto z = quaternion.getZ();
+    auto w = quaternion.getW();
+    auto xPow = std::pow(x, 2.0f);
+    auto yPow = std::pow(y, 2.0f);
+    auto zPow = std::pow(z, 2.0f);
+    return origin *
+           Matrix<T, 4, 4>{{1 - 2 * yPow - 2 * zPow, 2 * x * y - 2 * w * z,
+                            2 * x * z + 2 * w * y, 0.0f},
+                           {2 * x * y + 2 * w * z, 1 - 2 * xPow - 2 * zPow,
+                            2 * y * z - 2 * w * x, 0.0f},
+                           {2 * x * z - 2 * w * y, 2 * y * z + 2 * w * x,
+                            1 - 2 * xPow - 2 * yPow, 0.0f},
+                           {0, 0, 0, 1.0f}};
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+Vec3<T>
+Matrix<T, rowsAmount, columnsAmount>::apply(const Matrix<T, 4, 4>& matrix,
+                                            const Vec3<T>& origin) {
     Matrix<T, 4, 1> resultMatrix;
     resultMatrix[0][0] = origin.getX();
     resultMatrix[1][0] = origin.getY();
@@ -238,4 +292,46 @@ Vec3<T> Matrix<T, rowsAmount, columnsAmount>::apply(const Matrix<T, 4, 4>& matri
 
     resultMatrix = matrix * resultMatrix;
     return Vec3<T>{resultMatrix[0][0], resultMatrix[1][0], resultMatrix[2][0]};
+}
+
+// template <typename T, size_t rowsAmount, size_t columnsAmount>
+// glm::mat<columnsAmount, rowsAmount, float, glm::defaultp>
+// Matrix<T, rowsAmount, columnsAmount>::getGLMat() const {
+//     return {
+//         m_data[0][0], m_data[1][0], m_data[2][0], m_data[3][0],
+//         m_data[0][1], m_data[1][1], m_data[2][1], m_data[3][1],
+//         m_data[0][2], m_data[1][2], m_data[2][2], m_data[3][2],
+//         m_data[0][3], m_data[1][3], m_data[2][3], m_data[3][3],
+//     };
+// }
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+glm::mat<columnsAmount, rowsAmount, float, glm::defaultp>
+Matrix<T, rowsAmount, columnsAmount>::getGLMat() const {
+    Matrixf44 result;
+    result[2][0] = -1.0f;
+    result[0][1] = 1.0f;
+    result[1][2] = 1.0f;
+    result[3][3] = 1.0f;
+    result = result * *this;
+    return {result[0][0], result[1][0], result[2][0], result[3][0],
+            result[0][1], result[1][1], result[2][1], result[3][1],
+            result[0][2], result[1][2], result[2][2], result[3][2],
+            result[0][3], result[1][3], result[2][3], result[3][3]};
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+Matrix<T, rowsAmount, columnsAmount>
+Matrix<T, rowsAmount, columnsAmount>::fromGLMat(
+    const glm::mat<columnsAmount, rowsAmount, float, glm::defaultp>& value) {
+    Matrixf44 result;
+    result[1][0] = 1.0f;
+    result[2][1] = 1.0f;
+    result[0][2] = -1.0f;
+    result[3][3] = 1.0f;
+    result = result * *this;
+    return {{value[0][0], value[1][0], value[2][0], value[3][0]},
+            {value[0][1], value[1][1], value[2][1], value[3][1]},
+            {value[0][2], value[1][2], value[2][2], value[3][2]},
+            {value[0][3], value[1][3], value[2][3], value[3][3]}};
 }
