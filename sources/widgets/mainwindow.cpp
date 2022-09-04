@@ -1,5 +1,6 @@
 #include "widgets/mainwindow.h"
 #include "render_system/scene_node.h"
+#include "resources/wireframe_model.h"
 #include "utils/math/utils.h"
 #include "utils/math/vec3.h"
 #include "utils/shapes/convex_hull.h"
@@ -101,7 +102,7 @@ void MainWindow::openEmulationWindow() {
         simulateWidget->Bind(wxEVT_LEAVE_WINDOW,
                              &MainWindow::onOpenglEditorMouseFocusEvent, this);
         auto mesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        mesh->init(mainModel);
+        // mesh->init(mainModel);
 
         auto simMainMeshNode = std::make_shared<SceneNode>();
         auto shaderProgram = openglView->getRenderer().getShaderProgram(
@@ -154,7 +155,10 @@ void MainWindow::openEmulationWindow() {
         });
 
         auto physicWorld = std::make_shared<PhysicWorld>();
-        m_body = std::make_shared<PhysObject>(simMainMeshNode, std::make_shared<ConvexHull>(mainModel), 10.f);
+        auto bodyShape = std::make_shared<ConvexHull>(mainModel);
+        mesh->init(bodyShape->getModel());
+        // mesh->init(WireframeModel::fromModel(bodyShape->getModel()));
+        m_body = std::make_shared<PhysObject>(simMainMeshNode, bodyShape, 10.f);
 
         m_body->setPhysic(physicWorld->addBody(m_body->getConstructionInfo()));
 
@@ -171,8 +175,7 @@ void MainWindow::openEmulationWindow() {
         groundMeshNode->addDrawable(groundMesh);
         groundMeshNode->setShaderProgram(shaderProgram);
         groundMeshNode->setLocation(Vec3f(0.0f, 0.0f, -150.0f));
-        auto ground = std::make_shared<PhysObject>(
-            groundMeshNode, box, 0.f);
+        auto ground = std::make_shared<PhysObject>(groundMeshNode, box, 0.f);
         ground->setPhysic(physicWorld->addBody(ground->getConstructionInfo()));
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(groundMeshNode);
@@ -186,10 +189,12 @@ void MainWindow::openEmulationWindow() {
         sphereMeshNode->setShaderProgram(shaderProgram);
         sphereMeshNode->addDrawable(sphereMesh);
         sphereMeshNode->setLocation({0.0f, 0.0f, 400.0f});
-        auto spherePhys = std::make_shared<PhysObject>(
-            sphereMeshNode, sphere, 10.f);
+        // sphereMeshNode->addChild(camera);
+        auto spherePhys =
+            std::make_shared<PhysObject>(sphereMeshNode, sphere, 10.f);
 
-        spherePhys->setPhysic(physicWorld->addBody(spherePhys->getConstructionInfo()));
+        spherePhys->setPhysic(
+            physicWorld->addBody(spherePhys->getConstructionInfo()));
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(sphereMeshNode);
         }

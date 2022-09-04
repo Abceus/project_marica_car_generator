@@ -22,7 +22,7 @@ Model Sphere::getModel() const {
     }
 
     for (auto ring_num = 0; ring_num < segments / 2 - 1; ++ring_num) {
-        for (auto segment_num = 0; segment_num < segments; ++segment_num) {
+        for (auto segment_num = 0; segment_num < segments-1; ++segment_num) {
             GLuint currentIndex = ring_num * segments + segment_num;
             result.faces.push_back(
                 {{currentIndex, currentIndex + 1,

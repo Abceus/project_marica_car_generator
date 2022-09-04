@@ -50,6 +50,7 @@ set(SOURCES sources/main.cpp
         sources/utils/math/rot3.cpp
         sources/utils/math/utils.cpp
         sources/utils/math/quaternion.cpp
+        sources/utils/math/geometry_prototype.cpp
 
         sources/utils/shapes/box.cpp
         sources/utils/shapes/sphere.cpp

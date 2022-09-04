@@ -46,10 +46,14 @@ public:
 
     bool operator==(const Vec3<T>& other) const;
 
+    Vec3<T> operator-() const;
+
     T length() const;
 
     Vec3<T> getNormalized() const;
     Vec3<T> getCrossProduct(const Vec3<T>& other) const;
+    T getDotProduct(const Vec3<T>& other) const;
+    T componentsSum() const;
 
     Vec3<T> getRotated(const Vec3<T>& axis, T degrees) const;
 
@@ -157,6 +161,11 @@ bool Vec3<T>::operator==(const Vec3<T>& other) const {
 }
 
 template <typename T>
+Vec3<T> Vec3<T>::operator-() const {
+    return {-x, -y, -z};
+}
+
+template <typename T>
 T Vec3<T>::length() const {
     return sqrt(pow(x, static_cast<T>(2)) + pow(y, static_cast<T>(2)) + pow(z, static_cast<T>(2)));
 }
@@ -164,11 +173,10 @@ T Vec3<T>::length() const {
 template <typename T>
 Vec3<T> Vec3<T>::getNormalized() const {
     auto locLength = length();
-    auto inv_length = (static_cast<T>(1) / locLength);
     Vec3<T> result(*this);
-    result.x *= inv_length;
-    result.y *= inv_length;
-    result.z *= inv_length;
+    result.x /= locLength;
+    result.y /= locLength;
+    result.z /= locLength;
     return result;
 }
 
@@ -176,6 +184,16 @@ template <typename T>
 Vec3<T> Vec3<T>::getCrossProduct(const Vec3<T>& other) const {
     return Vec3<T>{y * other.z - other.y * z, z * other.x - other.z * x,
                    x * other.y - other.x * y};
+}
+
+template <typename T>
+T Vec3<T>::getDotProduct(const Vec3<T>& other) const {
+    return (*this * other).componentsSum();
+}
+
+template <typename T>
+T Vec3<T>::componentsSum() const {
+    return x + y + z;
 }
 
 template <typename T>
