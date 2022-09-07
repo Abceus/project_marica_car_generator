@@ -51,6 +51,8 @@ set(SOURCES sources/main.cpp
         sources/utils/math/utils.cpp
         sources/utils/math/quaternion.cpp
         sources/utils/math/geometry_prototype.cpp
+        sources/utils/math/line.cpp
+        sources/utils/math/plane.cpp
 
         sources/utils/shapes/box.cpp
         sources/utils/shapes/sphere.cpp

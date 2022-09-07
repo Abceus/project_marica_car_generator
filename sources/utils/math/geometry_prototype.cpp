@@ -1,5 +1,7 @@
 #include "utils/math/geometry_prototype.h"
 #include "resources/model.h"
+#include "utils/math/line.h"
+#include "utils/math/plane.h"
 #include "utils/math/vec3.h"
 #include "utils/shapes/sphere.h"
 #include <algorithm>
@@ -12,21 +14,6 @@
 #include <stack>
 #include <vector>
 
-float getDistBetweenLineAndPoint(const Vec3f& start, const Vec3f& end,
-                                 const Vec3f& point) {
-    auto a = (end - start).length();
-    auto b = (point - end).length();
-    auto c = (start - point).length();
-    auto p = (a + b + c) / 2.0f;
-    auto s = std::sqrt(p * (p - a) * (p - b) * (p - c));
-    return (2.0f * s) / a;
-}
-
-float getDistBetweenTriangleAndPoint(const Vec3f& a, const Vec3f& b,
-                                     const Vec3f& c, const Vec3f& p) {
-    auto n = (c - a).getCrossProduct(b - a).getNormalized();
-    return std::abs((p - a).getDotProduct(n));
-}
 
 Vec3f getCenter(const std::vector<Vec3f>& points) {
     Vec3f result;
@@ -37,10 +24,6 @@ Vec3f getCenter(const std::vector<Vec3f>& points) {
     }
     result = result / static_cast<float>(points.size());
     return result;
-}
-
-float getTripleProduct(const Vec3f& a, const Vec3f& b, const Vec3f& c) {
-    return a.getDotProduct(b.getCrossProduct(c));
 }
 
 struct Triangle {
@@ -76,36 +59,32 @@ enum class SideResult {
     BothPointsOnPlane
 };
 
-float getEps() {
-    return 0.0f;
-}
-
 SideResult pointsOnSide(const Vec3f& a, const Vec3f& b, const Vec3f& c,
                         const Vec3f& p1, const Vec3f& p2) {
-    auto tpa = getTripleProduct(a - p1, a - b, a - c);
-    if(std::abs(tpa) < 0.00001f) {
-        auto d = getDistBetweenTriangleAndPoint(a, b, c, p1);
-        if(d <= std::numeric_limits<float>::epsilon()) {
+    auto tpa = (a - p1).getTripleProduct(a - b, a - c);
+    if (std::abs(tpa) < 0.00001f) {
+        auto d = Plane::createFromPoints(a, b, c).getDistanceToPoint(p1);
+        if (d <= std::numeric_limits<float>::epsilon()) {
             tpa = 0.0f;
         }
     }
-    auto tpb = getTripleProduct(a - p2, a - b, a - c);
-    if(std::abs(tpb) < 0.00001f) {
-        auto d = getDistBetweenTriangleAndPoint(a, b, c, p2);
-        if(d <= std::numeric_limits<float>::epsilon()) {
+    auto tpb = (a - p2).getTripleProduct(a - b, a - c);
+    if (std::abs(tpb) < 0.00001f) {
+        auto d = Plane::createFromPoints(a, b, c).getDistanceToPoint(p2);
+        if (d <= std::numeric_limits<float>::epsilon()) {
             tpb = 0.0f;
         }
     }
-    if(tpa == 0.0f && tpb == 0.0f) {
+    if (tpa == 0.0f && tpb == 0.0f) {
         return SideResult::BothPointsOnPlane;
     }
-    if(tpa == 0.0f) {
+    if (tpa == 0.0f) {
         return SideResult::FirstPointOnPlane;
     }
-    if(tpb == 0.0f) {
+    if (tpb == 0.0f) {
         return SideResult::SecondPointOnPlane;
     }
-    if(tpa * tpb > 0.0f) {
+    if (tpa * tpb > 0.0f) {
         return SideResult::Same;
     }
     return SideResult::Different;
@@ -189,8 +168,8 @@ FindHorizontResult getHorizont(Triangle& firstTriangle, const Vec3f& point,
                     continue;
                 }
                 history.top().done.emplace(neighbor);
-                auto side = pointsOnSide(*neighbor->a, *neighbor->b, *neighbor->c,
-                                       point, center);
+                auto side = pointsOnSide(*neighbor->a, *neighbor->b,
+                                         *neighbor->c, point, center);
                 if (side == SideResult::Same) {
                     EdgeTrianglePair newEdge;
                     newEdge.edge = getEdgeBetweenTriangles(
@@ -215,12 +194,13 @@ void setPointToTriangles(std::set<Triangle*>& triangles,
     for (auto& triangle : triangles) {
         for (auto it = std::begin(points); it != std::end(points);) {
             auto side = pointsOnSide(*triangle->a, *triangle->b, *triangle->c,
-                                    center, *(*it));
+                                     center, *(*it));
             if (side == SideResult::Different) {
                 triangle->points.emplace(*it);
                 it = points.erase(it);
-            }
-            else if(side == SideResult::FirstPointOnPlane || side == SideResult::SecondPointOnPlane || side == SideResult::BothPointsOnPlane) {
+            } else if (side == SideResult::FirstPointOnPlane ||
+                       side == SideResult::SecondPointOnPlane ||
+                       side == SideResult::BothPointsOnPlane) {
                 it = points.erase(it);
             } else {
                 ++it;
@@ -230,19 +210,6 @@ void setPointToTriangles(std::set<Triangle*>& triangles,
 }
 
 Model getConvexHull(std::vector<Vec3f> vertices) {
-    // std::vector<Vec3f> testVertices = {
-    //     {-155, 82, -70}, {-242, -77, -9}, {-59, 54, 57}};
-    // Triangle testTriangle = {&testVertices[0], &testVertices[1],
-    //                          &testVertices[2]};
-    // Vec3f testCenter = {-54, 14, -4};
-    // Vec3f testPoint = {227, -59, -22};
-
-    // auto qwe1 = *testTriangle.a - *testTriangle.b;
-    // auto qwe2 = *testTriangle.a - *testTriangle.c;
-
-    // auto testSide = isPointsOnSameSide(*testTriangle.a, *testTriangle.b,
-    //                                    *testTriangle.c, testPoint, testCenter);
-
     auto vertexRemoveIterator =
         std::unique(std::begin(vertices), std::end(vertices));
     vertices.erase(vertexRemoveIterator, std::end(vertices));
@@ -321,8 +288,8 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
     auto maxDistance = std::numeric_limits<float>::lowest();
     Vec3f* maxDistPoint = nullptr;
     for (auto& vertex : availablePoints) {
-        auto d = getDistBetweenLineAndPoint(*maxDistPoints.first,
-                                            *maxDistPoints.second, *vertex);
+        auto d = Line(*maxDistPoints.first, *maxDistPoints.second)
+                     .getDistanceToPoint(*vertex);
         if (d > maxDistance) {
             maxDistance = d;
             maxDistPoint = vertex;
@@ -338,9 +305,10 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
     maxDistance = std::numeric_limits<float>::lowest();
     maxDistPoint = nullptr;
     for (auto& vertex : availablePoints) {
-        auto d = getDistBetweenTriangleAndPoint(*triangles.back().a,
-                                                *triangles.back().b,
-                                                *triangles.back().c, *vertex);
+        auto d =
+            Plane::createFromPoints(*triangles.back().a, *triangles.back().b,
+                                    *triangles.back().c)
+                .getDistanceToPoint(*vertex);
         if (d > maxDistance) {
             maxDistance = d;
             maxDistPoint = vertex;
@@ -369,9 +337,6 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
     for (auto& triangle : triangles) {
         addedTriangles.emplace(&triangle);
     }
-    std::vector<Vec3f> eyePosition;
-    auto iterNum = 0;
-    auto prevSumOfPoints = 0;
     while (!pointsSetForCheck.empty() ||
            std::any_of(
                std::begin(triangles), std::end(triangles),
@@ -390,24 +355,16 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
             break;
         }
 
-        auto currentSumOfPoints = std::accumulate(std::begin(triangles), std::end(triangles), 0, [](int sum, const Triangle& element){
-            return sum + element.points.size();
-        });
-        if(prevSumOfPoints == currentSumOfPoints) {
-            if(iterNum == -1) {
-                break;
-            }
-            // break;
-        }
-
         // находим самую дальную точку от вычисленной оболочки
         float maxDist = std::numeric_limits<float>::lowest();
         Triangle* maxDistTriangle = nullptr;
         Vec3f* maxDistPoint = nullptr;
         for (auto& triangle : triangles) {
             for (auto& point : triangle.points) {
-                auto dist = getDistBetweenTriangleAndPoint(
-                    *triangle.a, *triangle.b, *triangle.c, *point);
+                auto dist = Plane::createFromPoints(*triangle.a, *triangle.b,
+                                                    *triangle.c)
+                                .getDistanceToPoint(*point);
+
                 if (dist > maxDist) {
                     maxDistTriangle = &triangle;
                     maxDistPoint = point;
@@ -418,9 +375,7 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
 
         // Ищем горизонт
         auto horizont = getHorizont(*maxDistTriangle, *maxDistPoint, center);
-        // if (horizont.triangles.size() <= 1) {
-        // break;
-        // }
+
         // создаём новые треугольники
         addedTriangles.clear();
         for (auto& edge : horizont.edges) {
@@ -434,15 +389,6 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
 
             edge.notVisibleTriangle->neighbors.emplace(&triangles.back());
             triangles.back().neighbors.emplace(edge.notVisibleTriangle);
-
-            // for (auto neighbor : edge.triangle->neighbors) {
-            //     auto edge =
-            //         getEdgeBetweenTriangles(*neighbor, triangles.back());
-            //     if (edge.a != nullptr && edge.b != nullptr) {
-            //         neighbor->neighbors.emplace(&triangles.back());
-            //         triangles.back().neighbors.emplace(neighbor);
-            //     }
-            // }
         }
 
         for (auto it = std::begin(addedTriangles);
@@ -458,12 +404,7 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
         }
 
         pointsSetForCheck.clear();
-        // if (triangles.size() == horizont.triangles.size()) {
-        //     eyePosition.emplace_back(*maxDistPoint);
-        //     eyePosition.emplace_back(center);
-        //     break;
-        // }
-        // assert(triangles.size() != horizont.triangles.size());
+
         for (auto triangleForDelete : horizont.triangles) {
             pointsSetForCheck.merge(triangleForDelete->points);
             for (auto neighbor : triangleForDelete->neighbors) {
@@ -479,11 +420,6 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
                 triangles.erase(found);
             }
         }
-        if (iterNum == 300) {
-            // break;
-        }
-        ++iterNum;
-        prevSumOfPoints = currentSumOfPoints;
     }
 
     Model result;
@@ -500,29 +436,6 @@ Model getConvexHull(std::vector<Vec3f> vertices) {
             {static_cast<GLuint>(result.vertices.size() - 3),
              static_cast<GLuint>(result.vertices.size() - 2),
              static_cast<GLuint>(result.vertices.size() - 1)});
-    }
-    for (const auto& eye : eyePosition) {
-        Sphere sphere(5.0f);
-        auto m = sphere.getModel();
-        for (const auto& face : m.faces) {
-            result.vertices.emplace_back(m.vertices[face.vertexes[0]]);
-            result.vertices.back().X += eye.getX();
-            result.vertices.back().Y += eye.getY();
-            result.vertices.back().Z += eye.getZ();
-            result.vertices.emplace_back(m.vertices[face.vertexes[1]]);
-            result.vertices.back().X += eye.getX();
-            result.vertices.back().Y += eye.getY();
-            result.vertices.back().Z += eye.getZ();
-            result.vertices.emplace_back(m.vertices[face.vertexes[2]]);
-            result.vertices.back().X += eye.getX();
-            result.vertices.back().Y += eye.getY();
-            result.vertices.back().Z += eye.getZ();
-
-            result.faces.push_back(
-                {static_cast<GLuint>(result.vertices.size() - 3),
-                 static_cast<GLuint>(result.vertices.size() - 2),
-                 static_cast<GLuint>(result.vertices.size() - 1)});
-        }
     }
     return result;
 }

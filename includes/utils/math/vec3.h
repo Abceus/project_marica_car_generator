@@ -52,6 +52,7 @@ public:
 
     Vec3<T> getNormalized() const;
     Vec3<T> getCrossProduct(const Vec3<T>& other) const;
+    T getTripleProduct(const Vec3<T>& b, const Vec3<T>& c) const;
     T getDotProduct(const Vec3<T>& other) const;
     T componentsSum() const;
 
@@ -184,6 +185,11 @@ template <typename T>
 Vec3<T> Vec3<T>::getCrossProduct(const Vec3<T>& other) const {
     return Vec3<T>{y * other.z - other.y * z, z * other.x - other.z * x,
                    x * other.y - other.x * y};
+}
+
+template <typename T>
+T Vec3<T>::getTripleProduct(const Vec3<T>& b, const Vec3<T>& c) const {
+    return getDotProduct(b.getCrossProduct(c));
 }
 
 template <typename T>

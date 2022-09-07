@@ -101,14 +101,14 @@ void MainWindow::openEmulationWindow() {
                              &MainWindow::onOpenglEditorMouseFocusEvent, this);
         simulateWidget->Bind(wxEVT_LEAVE_WINDOW,
                              &MainWindow::onOpenglEditorMouseFocusEvent, this);
-        auto mesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        auto mesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
         // mesh->init(mainModel);
 
         auto simMainMeshNode = std::make_shared<SceneNode>();
         auto shaderProgram = openglView->getRenderer().getShaderProgram(
             ".\\resources\\shaders\\meshvertexshader.vert",
             ".\\resources\\shaders\\meshfragmentshader.frag");
-        simMainMeshNode->setShaderProgram(shaderProgram);
+        // simMainMeshNode->setShaderProgram(shaderProgram);
         std::shared_ptr<SceneNode> camera;
         auto scene = simulateWidget->getScene();
         if (auto lockedScene = scene.lock()) {
@@ -156,8 +156,8 @@ void MainWindow::openEmulationWindow() {
 
         auto physicWorld = std::make_shared<PhysicWorld>();
         auto bodyShape = std::make_shared<ConvexHull>(mainModel);
-        mesh->init(bodyShape->getModel());
-        // mesh->init(WireframeModel::fromModel(bodyShape->getModel()));
+        // mesh->init(bodyShape->getModel());
+        mesh->init(WireframeModel::fromModel(bodyShape->getModel()));
         m_body = std::make_shared<PhysObject>(simMainMeshNode, bodyShape, 10.f);
 
         m_body->setPhysic(physicWorld->addBody(m_body->getConstructionInfo()));
