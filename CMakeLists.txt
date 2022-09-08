@@ -42,6 +42,18 @@ set(SOURCES sources/main.cpp
         sources/resources/wireframe_model.cpp
         sources/resources/unanimation.cpp
         sources/resources/resource_manager.cpp
+
+        sources/resources/ase_reader/ase_reader_node.cpp
+        sources/resources/ase_reader/ase_reader_node_analyzer.cpp
+        sources/resources/ase_reader/ase_reader.cpp
+        sources/resources/ase_reader/ase_tokenizer.cpp
+        sources/resources/ase_reader/rules/lambda.cpp
+        sources/resources/ase_reader/rules/int.cpp
+        sources/resources/ase_reader/rules/string.cpp
+        sources/resources/ase_reader/rules/dict.cpp
+        sources/resources/ase_reader/rules/float.cpp
+        sources/resources/ase_reader/rules/set.cpp
+        sources/resources/ase_reader/rules/value.cpp
         
         sources/physics/physicworld.cpp
         sources/physics/physobject.cpp
