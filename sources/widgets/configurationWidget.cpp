@@ -5,6 +5,7 @@
 
 wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(COLLISION_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(TIRE_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 
 ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
@@ -33,6 +34,19 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
     collisionPicker->Bind(wxEVT_FILEPICKER_CHANGED,
                           [this](const wxFileDirPickerEvent& event) {
                               wxCommandEvent collisionEvent(COLLISION_CHANGED);
+                              collisionEvent.SetString(event.GetPath());
+                              wxPostEvent(this, collisionEvent);
+                          });
+
+    auto tirePicker = new wxFilePickerCtrl(
+        // this, wxID_ANY, wxEmptyString, "Select collision", "ASE (*.ase)|*.ase");
+        this, wxID_ANY, wxEmptyString, "Select tire", "PSK (*.psk)|*.psk");
+    tirePicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
+                                        wxFLP_FILE_MUST_EXIST);
+    sizer->Add(tirePicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
+    tirePicker->Bind(wxEVT_FILEPICKER_CHANGED,
+                          [this](const wxFileDirPickerEvent& event) {
+                              wxCommandEvent collisionEvent(TIRE_CHANGED);
                               collisionEvent.SetString(event.GetPath());
                               wxPostEvent(this, collisionEvent);
                           });

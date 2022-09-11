@@ -16,14 +16,25 @@ public:
 private:
     void openEmulationWindow();
     std::shared_ptr<SceneNode> mainMeshNode;
+    std::array<std::shared_ptr<SceneNode>, 4> tireMeshNodes;
     OpenglView* openglView = nullptr;
 
     wxWindow* simulateWindow = nullptr;
 
     Model mainModel;
+    Model tireModel;
 
     std::unique_ptr<CameraController> mainEditorCameraController;
     std::unique_ptr<CameraController> simulationEditorCameraController;
 
     std::shared_ptr<PhysObject> m_body;
+
+    std::vector<Vec3f> tirePositions = {
+        {100.0f, 100.0f, -50.0f},
+        {-100.0f, 100.0f, -50.0f},
+        {100.0f, -100.0f, -50.0f},
+        {-100.0f, -100.0f, -50.0f}
+    };
+
+     std::vector<std::weak_ptr<btSliderConstraint>> contsts;
 };

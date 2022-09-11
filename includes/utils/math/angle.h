@@ -27,8 +27,7 @@ public:
     static Angle fromDegrees(float degrees);
     static Angle fromRadians(float radians);
 
+    Angle normalized() const;
 private:
     float degrees = 0.0f;
-
-    void normalize();
 };

@@ -1,6 +1,9 @@
 #include "widgets/mainwindow.h"
 #include "render_system/scene_node.h"
 #include "resources/wireframe_model.h"
+#include "utils/math/angle.h"
+#include "utils/math/quaternion.h"
+#include "utils/math/rot3.h"
 #include "utils/math/utils.h"
 #include "utils/math/vec3.h"
 #include "utils/shapes/convex_hull.h"
@@ -8,6 +11,7 @@
 #include "widgets/configurationWidget.h"
 #include "widgets/openglview.h"
 #include "wx/button.h"
+#include "wx/event.h"
 #include "wx/msw/window.h"
 #include "wx/panel.h"
 #include "wx/sizer.h"
@@ -18,6 +22,7 @@
 #include "render_system/wireframe.h"
 #include "resources/model.h"
 #include <memory>
+#include <vector>
 
 #include "physics/physicworld.h"
 #include "physics/physobject.h"
@@ -57,10 +62,19 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
     mainMeshNode = std::make_shared<SceneNode>();
+    size_t i = 0;
+    for (auto& tireMeshNode : tireMeshNodes) {
+        tireMeshNode = std::make_shared<SceneNode>();
+        tireMeshNode->setLocation(tirePositions[i]);
+        ++i;
+    }
 
     auto scene = openglView->getScene();
     if (auto lockedScene = scene.lock()) {
         lockedScene->addNode(mainMeshNode);
+        for (auto& tireMeshNode : tireMeshNodes) {
+            lockedScene->addNode(tireMeshNode);
+        }
     }
 
     configurationWidget->Bind(
@@ -75,6 +89,38 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
             auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
             mesh->init(mainModel);
             mainMeshNode->addDrawable(mesh);
+        });
+
+    configurationWidget->Bind(
+        COLLISION_CHANGED, [this](const wxCommandEvent& event) {
+            mainMeshNode->clear();
+            auto shaderProgram = openglView->getRenderer().getShaderProgram(
+                ".\\resources\\shaders\\meshvertexshader.vert",
+                ".\\resources\\shaders\\meshfragmentshader.frag");
+            // mainMeshNode->setShaderProgram(shaderProgram);
+            auto models = Model::readASE(event.GetString());
+            for (const auto& model : models) {
+                // auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
+                auto mesh =
+                    openglView->getRenderer().makeDrawable<WireframeMesh>();
+                mesh->init(WireframeModel::fromModel(model));
+                mainMeshNode->addDrawable(mesh);
+            }
+        });
+
+    configurationWidget->Bind(
+        TIRE_CHANGED, [this](const wxCommandEvent& event) {
+            auto shaderProgram = openglView->getRenderer().getShaderProgram(
+                ".\\resources\\shaders\\meshvertexshader.vert",
+                ".\\resources\\shaders\\meshfragmentshader.frag");
+            tireModel = Model::readPSK(event.GetString());
+            auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
+            mesh->init(tireModel);
+            for (auto& tireMeshNode : tireMeshNodes) {
+                tireMeshNode->clear();
+                tireMeshNode->setShaderProgram(shaderProgram);
+                tireMeshNode->addDrawable(mesh);
+            }
         });
 
     configurationWidget->Bind(
@@ -117,15 +163,15 @@ void MainWindow::openEmulationWindow() {
             camera = lockedScene->getActiveCamera();
         }
 
-        auto childMainMeshNode = std::make_shared<SceneNode>();
-        childMainMeshNode->setShaderProgram(shaderProgram);
-        // Box childBox({10.0f, 10.0f, 10.0f});
-        Sphere childBox(10.0f);
-        auto childMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        childMesh->init(childBox.getModel());
-        childMainMeshNode->addDrawable(childMesh);
-        childMainMeshNode->setLocation({100.0f, 0.0f, 100.0f});
-        simMainMeshNode->addChild(childMainMeshNode);
+        // auto childMainMeshNode = std::make_shared<SceneNode>();
+        // childMainMeshNode->setShaderProgram(shaderProgram);
+        // // Box childBox({10.0f, 10.0f, 10.0f});
+        // Sphere childBox(10.0f);
+        // auto childMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        // childMesh->init(childBox.getModel());
+        // childMainMeshNode->addDrawable(childMesh);
+        // childMainMeshNode->setLocation({100.0f, 0.0f, 100.0f});
+        // simMainMeshNode->addChild(childMainMeshNode);
 
         // simMainMeshNode->addChild(camera);
         camera->setLocation({-100.0f, 0.0f, 100.0f});
@@ -143,29 +189,79 @@ void MainWindow::openEmulationWindow() {
         simulateWindow->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& event) {
             m_body->getPhysics()->activate(true);
             auto force = 100.0f;
-            btVector3 forceVec = {0.0f, 0.0f, 0.0f};
+            Vec3f forceVec;
             if (event.GetKeyCode() == WXK_UP) {
-                forceVec.setZ(force);
+                // forceVec.setX(force);
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setTargetAngMotorVelocity(150.0f);
+                    }
+                }
             } else if (event.GetKeyCode() == WXK_DOWN) {
-                forceVec.setZ(-force);
-            } else if (event.GetKeyCode() == WXK_SPACE) {
+                // forceVec.setX(-force);
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setTargetAngMotorVelocity(-150.0f);
+                    }
+                }
+            } else if (event.GetKeyCode() == WXK_LEFT) {
                 forceVec.setY(force);
+            } else if (event.GetKeyCode() == WXK_RIGHT) {
+                forceVec.setY(-force);
+            } else if (event.GetKeyCode() == WXK_SPACE) {
+                // forceVec.setZ(force);
+
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setPoweredAngMotor(false);
+                    }
+                }
+            } else if (event.GetKeyCode() == WXK_CONTROL) {
+                forceVec.setZ(-force);
             }
-            m_body->getPhysics()->applyCentralImpulse(forceVec);
+            m_body->getPhysics()->applyCentralImpulse(forceVec.toBtVec3());
+        });
+        simulateWidget->Bind(wxEVT_KEY_UP, [this](wxKeyEvent& event) {
+            if (event.GetKeyCode() == WXK_UP) {
+                // forceVec.setX(force);
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setTargetAngMotorVelocity(0.0f);
+                    }
+                }
+            } else if (event.GetKeyCode() == WXK_DOWN) {
+                // forceVec.setX(-force);
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setTargetAngMotorVelocity(0.0f);
+                    }
+                }
+            } else if (event.GetKeyCode() == WXK_SPACE) {
+                // forceVec.setZ(force);
+
+                for (auto& c : contsts) {
+                    if (auto constraint = c.lock()) {
+                        constraint->setPoweredAngMotor(true);
+                    }
+                }
+            }
         });
 
         auto physicWorld = std::make_shared<PhysicWorld>();
         auto bodyShape = std::make_shared<ConvexHull>(mainModel);
         // mesh->init(bodyShape->getModel());
         mesh->init(WireframeModel::fromModel(bodyShape->getModel()));
-        m_body = std::make_shared<PhysObject>(simMainMeshNode, bodyShape, 10.f);
+        // simMainMeshNode->setRotation(Quaternion::fromEulerAngles(
+        //     Rotor3(Angle::fromDegrees(180.0f), Angle(), Angle())));
+        m_body = std::make_shared<PhysObject>(simMainMeshNode, bodyShape);
+        m_body->setMass(500.0f);
 
         m_body->setPhysic(physicWorld->addBody(m_body->getConstructionInfo()));
 
         simulateWidget->addUpdatable(physicWorld);
         simulateWidget->addUpdatable(m_body);
 
-        auto box = std::make_shared<Box>(Vec3f{500.0f, 500.0f, 10.0f});
+        auto box = std::make_shared<Box>(Vec3f{1500.0f, 1500.0f, 10.0f});
 
         auto groundModel = box->getModel();
 
@@ -175,30 +271,76 @@ void MainWindow::openEmulationWindow() {
         groundMeshNode->addDrawable(groundMesh);
         groundMeshNode->setShaderProgram(shaderProgram);
         groundMeshNode->setLocation(Vec3f(0.0f, 0.0f, -150.0f));
-        auto ground = std::make_shared<PhysObject>(groundMeshNode, box, 0.f);
+        auto ground = std::make_shared<PhysObject>(groundMeshNode, box);
+        ground->setFriction(1.0f);
         ground->setPhysic(physicWorld->addBody(ground->getConstructionInfo()));
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(groundMeshNode);
         }
         simulateWidget->addUpdatable(ground);
 
-        auto sphere = std::make_shared<Sphere>(10.0f);
-        auto sphereMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        sphereMesh->init(sphere->getModel());
-        auto sphereMeshNode = std::make_shared<SceneNode>();
-        sphereMeshNode->setShaderProgram(shaderProgram);
-        sphereMeshNode->addDrawable(sphereMesh);
-        sphereMeshNode->setLocation({0.0f, 0.0f, 400.0f});
-        // sphereMeshNode->addChild(camera);
-        auto spherePhys =
-            std::make_shared<PhysObject>(sphereMeshNode, sphere, 10.f);
+        // auto sphere = std::make_shared<Sphere>(10.0f);
+        // auto sphereMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        // sphereMesh->init(sphere->getModel());
+        // auto sphereMeshNode = std::make_shared<SceneNode>();
+        // sphereMeshNode->setShaderProgram(shaderProgram);
+        // sphereMeshNode->addDrawable(sphereMesh);
+        // sphereMeshNode->setLocation({0.0f, 0.0f, 400.0f});
+        // // sphereMeshNode->addChild(camera);
+        // auto spherePhys =
+        //     std::make_shared<PhysObject>(sphereMeshNode, sphere, 10.f);
 
-        spherePhys->setPhysic(
-            physicWorld->addBody(spherePhys->getConstructionInfo()));
-        if (auto lockedScene = scene.lock()) {
-            lockedScene->addNode(sphereMeshNode);
+        // spherePhys->setPhysic(
+        //     physicWorld->addBody(spherePhys->getConstructionInfo()));
+        // if (auto lockedScene = scene.lock()) {
+        //     lockedScene->addNode(sphereMeshNode);
+        // }
+        // simulateWidget->addUpdatable(spherePhys);
+
+        {
+            auto tireShape = std::make_shared<ConvexHull>(tireModel);
+            auto tireMesh =
+                simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+            tireMesh->init(WireframeModel::fromModel(tireShape->getModel()));
+
+            for (const auto& tirePosition : tirePositions) {
+                auto tireMeshNode = std::make_shared<SceneNode>();
+                tireMeshNode->setLocation(tirePosition);
+                tireMeshNode->addDrawable(tireMesh);
+                auto scene = simulateWidget->getScene();
+                if (auto lockedScene = scene.lock()) {
+                    lockedScene->addNode(tireMeshNode);
+                }
+
+                auto tirePhysBody =
+                    std::make_shared<PhysObject>(tireMeshNode, tireShape);
+                tirePhysBody->setMass(3.0f);
+                tirePhysBody->setFriction(1.0f);
+
+                tirePhysBody->setPhysic(
+                    physicWorld->addBody(tirePhysBody->getConstructionInfo()));
+
+                simulateWidget->addUpdatable(tirePhysBody);
+
+                auto bodyJointTransform = btTransform::getIdentity();
+                bodyJointTransform.setOrigin(tirePosition.toBtVec3());
+
+                auto constraint =
+                    physicWorld->addConstraint<btSliderConstraint>(
+                        *m_body->getPhysics(), *tirePhysBody->getPhysics(),
+                        bodyJointTransform, btTransform::getIdentity(), true);
+
+                constraint->setUpperAngLimit(
+                    Angle::fromDegrees(180.0f).getRadians());
+                constraint->setLowerAngLimit(
+                    Angle::fromDegrees(-180.0f).getRadians());
+                constraint->setLowerLinLimit(0.0f);
+                constraint->setUpperLinLimit(0.0f);
+                constraint->setMaxAngMotorForce(15000.0f);
+                constraint->setPoweredAngMotor(true);
+                contsts.emplace_back(constraint);
+            }
         }
-        simulateWidget->addUpdatable(spherePhys);
 
         simulateWindow->Show();
     }

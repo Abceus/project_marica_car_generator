@@ -210,21 +210,7 @@ bool Application::OnInit() {
         "WIREFRAME_COLOR",
         std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
-    ASEReader reader;
-    reader.init("C:\\Users\\Jamil\\Desktop\\1\\qwe.ASE");
-
-    auto f = reader.getRootNode()
-                 .lock()
-                 ->getChild("GEOMOBJECT")
-                 ->getElement(0)
-                 ->getChild("MESH")
-                 ->getChild("MESH_VERTEX_LIST")
-                 ->getElement(20)
-                 ->getChild("MESH_VERTEX")
-                 ->getElement(1)
-                 ->getValue<float>();
-
-    // auto mainWindow = new MainWindow();
-    // mainWindow->Show(true);
+    auto mainWindow = new MainWindow();
+    mainWindow->Show(true);
     return true;
 }

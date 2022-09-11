@@ -21,4 +21,5 @@ struct Model {
     std::vector<std::string> materials;
 
     static Model readPSK(const std::string& filename);
+    static std::vector<Model> readASE(const std::string& filename);
 };

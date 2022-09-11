@@ -4,7 +4,6 @@
 
 void Angle::setDegrees(float degrees_) {
     degrees = degrees_;
-    normalize();
 }
 
 float Angle::getDegrees() const {
@@ -13,7 +12,6 @@ float Angle::getDegrees() const {
 
 void Angle::setRadians(float radians) {
     degrees = (radians * 180.0f) / std::numbers::pi_v<float>;
-    normalize();
 }
 
 float Angle::getRadians() const {
@@ -73,10 +71,12 @@ Angle Angle::fromRadians(float radians) {
     return result;
 }
 
-void Angle::normalize() {
-    while(degrees < 0) {
-        degrees += 360.0f;
+Angle Angle::normalized() const {
+    Angle result = *this;
+    while(result.degrees < 0) {
+        result.degrees += 360.0f;
     }
 
-    degrees = std::fmod(degrees, 360.0f);
+    result.degrees = std::fmod(degrees, 360.0f);
+    return result;
 }

@@ -6,13 +6,12 @@
 #include <memory>
 
 PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,
-                       const std::shared_ptr<IShape>& shape, float mass)
+                       const std::shared_ptr<IShape>& shape)
     : m_node(node), shape(shape) {
     colShape = std::unique_ptr<btCollisionShape>(shape->createPhysicShape());
 
     btTransform startTransform;
     startTransform.setIdentity();
-    m_mass = mass;
     auto location = node->getLocation();
     startTransform.setOrigin(location.toBtVec3());
     startTransform.setRotation(node->getRotation().toBtQuat());
@@ -43,5 +42,23 @@ btRigidBody::btRigidBodyConstructionInfo PhysObject::getConstructionInfo() {
     if (isDynamic) {
         colShape->calculateLocalInertia(m_mass, localInertia);
     }
-    return {m_mass, myMotionState.get(), colShape.get(), localInertia};
+    btRigidBody::btRigidBodyConstructionInfo result{m_mass, myMotionState.get(), colShape.get(), localInertia};
+    result.m_friction = friction;
+    return result;
+}
+
+void PhysObject::setMass(float value) {
+    m_mass = value;
+}
+
+float PhysObject::getMass() const {
+    return m_mass;
+}
+
+void PhysObject::setFriction(float value) {
+    friction = value;
+}
+
+float PhysObject::getFriction() const {
+    return friction;
 }
