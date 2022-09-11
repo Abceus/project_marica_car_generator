@@ -91,6 +91,7 @@ void Renderer::draw(const std::shared_ptr<Scene>& scene) {
 std::shared_ptr<ShaderProgram>
 Renderer::getShaderProgram(const std::string& vertexShaderPath,
                            const std::string& fragmentShaderPath) {
+    auto context = pushContextScoped();
     std::shared_ptr<ShaderProgram> shaderProgram(new ShaderProgram);
 
     std::ifstream vertexShaderStream(vertexShaderPath);

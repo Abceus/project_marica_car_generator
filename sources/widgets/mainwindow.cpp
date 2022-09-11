@@ -30,6 +30,8 @@
 #include "utils/shapes/box.h"
 #include "utils/shapes/sphere.h"
 
+#include "widgets/event_data/float.h"
+
 MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
@@ -61,67 +63,109 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
     openglView->Bind(wxEVT_LEAVE_WINDOW,
                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
-    mainMeshNode = std::make_shared<SceneNode>();
-    size_t i = 0;
-    for (auto& tireMeshNode : tireMeshNodes) {
-        tireMeshNode = std::make_shared<SceneNode>();
-        tireMeshNode->setLocation(tirePositions[i]);
-        ++i;
-    }
+    openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
+        auto shaderProgram = openglView->getRenderer().getShaderProgram(
+            ".\\resources\\shaders\\meshvertexshader.vert",
+            ".\\resources\\shaders\\meshfragmentshader.frag");
 
-    auto scene = openglView->getScene();
-    if (auto lockedScene = scene.lock()) {
-        lockedScene->addNode(mainMeshNode);
-        for (auto& tireMeshNode : tireMeshNodes) {
-            lockedScene->addNode(tireMeshNode);
+        mainNode = std::make_shared<SceneNode>();
+        mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+        mainNode->setShaderProgram(shaderProgram);
+        mainNode->addDrawable(mainMesh);
+        mainCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        mainNode->addDrawable(mainCollisionMesh);
+
+        tireCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        for (auto& wheel : wheelSteerMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
         }
-    }
 
-    configurationWidget->Bind(
-        MESH_CHANGED, [this](const wxCommandEvent& event) {
-            mainMeshNode->clear();
-            auto shaderProgram = openglView->getRenderer().getShaderProgram(
-                ".\\resources\\shaders\\meshvertexshader.vert",
-                ".\\resources\\shaders\\meshfragmentshader.frag");
-            mainMeshNode->setShaderProgram(shaderProgram);
-            mainModel = Model::readPSK(event.GetString());
-            // auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
-            auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
-            mesh->init(mainModel);
-            mainMeshNode->addDrawable(mesh);
-        });
+        for (auto& wheel : wheelEngMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
+        }
+
+        auto scene = openglView->getScene();
+        if (auto lockedScene = scene.lock()) {
+            lockedScene->addNode(mainNode);
+        }
+    });
+
+    configurationWidget->Bind(MESH_CHANGED,
+                              [this](const wxCommandEvent& event) {
+                                  mainModel = Model::readPSK(event.GetString());
+                                  mainMesh->init(mainModel);
+                              });
 
     configurationWidget->Bind(
         COLLISION_CHANGED, [this](const wxCommandEvent& event) {
-            mainMeshNode->clear();
-            auto shaderProgram = openglView->getRenderer().getShaderProgram(
-                ".\\resources\\shaders\\meshvertexshader.vert",
-                ".\\resources\\shaders\\meshfragmentshader.frag");
-            // mainMeshNode->setShaderProgram(shaderProgram);
-            auto models = Model::readASE(event.GetString());
-            for (const auto& model : models) {
-                // auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
-                auto mesh =
-                    openglView->getRenderer().makeDrawable<WireframeMesh>();
-                mesh->init(WireframeModel::fromModel(model));
-                mainMeshNode->addDrawable(mesh);
-            }
+            // auto models = Model::readASE(event.GetString());
+            // if (!models.empty()) {
+            //     mainCollision = WireframeModel::fromModel(models[0]);
+            // } else {
+            //     mainCollision = WireframeModel();
+            // }
+            auto model = Model::readPSK(event.GetString());
+            mainCollision = WireframeModel::fromModel(model);
+            mainCollisionMesh->init(mainCollision);
         });
 
     configurationWidget->Bind(
         TIRE_CHANGED, [this](const wxCommandEvent& event) {
-            auto shaderProgram = openglView->getRenderer().getShaderProgram(
-                ".\\resources\\shaders\\meshvertexshader.vert",
-                ".\\resources\\shaders\\meshfragmentshader.frag");
-            tireModel = Model::readPSK(event.GetString());
-            auto mesh = openglView->getRenderer().makeDrawable<Mesh>();
-            mesh->init(tireModel);
-            for (auto& tireMeshNode : tireMeshNodes) {
-                tireMeshNode->clear();
-                tireMeshNode->setShaderProgram(shaderProgram);
-                tireMeshNode->addDrawable(mesh);
+            // auto models = Model::readASE(event.GetString());
+            // if (!models.empty()) {
+            //     tireCollision = WireframeModel::fromModel(models[0]);
+            // } else {
+            //     tireCollision = WireframeModel();
+            // }
+            auto model = Model::readPSK(event.GetString());
+            tireCollision = WireframeModel::fromModel(model);
+            tireCollisionMesh->init(tireCollision);
+        });
+
+    configurationWidget->Bind(
+        WHEEL_STEER_ACROSS_CHANGED, [this](wxCommandEvent& event) {
+            if (auto floatData =
+                    static_cast<FloatData*>(event.GetClientObject())) {
+                setWheelSteerAcross(floatData->value);
             }
         });
+
+    configurationWidget->Bind(
+        WHEEL_STEER_ALONG_CHANGED, [this](wxCommandEvent& event) {
+            if (auto floatData =
+                    static_cast<FloatData*>(event.GetClientObject())) {
+                setWheelSteerAlong(floatData->value);
+            }
+        });
+
+    configurationWidget->Bind(
+        WHEEL_ENG_ACROSS_CHANGED, [this](wxCommandEvent& event) {
+            if (auto floatData =
+                    static_cast<FloatData*>(event.GetClientObject())) {
+                setWheelEngAcross(floatData->value);
+            }
+        });
+
+    configurationWidget->Bind(
+        WHEEL_ENG_ALONG_CHANGED, [this](wxCommandEvent& event) {
+            if (auto floatData =
+                    static_cast<FloatData*>(event.GetClientObject())) {
+                setWheelEngAlong(floatData->value);
+            }
+        });
+
+    configurationWidget->Bind(WHEEL_VERT_CHANGED, [this](
+                                                      wxCommandEvent& event) {
+        if (auto floatData = static_cast<FloatData*>(event.GetClientObject())) {
+            setWheelVert(floatData->value);
+        }
+    });
 
     configurationWidget->Bind(
         EMULATE_BUTTON_CLICKED,
@@ -136,10 +180,75 @@ void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {
     }
 }
 
+void MainWindow::setMainModel(const Model& model) {
+    mainModel = model;
+}
+
+void MainWindow::setMainCollision(const Model& model) {
+    mainCollision = WireframeModel::fromModel(model);
+}
+
+void MainWindow::setTireCollision(const Model& model) {
+    tireCollision = WireframeModel::fromModel(model);
+}
+
+void MainWindow::setWheelSteerAlong(float value) {
+    for (auto& wheel : wheelSteerMeshNodes) {
+        auto leftSteerWheelLocation = wheel->getLocation();
+        leftSteerWheelLocation.setX(value);
+        wheel->setLocation(leftSteerWheelLocation);
+    }
+}
+
+void MainWindow::setWheelSteerAcross(float value) {
+    auto leftSteerWheelLocation = wheelSteerMeshNodes[0]->getLocation();
+    leftSteerWheelLocation.setY(value);
+    wheelSteerMeshNodes[0]->setLocation(leftSteerWheelLocation);
+
+    auto rightSteerWheelLocation = wheelSteerMeshNodes[1]->getLocation();
+    rightSteerWheelLocation.setY(-value);
+    wheelSteerMeshNodes[1]->setLocation(rightSteerWheelLocation);
+}
+
+void MainWindow::setWheelEngAlong(float value) {
+    for (auto& wheel : wheelEngMeshNodes) {
+        auto leftSteerWheelLocation = wheel->getLocation();
+        leftSteerWheelLocation.setX(value);
+        wheel->setLocation(leftSteerWheelLocation);
+    }
+}
+
+void MainWindow::setWheelEngAcross(float value) {
+    auto leftEngWheelLocation = wheelEngMeshNodes[0]->getLocation();
+    leftEngWheelLocation.setY(value);
+    wheelEngMeshNodes[0]->setLocation(leftEngWheelLocation);
+
+    auto rightEngWheelLocation = wheelEngMeshNodes[1]->getLocation();
+    rightEngWheelLocation.setY(-value);
+    wheelEngMeshNodes[1]->setLocation(rightEngWheelLocation);
+}
+
+void MainWindow::setWheelVert(float value) {
+    for (auto& wheel : wheelSteerMeshNodes) {
+        auto leftSteerWheelLocation = wheel->getLocation();
+        leftSteerWheelLocation.setZ(value);
+        wheel->setLocation(leftSteerWheelLocation);
+    }
+
+    for (auto& wheel : wheelEngMeshNodes) {
+        auto leftSteerWheelLocation = wheel->getLocation();
+        leftSteerWheelLocation.setZ(value);
+        wheel->setLocation(leftSteerWheelLocation);
+    }
+}
+
 void MainWindow::openEmulationWindow() {
     if (!simulateWindow) {
         simulateWindow = new wxFrame(this, wxID_ANY, "Simulation");
         auto simulateWidget = new OpenglView(simulateWindow);
+        auto scene = simulateWidget->getScene();
+        auto physicWorld = std::make_shared<PhysicWorld>();
+        simulateWidget->addUpdatable(physicWorld);
 
         simulationEditorCameraController =
             std::make_unique<FreeCameraController>(simulateWidget);
@@ -147,47 +256,99 @@ void MainWindow::openEmulationWindow() {
                              &MainWindow::onOpenglEditorMouseFocusEvent, this);
         simulateWidget->Bind(wxEVT_LEAVE_WINDOW,
                              &MainWindow::onOpenglEditorMouseFocusEvent, this);
-        auto mesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
-        // mesh->init(mainModel);
 
-        auto simMainMeshNode = std::make_shared<SceneNode>();
-        auto shaderProgram = openglView->getRenderer().getShaderProgram(
+        auto simMainNode = std::make_shared<SceneNode>();
+        if (auto lockedScene = scene.lock()) {
+            lockedScene->addNode(simMainNode);
+        }
+        auto simMainCollisionMesh =
+            simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        simMainCollisionMesh->init(mainCollision);
+        simMainNode->addDrawable(simMainCollisionMesh);
+
+        auto mainCollisionShape =
+            std::make_shared<ConvexHull>(mainCollision.vertices);
+        mainPhysic =
+            std::make_shared<PhysObject>(simMainNode, mainCollisionShape);
+        mainPhysic->setMass(500.0f);
+        mainPhysic->setPhysic(
+            physicWorld->addBody(mainPhysic->getConstructionInfo()));
+        simulateWidget->addUpdatable(mainPhysic);
+
+        auto shaderProgram = simulateWidget->getRenderer().getShaderProgram(
             ".\\resources\\shaders\\meshvertexshader.vert",
             ".\\resources\\shaders\\meshfragmentshader.frag");
-        // simMainMeshNode->setShaderProgram(shaderProgram);
-        std::shared_ptr<SceneNode> camera;
-        auto scene = simulateWidget->getScene();
-        if (auto lockedScene = scene.lock()) {
-            lockedScene->addNode(simMainMeshNode);
+        auto simMainMeshNode = std::make_shared<SceneNode>();
+        simMainMeshNode->setShaderProgram(shaderProgram);
+        auto simMainMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        simMainMesh->init(mainModel);
+        simMainMeshNode->addDrawable(simMainMesh);
+        simMainNode->addChild(simMainMeshNode);
 
+        auto wheelMesh =
+            simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        wheelMesh->init(tireCollision);
+
+        auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
+
+        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {wheelSteerMeshNodes, wheelEngMeshNodes};
+
+        for(const auto& nodes: wheels) {
+            for (const auto& wheel : nodes) {
+                auto wheelNode = std::make_shared<SceneNode>();
+                wheelNode->setLocation(wheel->getLocation());
+                wheelNode->addDrawable(wheelMesh);
+                if (auto lockedScene = scene.lock()) {
+                    lockedScene->addNode(wheelNode);
+                }
+
+                auto tirePhysBody =
+                    std::make_shared<PhysObject>(wheelNode, tireShape);
+                tirePhysBody->setMass(3.0f);
+                tirePhysBody->setFriction(1.0f);
+                tirePhysBody->setPhysic(
+                    physicWorld->addBody(tirePhysBody->getConstructionInfo()));
+                tirePhysBody->getPhysics()->setIgnoreCollisionCheck(
+                    mainPhysic->getPhysics().get(), true);
+                simulateWidget->addUpdatable(tirePhysBody);
+
+                auto bodyJointTransform = btTransform::getIdentity();
+                bodyJointTransform.setOrigin(wheelNode->getLocation().toBtVec3());
+
+                auto constraint = physicWorld->addConstraint<btSliderConstraint>(
+                    *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(),
+                    bodyJointTransform, btTransform::getIdentity(), true);
+
+                constraint->setUpperAngLimit(
+                    Angle::fromDegrees(180.0f).getRadians());
+                constraint->setLowerAngLimit(
+                    Angle::fromDegrees(-180.0f).getRadians());
+                constraint->setLowerLinLimit(0.0f);
+                constraint->setUpperLinLimit(0.0f);
+                constraint->setMaxAngMotorForce(15000.0f);
+                constraint->setPoweredAngMotor(true);
+                contsts.emplace_back(constraint);
+            }
+        }
+
+        std::shared_ptr<SceneNode> camera;
+        if (auto lockedScene = scene.lock()) {
             camera = lockedScene->getActiveCamera();
         }
 
-        // auto childMainMeshNode = std::make_shared<SceneNode>();
-        // childMainMeshNode->setShaderProgram(shaderProgram);
-        // // Box childBox({10.0f, 10.0f, 10.0f});
-        // Sphere childBox(10.0f);
-        // auto childMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        // childMesh->init(childBox.getModel());
-        // childMainMeshNode->addDrawable(childMesh);
-        // childMainMeshNode->setLocation({100.0f, 0.0f, 100.0f});
-        // simMainMeshNode->addChild(childMainMeshNode);
-
-        // simMainMeshNode->addChild(camera);
         camera->setLocation({-100.0f, 0.0f, 100.0f});
         camera->setRotation({0.0f, 0.0f, 0.0f});
 
-        simMainMeshNode->addDrawable(mesh);
         simulateWindow->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& event) {
             simulateWindow = nullptr;
             simulationEditorCameraController.reset();
-            m_body.reset();
+            mainPhysic.reset();
             event.Skip();
         });
         simulateWindow->SetWindowStyleFlag(
             simulateWindow->GetWindowStyleFlag() | wxWANTS_CHARS);
         simulateWindow->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& event) {
-            m_body->getPhysics()->activate(true);
+            mainPhysic->getPhysics()->activate(true);
             auto force = 100.0f;
             Vec3f forceVec;
             if (event.GetKeyCode() == WXK_UP) {
@@ -219,8 +380,9 @@ void MainWindow::openEmulationWindow() {
             } else if (event.GetKeyCode() == WXK_CONTROL) {
                 forceVec.setZ(-force);
             }
-            m_body->getPhysics()->applyCentralImpulse(forceVec.toBtVec3());
+            mainPhysic->getPhysics()->applyCentralImpulse(forceVec.toBtVec3());
         });
+
         simulateWidget->Bind(wxEVT_KEY_UP, [this](wxKeyEvent& event) {
             if (event.GetKeyCode() == WXK_UP) {
                 // forceVec.setX(force);
@@ -247,24 +409,8 @@ void MainWindow::openEmulationWindow() {
             }
         });
 
-        auto physicWorld = std::make_shared<PhysicWorld>();
-        auto bodyShape = std::make_shared<ConvexHull>(mainModel);
-        // mesh->init(bodyShape->getModel());
-        mesh->init(WireframeModel::fromModel(bodyShape->getModel()));
-        // simMainMeshNode->setRotation(Quaternion::fromEulerAngles(
-        //     Rotor3(Angle::fromDegrees(180.0f), Angle(), Angle())));
-        m_body = std::make_shared<PhysObject>(simMainMeshNode, bodyShape);
-        m_body->setMass(500.0f);
-
-        m_body->setPhysic(physicWorld->addBody(m_body->getConstructionInfo()));
-
-        simulateWidget->addUpdatable(physicWorld);
-        simulateWidget->addUpdatable(m_body);
-
         auto box = std::make_shared<Box>(Vec3f{1500.0f, 1500.0f, 10.0f});
-
         auto groundModel = box->getModel();
-
         auto groundMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
         groundMesh->init(groundModel);
         auto groundMeshNode = std::make_shared<SceneNode>();
@@ -278,69 +424,6 @@ void MainWindow::openEmulationWindow() {
             lockedScene->addNode(groundMeshNode);
         }
         simulateWidget->addUpdatable(ground);
-
-        // auto sphere = std::make_shared<Sphere>(10.0f);
-        // auto sphereMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
-        // sphereMesh->init(sphere->getModel());
-        // auto sphereMeshNode = std::make_shared<SceneNode>();
-        // sphereMeshNode->setShaderProgram(shaderProgram);
-        // sphereMeshNode->addDrawable(sphereMesh);
-        // sphereMeshNode->setLocation({0.0f, 0.0f, 400.0f});
-        // // sphereMeshNode->addChild(camera);
-        // auto spherePhys =
-        //     std::make_shared<PhysObject>(sphereMeshNode, sphere, 10.f);
-
-        // spherePhys->setPhysic(
-        //     physicWorld->addBody(spherePhys->getConstructionInfo()));
-        // if (auto lockedScene = scene.lock()) {
-        //     lockedScene->addNode(sphereMeshNode);
-        // }
-        // simulateWidget->addUpdatable(spherePhys);
-
-        {
-            auto tireShape = std::make_shared<ConvexHull>(tireModel);
-            auto tireMesh =
-                simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
-            tireMesh->init(WireframeModel::fromModel(tireShape->getModel()));
-
-            for (const auto& tirePosition : tirePositions) {
-                auto tireMeshNode = std::make_shared<SceneNode>();
-                tireMeshNode->setLocation(tirePosition);
-                tireMeshNode->addDrawable(tireMesh);
-                auto scene = simulateWidget->getScene();
-                if (auto lockedScene = scene.lock()) {
-                    lockedScene->addNode(tireMeshNode);
-                }
-
-                auto tirePhysBody =
-                    std::make_shared<PhysObject>(tireMeshNode, tireShape);
-                tirePhysBody->setMass(3.0f);
-                tirePhysBody->setFriction(1.0f);
-
-                tirePhysBody->setPhysic(
-                    physicWorld->addBody(tirePhysBody->getConstructionInfo()));
-
-                simulateWidget->addUpdatable(tirePhysBody);
-
-                auto bodyJointTransform = btTransform::getIdentity();
-                bodyJointTransform.setOrigin(tirePosition.toBtVec3());
-
-                auto constraint =
-                    physicWorld->addConstraint<btSliderConstraint>(
-                        *m_body->getPhysics(), *tirePhysBody->getPhysics(),
-                        bodyJointTransform, btTransform::getIdentity(), true);
-
-                constraint->setUpperAngLimit(
-                    Angle::fromDegrees(180.0f).getRadians());
-                constraint->setLowerAngLimit(
-                    Angle::fromDegrees(-180.0f).getRadians());
-                constraint->setLowerLinLimit(0.0f);
-                constraint->setUpperLinLimit(0.0f);
-                constraint->setMaxAngMotorForce(15000.0f);
-                constraint->setPoweredAngMotor(true);
-                contsts.emplace_back(constraint);
-            }
-        }
 
         simulateWindow->Show();
     }

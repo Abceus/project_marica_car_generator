@@ -51,7 +51,7 @@ Scene::addNode(const std::shared_ptr<SceneNode>& newNode) {
 
 void Scene::drawNode(const std::shared_ptr<SceneNode>& node,
                      const Transform& parentTransform) {
-    bool shaderChanged = true;
+    bool shaderChanged = false;
     if (node->getShaderProgram()) {
         if (m_shaderProgram != node->getShaderProgram()) {
             if (m_shaderProgram) {

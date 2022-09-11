@@ -7,11 +7,11 @@
 
 #include "utils/math/geometry_prototype.h"
 
-ConvexHull::ConvexHull(const Model& model) : model(model) {}
+ConvexHull::ConvexHull(const std::vector<Vertex>& model) : model(model) {}
 
 Model ConvexHull::getModel() const {
     std::vector<Vec3f> v;
-    for(const auto& vert: model.vertices) {
+    for(const auto& vert: model) {
         v.push_back({vert.X, vert.Y, vert.Z});
     }
     return getConvexHull(v);
@@ -19,7 +19,7 @@ Model ConvexHull::getModel() const {
 
 btCollisionShape* ConvexHull::createPhysicShape() const {
     auto result = new btConvexHullShape();
-    for (auto& vert : model.vertices) {
+    for (auto& vert : model) {
         result->addPoint(Vec3f(vert.X, vert.Y, vert.Z).toBtVec3());
     }
     return result;

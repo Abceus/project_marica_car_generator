@@ -13,6 +13,7 @@
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
 
+wxDECLARE_EVENT(OPENGL_INITED, wxCommandEvent);
 class OpenglView : public wxGLCanvas {
 public:
     OpenglView(wxWindow* parent);

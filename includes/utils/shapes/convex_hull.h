@@ -6,9 +6,9 @@
 
 class ConvexHull : public IShape {
 public:
-    ConvexHull(const Model& model);
+    ConvexHull(const std::vector<Vertex>& model);
     Model getModel() const override;
     btCollisionShape* createPhysicShape() const override;
 private:
-    Model model;
+    std::vector<Vertex> model;
 };

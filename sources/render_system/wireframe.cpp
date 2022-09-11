@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <memory>
 
+WireframeMesh::WireframeMesh() : edgeArray(std::make_shared<EdgeArray>()) {}
+
 void WireframeMesh::init(const WireframeModel& model, const Color& color) {
     m_color = color;
 
@@ -16,7 +18,6 @@ void WireframeMesh::init(const WireframeModel& model, const Color& color) {
     auto ebo = std::make_shared<ElementBuffer>();
     ebo->init(model.edges);
 
-    edgeArray = std::make_shared<EdgeArray>();
     edgeArray->init(vbo, ebo);
 }
 

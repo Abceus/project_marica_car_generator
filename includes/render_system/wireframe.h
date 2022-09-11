@@ -8,6 +8,7 @@
 
 class WireframeMesh : public Drawable {
 public:
+    WireframeMesh();
     void init(const WireframeModel& model, const Color& color = Color());
     void draw(ShaderProgram* shader) const override;
 
