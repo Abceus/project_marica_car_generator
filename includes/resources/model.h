@@ -1,8 +1,13 @@
 #pragma once
 
+#include <memory>
+#include <set>
 #include <string>
+#include <vcruntime.h>
 #include <vector>
+#include <map>
 
+#include "resources/skeletal.h"
 #include "utils/gl.h"
 
 struct Vertex {
@@ -19,6 +24,10 @@ struct Model {
     std::vector<Vertex> vertices;
     std::vector<Face> faces;
     std::vector<std::string> materials;
+
+    Skeletal skeletal;
+    std::map<size_t, std::set<std::string>> vlinks;
+    std::map<std::string, std::vector<std::pair<size_t, float>>> blinks;
 
     static Model readPSK(const std::string& filename);
     static std::vector<Model> readASE(const std::string& filename);

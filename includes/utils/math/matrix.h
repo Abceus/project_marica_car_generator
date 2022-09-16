@@ -34,6 +34,10 @@ public:
     operator-(const Matrix<T, rowsAmount, columnsAmount>& other) const;
 
     Matrix<T, columnsAmount, rowsAmount> getTranspose() const;
+    Matrix<T, columnsAmount, rowsAmount> getInverted() const;
+
+    T getDeterminant() const;
+    T getMinor(size_t row, size_t column) const;
 
     std::array<T, columnsAmount>& operator[](std::size_t idx);
 
@@ -197,6 +201,56 @@ Matrix<T, rowsAmount, columnsAmount>::getTranspose() const {
         }
     }
     return result;
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+Matrix<T, columnsAmount, rowsAmount>
+Matrix<T, rowsAmount, columnsAmount>::getInverted() const {
+    Matrix<T, columnsAmount, rowsAmount> result;
+    auto det = getDeterminant();
+    if (det != 0) {
+        for (size_t i = 0; i < rowsAmount; ++i) {
+            for (size_t j = 0; j < columnsAmount; ++j) {
+                result[i][j] = std::pow(-1, i + j) * getMinor(i, j);
+            }
+        }
+        return result.getTranspose() * (1 / det);
+    }
+    return result;
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+T Matrix<T, rowsAmount, columnsAmount>::getDeterminant() const {
+    static_assert(rowsAmount == columnsAmount);
+    T result = 0;
+    if constexpr (rowsAmount == 1) {
+        return m_data[0][0];
+    }
+    else {
+        for (size_t column = 0; column < columnsAmount; ++column) {
+            result +=
+                std::pow(-1, column) * m_data[0][column] * getMinor(0, column);
+        }
+    }
+    return result;
+}
+
+template <typename T, size_t rowsAmount, size_t columnsAmount>
+T Matrix<T, rowsAmount, columnsAmount>::getMinor(size_t row,
+                                                 size_t column) const {
+    Matrix<T, rowsAmount - 1, columnsAmount - 1> submatrix;
+    for (size_t i = 0; i < rowsAmount; ++i) {
+        if (i != row) {
+            size_t subrow = i > row ? i - 1 : i;
+            for (size_t j = 0; j < columnsAmount; ++j) {
+                if (j != column) {
+                    size_t subcolumn = j > column ? j - 1 : j;
+                    submatrix[subrow][subcolumn] = m_data[i][j];
+                }
+            }
+        }
+    }
+    return submatrix.getDeterminant();
 }
 
 template <typename T, size_t rowsAmount, size_t columnsAmount>

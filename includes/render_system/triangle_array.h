@@ -21,6 +21,8 @@ public:
     void draw() const;
     void draw(size_t firstIndex, size_t count) const;
 
+    std::weak_ptr<VertexBuffer> getVertexBuffer() const;
+
 private:
     std::shared_ptr<VertexBuffer> vertexBuffer;
     std::shared_ptr<ElementBuffer> elementBuffer;

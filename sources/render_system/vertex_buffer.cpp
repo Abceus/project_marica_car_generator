@@ -10,7 +10,7 @@ void VertexBuffer::init(const std::vector<Vertex>& vertices) {
     bind();
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(),
-                 vertices.data(), GL_STATIC_DRAW);
+                 vertices.data(), GL_DYNAMIC_DRAW);
 
     unbind();
 }
@@ -32,4 +32,15 @@ void VertexBuffer::unbind() const {
 
 bool VertexBuffer::isValid() const {
     return bufferIndex != INVALID_BUFFER_INDEX;
+}
+
+void VertexBuffer::updateBuffer(size_t offset,
+                                const std::vector<Vertex>& vertices) {
+    if (isValid()) {
+        bind();
+        glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset) * sizeof(Vertex),
+                        static_cast<GLsizeiptr>(vertices.size()) * sizeof(Vertex),
+                        reinterpret_cast<const void*>(vertices.data()));
+        unbind();
+    }
 }

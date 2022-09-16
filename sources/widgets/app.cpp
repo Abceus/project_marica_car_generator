@@ -10,6 +10,7 @@
 #include "resources/ase_reader/rules/set.h"
 #include "resources/ase_reader/rules/string.h"
 #include "resources/ase_reader/rules/value.h"
+#include "utils/math/matrix.h"
 #include "widgets/mainwindow.h"
 #include <memory>
 #include <string>
@@ -212,5 +213,6 @@ bool Application::OnInit() {
 
     auto mainWindow = new MainWindow();
     mainWindow->Show(true);
+
     return true;
 }

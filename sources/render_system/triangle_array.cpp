@@ -82,3 +82,7 @@ void TriangleArray::draw(size_t firstIndex, size_t count) const {
         unbind();
     }
 }
+
+std::weak_ptr<VertexBuffer> TriangleArray::getVertexBuffer() const {
+    return vertexBuffer;
+}

@@ -16,6 +16,8 @@ public:
     void draw() const;
 
     void setTexture(const std::shared_ptr<Texture>& texture);
+
+    std::weak_ptr<TriangleArray> getVertexArray() const;
 private:
     std::shared_ptr<TriangleArray> vertexArray;
     std::shared_ptr<Texture> texture;

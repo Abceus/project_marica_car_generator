@@ -132,7 +132,10 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
         WHEEL_STEER_ACROSS_CHANGED, [this](wxCommandEvent& event) {
             if (auto floatData =
                     static_cast<FloatData*>(event.GetClientObject())) {
-                setWheelSteerAcross(floatData->value);
+                // setWheelSteerAcross(floatData->value);
+                // mainMesh->rotateBone("LeftFrontTIRE",
+                // Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(floatData->value))));
+                mainMesh->transposeBone("LeftFrontTIRE", {floatData->value});
             }
         });
 
@@ -140,7 +143,13 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
         WHEEL_STEER_ALONG_CHANGED, [this](wxCommandEvent& event) {
             if (auto floatData =
                     static_cast<FloatData*>(event.GetClientObject())) {
-                setWheelSteerAlong(floatData->value);
+                // setWheelSteerAlong(floatData->value);
+                mainMesh->rotateBone(
+                    "LeftFrontTIRE",
+                    Quaternion::fromEulerAngles(
+                        Rotor3(Angle::fromDegrees(0.0),
+                               Angle::fromDegrees(floatData->value),
+                               Angle::fromDegrees(0.0))));
             }
         });
 
@@ -291,9 +300,10 @@ void MainWindow::openEmulationWindow() {
 
         auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
 
-        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {wheelSteerMeshNodes, wheelEngMeshNodes};
+        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {
+            wheelSteerMeshNodes, wheelEngMeshNodes};
 
-        for(const auto& nodes: wheels) {
+        for (const auto& nodes : wheels) {
             for (const auto& wheel : nodes) {
                 auto wheelNode = std::make_shared<SceneNode>();
                 wheelNode->setLocation(wheel->getLocation());
@@ -313,11 +323,13 @@ void MainWindow::openEmulationWindow() {
                 simulateWidget->addUpdatable(tirePhysBody);
 
                 auto bodyJointTransform = btTransform::getIdentity();
-                bodyJointTransform.setOrigin(wheelNode->getLocation().toBtVec3());
+                bodyJointTransform.setOrigin(
+                    wheelNode->getLocation().toBtVec3());
 
-                auto constraint = physicWorld->addConstraint<btSliderConstraint>(
-                    *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(),
-                    bodyJointTransform, btTransform::getIdentity(), true);
+                auto constraint =
+                    physicWorld->addConstraint<btSliderConstraint>(
+                        *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(),
+                        bodyJointTransform, btTransform::getIdentity(), true);
 
                 constraint->setUpperAngLimit(
                     Angle::fromDegrees(180.0f).getRadians());

@@ -19,3 +19,7 @@ void Batch::draw() const {
 void Batch::setTexture(const std::shared_ptr<Texture>& texture_) {
     texture = texture_;
 }
+
+std::weak_ptr<TriangleArray> Batch::getVertexArray() const {
+    return vertexArray;
+}

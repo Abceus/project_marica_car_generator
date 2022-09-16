@@ -7,6 +7,11 @@ set( CMAKE_CXX_STANDARD 20 )
 set(BUILD_SHARED_LIBS OFF)
 set(wxUSE_STL ON)
 set(_CRT_SECURE_NO_WARNINGS ON)
+if(CMAKE_BUILD_TYPE STREQUAL  "Debug")
+        set(wxUSE_EXCEPTIONS OFF)
+else()
+        set(wxUSE_EXCEPTIONS ON)
+endif()
 add_subdirectory(3rd_party/wxWidgets)
 
 set(SOURCES sources/main.cpp
@@ -42,6 +47,7 @@ set(SOURCES sources/main.cpp
         sources/resources/wireframe_model.cpp
         sources/resources/unanimation.cpp
         sources/resources/resource_manager.cpp
+        sources/resources/skeletal.cpp
 
         sources/resources/ase_reader/ase_reader_node.cpp
         sources/resources/ase_reader/ase_reader_node_analyzer.cpp

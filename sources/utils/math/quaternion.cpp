@@ -54,7 +54,7 @@ Vec3f Quaternion::getZAxis() const {
 }
 
 glm::quat Quaternion::toGLQuat() const {
-    return {y, z, -x, w};
+    return {w, y, z, -x};
 }
 Quaternion Quaternion::fromGLQuat(const glm::quat& other) {
     return {-other.z, other.x, other.y, other.w};
