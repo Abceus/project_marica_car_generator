@@ -61,9 +61,6 @@ set(SOURCES sources/main.cpp
         sources/resources/ase_reader/rules/set.cpp
         sources/resources/ase_reader/rules/value.cpp
         
-        sources/physics/physicworld.cpp
-        sources/physics/physobject.cpp
-        
         sources/utils/math/angle.cpp
         sources/utils/math/rot3.cpp
         sources/utils/math/utils.cpp
@@ -75,6 +72,14 @@ set(SOURCES sources/main.cpp
         sources/utils/shapes/box.cpp
         sources/utils/shapes/sphere.cpp
         sources/utils/shapes/convex_hull.cpp)
+
+set(PHYSIC_SOURCES
+        sources/physics/physicworld.cpp
+        sources/physics/physobject.cpp)
+
+if(WITH_PHYSICS)
+        set(SOURCES ${SOURCES} ${PHYSIC_SOURCES})
+endif()
 
 if(WIN32)
         add_executable( ProjectMaricaCarGenerator WIN32
@@ -91,28 +96,36 @@ add_subdirectory(3rd_party/glew)
 
 add_subdirectory(3rd_party/glm)
 
-set(USE_GRAPHICAL_BENCHMARK OFF CACHE BOOL "Use Graphical Benchmark" FORCE)
-set(ENABLE_VHACD OFF CACHE BOOL "Use VHACD in BulletRobotics and pybullet" FORCE)
-set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build original Bullet CPU examples" FORCE)
-set(USE_GLUT OFF CACHE BOOL "Use Glut" FORCE)
-set(BUILD_ENET OFF CACHE BOOL "Set when you want to build apps with enet UDP networking support" FORCE)
-set(BUILD_CLSOCKET OFF CACHE BOOL "Set when you want to build apps with enet TCP networking support" FORCE)
-set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "Set when you want to build the OpenGL3+ demos" FORCE)
-set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "Set when you want to build the Bullet 2 demos" FORCE)
-set(BUILD_EXTRAS OFF CACHE BOOL "Set when you want to build the extras" FORCE)
-set(INSTALL_LIBS OFF CACHE BOOL "Set when you want to install libraries" FORCE)
-set(INSTALL_CMAKE_FILES OFF CACHE BOOL "Install generated CMake files" FORCE)
-set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests" FORCE)
-set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC Runtime Library DLL (/MD or /MDd)" FORCE)
-set(USE_MSVC_RELEASE_RUNTIME_ALWAYS OFF CACHE BOOL "Use MSVC Release Runtime Library even in Debug" FORCE)
-set(BUILD_BULLET3 OFF CACHE BOOL "Set when you want to build Bullet 3" FORCE)
-add_subdirectory(3rd_party/bullet-physics)
+if(WITH_PHYSICS)
+        set(USE_GRAPHICAL_BENCHMARK OFF CACHE BOOL "Use Graphical Benchmark" FORCE)
+        set(ENABLE_VHACD OFF CACHE BOOL "Use VHACD in BulletRobotics and pybullet" FORCE)
+        set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build original Bullet CPU examples" FORCE)
+        set(USE_GLUT OFF CACHE BOOL "Use Glut" FORCE)
+        set(BUILD_ENET OFF CACHE BOOL "Set when you want to build apps with enet UDP networking support" FORCE)
+        set(BUILD_CLSOCKET OFF CACHE BOOL "Set when you want to build apps with enet TCP networking support" FORCE)
+        set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "Set when you want to build the OpenGL3+ demos" FORCE)
+        set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "Set when you want to build the Bullet 2 demos" FORCE)
+        set(BUILD_EXTRAS OFF CACHE BOOL "Set when you want to build the extras" FORCE)
+        set(INSTALL_LIBS OFF CACHE BOOL "Set when you want to install libraries" FORCE)
+        set(INSTALL_CMAKE_FILES OFF CACHE BOOL "Install generated CMake files" FORCE)
+        set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Unit Tests" FORCE)
+        set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC Runtime Library DLL (/MD or /MDd)" FORCE)
+        set(USE_MSVC_RELEASE_RUNTIME_ALWAYS OFF CACHE BOOL "Use MSVC Release Runtime Library even in Debug" FORCE)
+        set(BUILD_BULLET3 OFF CACHE BOOL "Set when you want to build Bullet 3" FORCE)
+        add_subdirectory(3rd_party/bullet-physics)
+
+        target_include_directories( ProjectMaricaCarGenerator
+                PRIVATE ${BULLET_PHYSICS_SOURCE_DIR}/src)
+
+        target_link_libraries(ProjectMaricaCarGenerator BulletDynamics BulletCollision LinearMath)
+
+        target_compile_definitions(ProjectMaricaCarGenerator PUBLIC WITH_PHYSICS)
+endif()
 
 target_include_directories( ProjectMaricaCarGenerator
-        PRIVATE includes ${BULLET_PHYSICS_SOURCE_DIR}/src)
+        PRIVATE includes)
 
-target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl glew_s glm::glm OpenGL::GL
-BulletDynamics BulletCollision LinearMath)
+target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl glew_s glm::glm OpenGL::GL)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

@@ -1,5 +1,7 @@
 #pragma once
+#ifdef WITH_PHYSICS
 #include "LinearMath/btVector3.h"
+#endif
 #include <cmath>
 #include <glm/glm.hpp>
 
@@ -31,8 +33,10 @@ public:
     glm::vec3 toGLVec3(Vec3Type type = Vec3Type::Coords) const;
     static Vec3<T> fromGLVec3(const glm::vec3& other);
 
+#ifdef WITH_PHYSICS
     btVector3 toBtVec3(Vec3Type type = Vec3Type::Coords) const;
     static Vec3<T> fromBtVec3(const btVector3& other);
+#endif
 
     Vec3<T> operator+(const Vec3<T>& other) const;
     Vec3<T> operator-(const Vec3<T>& other) const;
@@ -101,6 +105,7 @@ Vec3<T> Vec3<T>::fromGLVec3(const glm::vec3& other) {
     return {-other.z, other.x, other.y};
 }
 
+#ifdef WITH_PHYSICS
 template <typename T>
 btVector3 Vec3<T>::toBtVec3(Vec3Type type) const {
     btVector3 result{static_cast<float>(y), static_cast<float>(z),
@@ -115,6 +120,7 @@ template <typename T>
 Vec3<T> Vec3<T>::fromBtVec3(const btVector3& other) {
     return {-other.z(), other.x(), other.y()};
 }
+#endif
 
 template <typename T>
 Vec3<T> Vec3<T>::operator+(const Vec3<T>& other) const {

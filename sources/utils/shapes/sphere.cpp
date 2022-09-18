@@ -38,6 +38,8 @@ Model Sphere::getModel() const {
     return result;
 }
 
+#ifdef WITH_PHYSICS
 btCollisionShape* Sphere::createPhysicShape() const {
     return new btSphereShape(radius);
 }
+#endif

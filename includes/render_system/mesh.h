@@ -4,7 +4,6 @@
 #include <string>
 #include <vcruntime.h>
 
-#include "LinearMath/btQuaternion.h"
 #include "resources/unanimation.h"
 #include "resources/model.h"
 #include "render_system/drawable.h"

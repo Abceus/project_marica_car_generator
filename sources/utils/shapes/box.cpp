@@ -41,7 +41,9 @@ Model Box::getModel() const {
 	return result;
 }
 
+#ifdef WITH_PHYSICS
 btCollisionShape* Box::createPhysicShape() const {
     auto halfBoxSize = size / 2.0f;
     return new btBoxShape(halfBoxSize.toBtVec3(Vec3Type::Size));
 }
+#endif

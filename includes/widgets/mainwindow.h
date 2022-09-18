@@ -1,5 +1,7 @@
 #pragma once
+#ifdef WITH_PHYSICS
 #include "physics/physobject.h"
+#endif
 #include "render_system/camera/camera_controller.h"
 #include "render_system/scene_node.h"
 #include "render_system/wireframe.h"
@@ -27,7 +29,9 @@ public:
     void setWheelVert(float value);
 
 private:
+#ifdef WITH_PHYSICS
     void openEmulationWindow();
+#endif
 
     Model mainModel;
     WireframeModel mainCollision;
@@ -48,12 +52,14 @@ private:
     std::unique_ptr<CameraController> mainEditorCameraController;
     std::unique_ptr<CameraController> simulationEditorCameraController;
 
-    std::shared_ptr<PhysObject> mainPhysic;
-
     std::vector<Vec3f> tirePositions = {{100.0f, 100.0f, -50.0f},
                                         {-100.0f, 100.0f, -50.0f},
                                         {100.0f, -100.0f, -50.0f},
                                         {-100.0f, -100.0f, -50.0f}};
 
+#ifdef WITH_PHYSICS
     std::vector<std::weak_ptr<btSliderConstraint>> contsts;
+
+    std::shared_ptr<PhysObject> mainPhysic;
+#endif
 };

@@ -1,6 +1,5 @@
 #include "utils/shapes/convex_hull.h"
 
-#include "LinearMath/btVector3.h"
 #include "resources/wireframe_model.h"
 #include "utils/math/vec3.h"
 #include <memory>
@@ -17,6 +16,7 @@ Model ConvexHull::getModel() const {
     return getConvexHull(v);
 }
 
+#ifdef WITH_PHYSICS
 btCollisionShape* ConvexHull::createPhysicShape() const {
     auto result = new btConvexHullShape();
     for (auto& vert : model) {
@@ -24,3 +24,4 @@ btCollisionShape* ConvexHull::createPhysicShape() const {
     }
     return result;
 }
+#endif

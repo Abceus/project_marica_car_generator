@@ -60,6 +60,7 @@ Quaternion Quaternion::fromGLQuat(const glm::quat& other) {
     return {-other.z, other.x, other.y, other.w};
 }
 
+#ifdef WITH_PHYSICS
 btQuaternion Quaternion::toBtQuat() const {
     return {y, z, -x, -w};
 }
@@ -67,6 +68,7 @@ btQuaternion Quaternion::toBtQuat() const {
 Quaternion Quaternion::fromBtQuat(const btQuaternion& other) {
     return {-other.z(), other.x(), other.y(), -other.w()};
 }
+#endif
 
 Rotor3 Quaternion::toEulerAngles() const {
     Rotor3 result;

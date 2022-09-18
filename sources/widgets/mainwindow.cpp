@@ -24,8 +24,10 @@
 #include <memory>
 #include <vector>
 
+#ifdef WITH_PHYSICS
 #include "physics/physicworld.h"
 #include "physics/physobject.h"
+#endif
 
 #include "utils/shapes/box.h"
 #include "utils/shapes/sphere.h"
@@ -176,9 +178,11 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
         }
     });
 
+#ifdef WITH_PHYSICS
     configurationWidget->Bind(
         EMULATE_BUTTON_CLICKED,
         [this](const wxCommandEvent& event) { openEmulationWindow(); });
+#endif
 }
 
 void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {
@@ -251,6 +255,7 @@ void MainWindow::setWheelVert(float value) {
     }
 }
 
+#ifdef WITH_PHYSICS
 void MainWindow::openEmulationWindow() {
     if (!simulateWindow) {
         simulateWindow = new wxFrame(this, wxID_ANY, "Simulation");
@@ -440,3 +445,4 @@ void MainWindow::openEmulationWindow() {
         simulateWindow->Show();
     }
 }
+#endif

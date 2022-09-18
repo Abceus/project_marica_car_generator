@@ -14,7 +14,9 @@ wxDEFINE_EVENT(WHEEL_STEER_ALONG_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_ENG_ACROSS_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
+#ifdef WITH_PHYSICS
 wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
+#endif
 
 ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
     : wxWindow(parent, wxID_ANY) {
@@ -132,6 +134,7 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
             wxPostEvent(this, newEvent);
         });
 
+#ifdef WITH_PHYSICS
     auto emulateButton = new wxButton(this, wxID_ANY);
     emulateButton->SetLabel("Emulate");
     sizer->Add(emulateButton, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
@@ -140,4 +143,5 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
         wxCommandEvent collisionEvent(EMULATE_BUTTON_CLICKED);
         wxPostEvent(this, collisionEvent);
     });
+#endif
 }

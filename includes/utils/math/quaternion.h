@@ -1,7 +1,9 @@
 #pragma once
 
 #include "glm/fwd.hpp"
+#ifdef WITH_PHYSICS
 #include <LinearMath/btQuaternion.h>
+#endif
 
 #include "utils/math/vec3.h"
 #include "utils/math/rot3.h"
@@ -29,8 +31,10 @@ public:
     glm::quat toGLQuat() const;
     static Quaternion fromGLQuat(const glm::quat& other);
 
+#ifdef WITH_PHYSICS
     btQuaternion toBtQuat() const;
     static Quaternion fromBtQuat(const btQuaternion& other);
+#endif
 
     Rotor3 toEulerAngles() const;
     static Quaternion fromEulerAngles(const Rotor3& angles);
