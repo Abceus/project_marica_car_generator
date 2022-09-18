@@ -11,6 +11,7 @@
 #include "render_system/texture.h"
 #include "render_system/batch.h"
 #include "utils/math/vec3.h"
+#include "utils/range_array.h"
 
 class Mesh : public Drawable
 {
@@ -30,5 +31,5 @@ private:
     std::map<Bone*, std::vector<std::pair<Vertex*, float>>> blinks;
     std::map<Vertex*, size_t> vmap;
 
-    mutable std::list<std::pair<size_t, std::vector<Vertex>>> updates;
+    mutable RangeArray<Vertex> updates;
 };

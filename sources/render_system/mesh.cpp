@@ -90,7 +90,7 @@ void Mesh::setTexture(const std::shared_ptr<Texture>& texture, size_t index) {}
 void Mesh::addTexture(const std::shared_ptr<Texture>& texture) {}
 
 void Mesh::draw(ShaderProgram* shaderProgram) const {
-    if (!updates.empty()) {
+    if (!updates.isEmpty()) {
         for (const auto& update : updates) {
             if (!batches.empty()) {
                 batches[0]
@@ -98,7 +98,7 @@ void Mesh::draw(ShaderProgram* shaderProgram) const {
                     .lock()
                     ->getVertexBuffer()
                     .lock()
-                    ->updateBuffer(update.first, update.second);
+                    ->updateBuffer(update.getFirst(), update.getData());
             }
         }
         updates.clear();
@@ -124,8 +124,8 @@ void Mesh::rotateBone(const std::string& boneName,
                            b->getGlobalOriginMatrix().getInverted();
             // resultMatrix = b->getGlobalOriginMatrix().getInverted();
         }
-        std::pair<size_t, std::vector<Vertex>> update;
-        update.first = vmap.find(vertex.first)->second;
+        Range<Vertex> update;
+        update.setFirst(vmap.find(vertex.first)->second);
         Vertex resultVertex = *vertex.first;
         auto q =
             Matrixf44::apply(resultMatrix, Vec3f(resultVertex.X, resultVertex.Y,
@@ -133,8 +133,8 @@ void Mesh::rotateBone(const std::string& boneName,
         resultVertex.X = q.getX();
         resultVertex.Y = q.getY();
         resultVertex.Z = q.getZ();
-        update.second.push_back(resultVertex);
-        updates.push_back(update);
+        update.setData({resultVertex});
+        updates.add(update);
     }
 }
 
@@ -147,12 +147,12 @@ void Mesh::transposeBone(const std::string& boneName, const Vec3f& position) {
         auto vlink = vlinks.find(vertex.first);
         Matrixf44 resultMatrix(1.0f);
         for (const auto& b : vlink->second) {
-            resultMatrix = b->getOrigin().getMatrix() * resultMatrix *
+            resultMatrix = b->getGlobalOriginMatrix() * resultMatrix *
                            (b->getGlobalMatrix() * vertex.second) *
-                           b->getOrigin().getMatrix().getInverted();
+                           b->getGlobalOriginMatrix().getInverted();
         }
-        std::pair<size_t, std::vector<Vertex>> update;
-        update.first = vmap.find(vertex.first)->second;
+        Range<Vertex> update;
+        update.setFirst(vmap.find(vertex.first)->second);
         Vertex resultVertex = *vertex.first;
         auto q =
             Matrixf44::apply(resultMatrix, Vec3f(resultVertex.X, resultVertex.Y,
@@ -160,7 +160,7 @@ void Mesh::transposeBone(const std::string& boneName, const Vec3f& position) {
         resultVertex.X = q.getX();
         resultVertex.Y = q.getY();
         resultVertex.Z = q.getZ();
-        update.second.push_back(resultVertex);
-        updates.push_back(update);
+        update.setData({resultVertex});
+        updates.add(update);
     }
 }
