@@ -17,7 +17,6 @@ class Mesh : public Drawable
 public:
     void init(const Model& model);
     void setTexture( const std::shared_ptr<Texture>& texture, size_t index );
-    void addTexture( const std::shared_ptr<Texture>& texture );
     void draw(ShaderProgram* shaderProgram) const override;
 
     void rotateBone(const std::string& boneName, const Quaternion& quaternion);

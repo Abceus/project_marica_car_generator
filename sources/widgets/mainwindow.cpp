@@ -8,8 +8,10 @@
 #include "utils/math/vec3.h"
 #include "utils/shapes/convex_hull.h"
 #include "utils/shapes/shape.h"
-#include "widgets/configurationWidget.h"
+#include "widgets/configuration_widget.h"
+#include "widgets/event_data/indexed_texture.h"
 #include "widgets/openglview.h"
+#include "widgets/texture_array_widget.h"
 #include "wx/button.h"
 #include "wx/event.h"
 #include "wx/msw/window.h"
@@ -98,11 +100,26 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
         }
     });
 
-    configurationWidget->Bind(MESH_CHANGED,
-                              [this](const wxCommandEvent& event) {
-                                  mainModel = Model::readPSK(event.GetString());
-                                  mainMesh->init(mainModel);
-                              });
+    configurationWidget->Bind(
+        MESH_CHANGED, [this, configurationWidget](const wxCommandEvent& event) {
+            mainModel = Model::readPSK(event.GetString());
+            mainMesh->init(mainModel);
+            configurationWidget->resizeTextureArray(mainModel.materials.size());
+            for (size_t i = 0; i < mainModel.materials.size(); ++i) {
+                configurationWidget->setTexture(i, mainModel.materials[i]);
+            }
+        });
+
+    configurationWidget->Bind(TEXTURE_CHANGED, [this](wxCommandEvent& event) {
+        if (auto indexedTextureData =
+                static_cast<IndexedTexture*>(event.GetClientObject())) {
+            auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
+            if (wxFileExists(indexedTextureData->path)) {
+                newTexture->init(wxImage(indexedTextureData->path));
+                mainMesh->setTexture(newTexture, indexedTextureData->index);
+            }
+        }
+    });
 
     configurationWidget->Bind(
         COLLISION_CHANGED, [this](const wxCommandEvent& event) {
@@ -146,12 +163,11 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
             if (auto floatData =
                     static_cast<FloatData*>(event.GetClientObject())) {
                 // setWheelSteerAlong(floatData->value);
-                mainMesh->rotateBone(
-                    "LeftFrontTIRE",
-                    Quaternion::fromEulerAngles(
-                        Rotor3(Angle::fromDegrees(0.0),
-                               Angle::fromDegrees(floatData->value),
-                               Angle::fromDegrees(0.0))));
+                mainMesh->rotateBone("LeftFrontTIRE",
+                                     Quaternion::fromEulerAngles(Rotor3(
+                                         Angle::fromDegrees(0.0),
+                                         Angle::fromDegrees(floatData->value),
+                                         Angle::fromDegrees(0.0))));
             }
         });
 

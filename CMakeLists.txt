@@ -19,7 +19,8 @@ set(SOURCES sources/main.cpp
         sources/widgets/app.cpp
         sources/widgets/mainwindow.cpp
         sources/widgets/openglview.cpp
-        sources/widgets/configurationWidget.cpp
+        sources/widgets/configuration_widget.cpp
+        sources/widgets/texture_array_widget.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp

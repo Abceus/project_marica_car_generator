@@ -1,5 +1,6 @@
 #pragma once
 #include <wx/window.h>
+#include "widgets/texture_array_widget.h"
 
 wxDECLARE_EVENT(MESH_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(COLLISION_CHANGED, wxCommandEvent);
@@ -17,4 +18,10 @@ class ConfigurationWidget : public wxWindow
 {
 public:
     ConfigurationWidget(wxWindow* parent);
+
+    void resizeTextureArray(size_t newSize);
+    void setTexture(size_t index, const std::string& newPath);
+
+private:
+    TextureArrayWidget* textureArrayWidget = nullptr;
 };

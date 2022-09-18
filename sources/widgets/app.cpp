@@ -15,15 +15,15 @@
 #include <memory>
 #include <string>
 #include <wx/image.h>
-#include <wx/imagjpeg.h>
-#include <wx/imagpng.h>
+#include <wx/imagbmp.h>
 #include <wx/imagtga.h>
+#include <wx/imagpcx.h>
 
 
 bool Application::OnInit() {
-    wxImage::AddHandler(new wxPNGHandler());
     wxImage::AddHandler(new wxTGAHandler());
-    wxImage::AddHandler(new wxJPEGHandler());
+    wxImage::AddHandler(new wxBMPHandler());
+    wxImage::AddHandler(new wxPCXHandler());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "3DSMAX_ASCIIEXPORT", std::make_shared<IntASEReaderNodeRule>());

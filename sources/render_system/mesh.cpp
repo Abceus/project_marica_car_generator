@@ -85,9 +85,9 @@ void Mesh::init(const Model& m) {
     }
 }
 
-void Mesh::setTexture(const std::shared_ptr<Texture>& texture, size_t index) {}
-
-void Mesh::addTexture(const std::shared_ptr<Texture>& texture) {}
+void Mesh::setTexture(const std::shared_ptr<Texture>& texture, size_t index) {
+    batches[index]->setTexture(texture);
+}
 
 void Mesh::draw(ShaderProgram* shaderProgram) const {
     if (!updates.isEmpty()) {
