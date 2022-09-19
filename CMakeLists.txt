@@ -49,6 +49,7 @@ set(SOURCES sources/main.cpp
         sources/resources/unanimation.cpp
         sources/resources/resource_manager.cpp
         sources/resources/skeletal.cpp
+        sources/resources/dds_info.cpp
 
         sources/resources/ase_reader/ase_reader_node.cpp
         sources/resources/ase_reader/ase_reader_node_analyzer.cpp

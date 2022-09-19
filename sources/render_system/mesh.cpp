@@ -53,7 +53,7 @@ void Mesh::init(const Model& m) {
         } else {
             image = wxImage(
                 "D:\\Documents\\gits\\project_marica_car_"
-                "generator\\example\\MaricaFlatoutTex\\Texture\\common.png");
+                "generator\\example\\MaricaFlatoutTex\\Texture\\common.tga");
         }
         texture->init(image);
 

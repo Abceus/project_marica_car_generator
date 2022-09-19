@@ -24,7 +24,7 @@ void TextureArrayWidget::resize(size_t newSize) {
         for (size_t i = pathes.size(); i < newSize; ++i) {
             pickers[i] =
                 new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString,
-                                     "Select texture", "PNG (*.png)|*.png");
+                                     "Select texture", "DDS (*.dds)|*.dds|TGA (*.tga)|*.tga|BMP (*.bmp)|*.bmp|PCX (*.pcx)|*.pcx");
 
             pickers[i]->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
                                            wxFLP_FILE_MUST_EXIST);

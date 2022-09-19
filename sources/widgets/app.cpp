@@ -10,6 +10,7 @@
 #include "resources/ase_reader/rules/set.h"
 #include "resources/ase_reader/rules/string.h"
 #include "resources/ase_reader/rules/value.h"
+#include "resources/dds_info.h"
 #include "utils/math/matrix.h"
 #include "widgets/mainwindow.h"
 #include <memory>
@@ -18,6 +19,8 @@
 #include <wx/imagbmp.h>
 #include <wx/imagtga.h>
 #include <wx/imagpcx.h>
+
+#include "resources/dds_info.h"
 
 
 bool Application::OnInit() {

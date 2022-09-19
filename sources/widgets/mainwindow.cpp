@@ -1,5 +1,6 @@
 #include "widgets/mainwindow.h"
 #include "render_system/scene_node.h"
+#include "resources/dds_info.h"
 #include "resources/wireframe_model.h"
 #include "utils/math/angle.h"
 #include "utils/math/quaternion.h"
@@ -113,9 +114,17 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
     configurationWidget->Bind(TEXTURE_CHANGED, [this](wxCommandEvent& event) {
         if (auto indexedTextureData =
                 static_cast<IndexedTexture*>(event.GetClientObject())) {
-            auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
-            if (wxFileExists(indexedTextureData->path)) {
-                newTexture->init(wxImage(indexedTextureData->path));
+            if (wxFileExists(indexedTextureData->path.string())) {
+                auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
+                auto extension = indexedTextureData->path.extension().string();
+                std::transform(extension.begin(), extension.end(), extension.begin(),
+                    [](unsigned char c){ return std::tolower(c); });
+                if(extension == ".dds") {
+                    newTexture->init(DDSInfo::loadDDS(indexedTextureData->path.string()));
+                }
+                else {
+                    newTexture->init(wxImage(indexedTextureData->path.string()));
+                }
                 mainMesh->setTexture(newTexture, indexedTextureData->index);
             }
         }
