@@ -20,7 +20,8 @@ set(SOURCES sources/main.cpp
         sources/widgets/mainwindow.cpp
         sources/widgets/openglview.cpp
         sources/widgets/configuration_widget.cpp
-        sources/widgets/texture_array_widget.cpp
+
+        sources/widgets/pgproperties/texture_array_pgproperty.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp
@@ -127,7 +128,7 @@ endif()
 target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes)
 
-target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl glew_s glm::glm OpenGL::GL)
+target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

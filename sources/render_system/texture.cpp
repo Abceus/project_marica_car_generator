@@ -10,9 +10,23 @@ void Texture::init(const wxImage& image) {
     glGenTextures(1, &textureIndex);
     activate();
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, image.HasAlpha() ? 4 : 3, image.GetWidth(),
+    int componentForPixel = image.HasAlpha() ? 4 : 3;
+    size_t dataSize = image.GetWidth() * image.GetHeight() * componentForPixel;
+    std::vector<unsigned char> data(dataSize);
+    for(size_t i = 0; i < image.GetWidth(); ++i) {
+        for(int j = 0; j < image.GetHeight(); ++j) {
+            data[(j*image.GetWidth()+i)*componentForPixel] = image.GetData()[(j*image.GetWidth()+i)*3];
+            data[(j*image.GetWidth()+i)*componentForPixel+1] = image.GetData()[(j*image.GetWidth()+i)*3+1];
+            data[(j*image.GetWidth()+i)*componentForPixel+2] = image.GetData()[(j*image.GetWidth()+i)*3+2];
+            if(image.HasAlpha()) {
+                data[(j*image.GetWidth()+i)*componentForPixel+3] = image.GetAlpha()[j*image.GetWidth()+i];
+            }
+        }
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, componentForPixel, image.GetWidth(),
                  image.GetHeight(), 0, image.HasAlpha() ? GL_RGBA : GL_RGB,
-                 GL_UNSIGNED_BYTE, image.GetData());
+                 GL_UNSIGNED_BYTE, data.data());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

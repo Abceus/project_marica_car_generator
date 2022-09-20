@@ -1,11 +1,19 @@
 #include "widgets/configuration_widget.h"
 #include "widgets/event_data/float.h"
-#include "widgets/texture_array_widget.h"
+#include "widgets/event_data/indexed_texture.h"
+#include "widgets/pgproperties/texture_array_pgproperty.h"
+#include "widgets/vec3_widget.h"
+#include "wx/arrstr.h"
 #include "wx/filepicker.h"
 #include "wx/log.h"
 #include "wx/msw/button.h"
+#include "wx/propgrid/propgriddefs.h"
 #include "wx/spinctrl.h"
+#include "wx/string.h"
 #include <limits>
+#include <wx/propgrid/advprops.h>
+#include <wx/propgrid/propgrid.h>
+
 
 wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(COLLISION_CHANGED, wxCommandEvent);
@@ -15,6 +23,7 @@ wxDEFINE_EVENT(WHEEL_STEER_ALONG_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_ENG_ACROSS_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(SKIN_CHANGED, wxCommandEvent);
 #ifdef WITH_PHYSICS
 wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 #endif
@@ -22,38 +31,68 @@ wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
     : wxWindow(parent, wxID_ANY) {
     auto sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->SetSizeHints(this);
+    // sizer->SetSizeHints(this);
     SetSizer(sizer);
 
-    auto meshPicker = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString,
-                                           "Select mesh", "PSK (*.psk)|*.psk");
-    meshPicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
-                                   wxFLP_FILE_MUST_EXIST);
-    sizer->Add(meshPicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    meshPicker->Bind(wxEVT_FILEPICKER_CHANGED,
-                     [this](const wxFileDirPickerEvent& event) {
-                         wxCommandEvent meshEvent(MESH_CHANGED);
-                         meshEvent.SetString(event.GetPath());
-                         wxPostEvent(this, meshEvent);
-                     });
+    auto grid = new wxPropertyGrid(this);
+    sizer->Add(grid, 1, wxEXPAND, 0);
 
-    textureArrayWidget = new TextureArrayWidget(this);
-    sizer->Add(textureArrayWidget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    textureArrayWidget->Bind(TEXTURE_CHANGED,
-                     [this](const wxCommandEvent& event) {
-                         wxPostEvent(this, event);
-                     });
+    auto meshPicker = grid->Append(new wxFileProperty("Mesh"));
+    auto wildcard = wxVariant(wxString("PSK (*.psk)|*.psk"));
+    meshPicker->DoSetAttribute("Wildcard", wildcard);
+    auto showFullPath = wxVariant(1);
+    meshPicker->DoSetAttribute("ShowFullPath", showFullPath);
+    grid->Bind(
+        wxEVT_PG_CHANGED, [this, meshPicker](wxPropertyGridEvent& event) {
+            if (event.GetProperty() == meshPicker) {
+                wxCommandEvent meshEvent(MESH_CHANGED);
+                meshEvent.SetString(event.GetPropertyValue().GetString());
+                wxPostEvent(this, meshEvent);
+            }
+        });
+
+    textureArrayProperty =
+        grid->Append(new TextureArrayPGProperty("Skins"));
+    grid->Bind(wxEVT_PG_CHANGED, [this](wxPropertyGridEvent& event) {
+        if (event.GetMainParent() != textureArrayProperty) {
+            event.Skip();
+            return;
+        }
+        auto data = new IndexedTextureData();
+        data->index =
+            event.GetProperty()->GetAttribute("index").GetInteger();
+        data->path = event.GetValue().GetString().ToStdString();
+        wxCommandEvent newEvent(SKIN_CHANGED);
+        newEvent.SetClientObject(data);
+        wxPostEvent(this, newEvent);
+    });
+
+    // textureArrayWidget = new TextureArrayWidget(this);
+    // sizer->Add(textureArrayWidget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
+    // textureArrayWidget->Bind(TEXTURE_CHANGED,
+    //                  [this](const wxCommandEvent& event) {
+    //                      wxPostEvent(this, event);
+    //                  });
+
+    // auto vec3Widget = new Vec3Widget<float>(this);
+    // sizer->Add(vec3Widget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
+    // vec3Widget->Bind(VALUE_CHANGED,
+    //                  [this](const wxCommandEvent& event) {
+    //                      wxPostEvent(this, event);
+    //                  });
 
     // auto collisionPicker = new wxFilePickerCtrl(
     //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
     //     // (*.ase)|*.ase");
-    //     this, wxID_ANY, wxEmptyString, "Select collision", "PSK (*.psk)|*.psk");
+    //     this, wxID_ANY, wxEmptyString, "Select collision", "PSK
+    //     (*.psk)|*.psk");
     // collisionPicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
     //                                     wxFLP_FILE_MUST_EXIST);
     // sizer->Add(collisionPicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
     // collisionPicker->Bind(wxEVT_FILEPICKER_CHANGED,
     //                       [this](const wxFileDirPickerEvent& event) {
-    //                           wxCommandEvent collisionEvent(COLLISION_CHANGED);
+    //                           wxCommandEvent
+    //                           collisionEvent(COLLISION_CHANGED);
     //                           collisionEvent.SetString(event.GetPath());
     //                           wxPostEvent(this, collisionEvent);
     //                       });
@@ -133,7 +172,8 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
     // wheelVertCtrl->SetRange(std::numeric_limits<float>::lowest(),
     //                         std::numeric_limits<float>::max());
     // wheelVertCtrl->SetValue(0.0);
-    // wheelVertCtrl->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event) {
+    // wheelVertCtrl->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent&
+    // event) {
     //     auto data = new FloatData();
     //     data->value = static_cast<float>(event.GetValue());
     //     wxCommandEvent newEvent(WHEEL_VERT_CHANGED);
@@ -154,13 +194,17 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
 }
 
 void ConfigurationWidget::resizeTextureArray(size_t newSize) {
-    if (textureArrayWidget) {
-        textureArrayWidget->resize(newSize);
+    if (textureArrayProperty) {
+        wxArrayString value;
+        value.resize(newSize);
+        textureArrayProperty->SetValue(value);
     }
 }
 
 void ConfigurationWidget::setTexture(size_t index, const std::string& newPath) {
-    if (textureArrayWidget) {
-        textureArrayWidget->setPath(index, newPath);
+    if (textureArrayProperty) {
+        wxArrayString value = textureArrayProperty->GetValue();
+        value[index] = newPath;
+        textureArrayProperty->SetValue(value);
     }
 }

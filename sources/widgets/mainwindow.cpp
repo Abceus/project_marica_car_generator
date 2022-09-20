@@ -12,7 +12,6 @@
 #include "widgets/configuration_widget.h"
 #include "widgets/event_data/indexed_texture.h"
 #include "widgets/openglview.h"
-#include "widgets/texture_array_widget.h"
 #include "wx/button.h"
 #include "wx/event.h"
 #include "wx/msw/window.h"
@@ -111,21 +110,22 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
             }
         });
 
-    configurationWidget->Bind(TEXTURE_CHANGED, [this](wxCommandEvent& event) {
-        if (auto indexedTextureData =
-                static_cast<IndexedTexture*>(event.GetClientObject())) {
-            if (wxFileExists(indexedTextureData->path.string())) {
+    configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event) {
+        if (auto IndexedTextureDataData =
+                static_cast<IndexedTextureData*>(event.GetClientObject())) {
+            if (wxFileExists(IndexedTextureDataData->path.string())) {
                 auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
-                auto extension = indexedTextureData->path.extension().string();
+                auto extension = IndexedTextureDataData->path.extension().string();
                 std::transform(extension.begin(), extension.end(), extension.begin(),
                     [](unsigned char c){ return std::tolower(c); });
+                auto currentContext = openglView->getRenderer().pushContextScoped();
                 if(extension == ".dds") {
-                    newTexture->init(DDSInfo::loadDDS(indexedTextureData->path.string()));
+                    newTexture->init(DDSInfo::loadDDS(IndexedTextureDataData->path.string()));
                 }
                 else {
-                    newTexture->init(wxImage(indexedTextureData->path.string()));
+                    newTexture->init(wxImage(IndexedTextureDataData->path.string()));
                 }
-                mainMesh->setTexture(newTexture, indexedTextureData->index);
+                mainMesh->setTexture(newTexture, IndexedTextureDataData->index);
             }
         }
     });
