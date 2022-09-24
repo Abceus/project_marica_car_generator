@@ -4,11 +4,9 @@
 #endif
 #include <cmath>
 #include <glm/glm.hpp>
+#include <iostream>
 
-enum class Vec3Type {
-    Coords,
-    Size
-};
+enum class Vec3Type { Coords, Size };
 
 template <typename T>
 class Vec3 {
@@ -93,9 +91,9 @@ Vec3<T>::operator Vec3<Y>() const {
 template <typename T>
 glm::vec3 Vec3<T>::toGLVec3(Vec3Type type) const {
     glm::vec3 result{static_cast<float>(y), static_cast<float>(z),
-                static_cast<float>(-x)};
-    if(type == Vec3Type::Size) {
-        result = glm::abs(result); 
+                     static_cast<float>(-x)};
+    if (type == Vec3Type::Size) {
+        result = glm::abs(result);
     }
     return result;
 }
@@ -109,8 +107,8 @@ Vec3<T> Vec3<T>::fromGLVec3(const glm::vec3& other) {
 template <typename T>
 btVector3 Vec3<T>::toBtVec3(Vec3Type type) const {
     btVector3 result{static_cast<float>(y), static_cast<float>(z),
-            static_cast<float>(-x)};
-    if(type == Vec3Type::Size) {
+                     static_cast<float>(-x)};
+    if (type == Vec3Type::Size) {
         result = result.absolute();
     }
     return result;
@@ -174,7 +172,8 @@ Vec3<T> Vec3<T>::operator-() const {
 
 template <typename T>
 T Vec3<T>::length() const {
-    return sqrt(pow(x, static_cast<T>(2)) + pow(y, static_cast<T>(2)) + pow(z, static_cast<T>(2)));
+    return sqrt(pow(x, static_cast<T>(2)) + pow(y, static_cast<T>(2)) +
+                pow(z, static_cast<T>(2)));
 }
 
 template <typename T>
@@ -232,6 +231,22 @@ void Vec3<T>::setY(T y_) {
 template <typename T>
 void Vec3<T>::setZ(T z_) {
     z = z_;
+}
+
+template <typename T>
+std::istream& operator>>(std::istream& is, Vec3<T>& value) {
+    float x, y, z;
+    is >> x >> y >> z;
+    value.setX(x);
+    value.setY(y);
+    value.setZ(z);
+    return is;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Vec3<T>& value) {
+    os << value.getX() << " " << value.getY() << " " << value.getZ();
+    return os;
 }
 
 using Vec3f = Vec3<float>;

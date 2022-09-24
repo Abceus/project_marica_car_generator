@@ -1,13 +1,12 @@
 #pragma once
-#include "wx/filepicker.h"
-#include <string>
+#include "utils/math/vec3.h"
 #include <wx/propgrid/props.h>
 
-class TextureArrayPGProperty : public wxPGProperty {
+class Vec3fPGProperty : public wxPGProperty {
 public:
-    TextureArrayPGProperty(const wxString& label = wxPG_LABEL,
+    Vec3fPGProperty(const wxString& label = wxPG_LABEL,
                            const wxString& name = wxPG_LABEL,
-                           const wxArrayString& value = {});
+                           const Vec3f& value = {});
 
     void OnSetValue() override;
     wxString GetValueAsString(int argFlags = 0) const override;

@@ -22,6 +22,9 @@ set(SOURCES sources/main.cpp
         sources/widgets/configuration_widget.cpp
 
         sources/widgets/pgproperties/texture_array_pgproperty.cpp
+        sources/widgets/pgproperties/vec3f_pgproperty.cpp
+
+        sources/widgets/variants/vec3f.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp

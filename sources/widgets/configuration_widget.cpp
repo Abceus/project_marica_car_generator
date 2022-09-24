@@ -2,7 +2,7 @@
 #include "widgets/event_data/float.h"
 #include "widgets/event_data/indexed_texture.h"
 #include "widgets/pgproperties/texture_array_pgproperty.h"
-#include "widgets/vec3_widget.h"
+#include "widgets/pgproperties/vec3f_pgproperty.h"
 #include "wx/arrstr.h"
 #include "wx/filepicker.h"
 #include "wx/log.h"
@@ -13,7 +13,6 @@
 #include <limits>
 #include <wx/propgrid/advprops.h>
 #include <wx/propgrid/propgrid.h>
-
 
 wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(COLLISION_CHANGED, wxCommandEvent);
@@ -51,16 +50,14 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
             }
         });
 
-    textureArrayProperty =
-        grid->Append(new TextureArrayPGProperty("Skins"));
+    textureArrayProperty = grid->Append(new TextureArrayPGProperty("Skins"));
     grid->Bind(wxEVT_PG_CHANGED, [this](wxPropertyGridEvent& event) {
         if (event.GetMainParent() != textureArrayProperty) {
             event.Skip();
             return;
         }
         auto data = new IndexedTextureData();
-        data->index =
-            event.GetProperty()->GetAttribute("index").GetInteger();
+        data->index = event.GetProperty()->GetAttribute("index").GetInteger();
         data->path = event.GetValue().GetString().ToStdString();
         wxCommandEvent newEvent(SKIN_CHANGED);
         newEvent.SetClientObject(data);
@@ -74,12 +71,13 @@ ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
     //                      wxPostEvent(this, event);
     //                  });
 
-    // auto vec3Widget = new Vec3Widget<float>(this);
-    // sizer->Add(vec3Widget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // vec3Widget->Bind(VALUE_CHANGED,
-    //                  [this](const wxCommandEvent& event) {
-    //                      wxPostEvent(this, event);
-    //                  });
+    auto vec3Property = grid->Append(new Vec3fPGProperty("Coords"));
+    grid->Bind(wxEVT_PG_CHANGED, [vec3Property](wxPropertyGridEvent& event) {
+        if (event.GetMainParent() != vec3Property) {
+            event.Skip();
+            return;
+        }
+    });
 
     // auto collisionPicker = new wxFilePickerCtrl(
     //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
