@@ -80,6 +80,18 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
             openglView->getRenderer().makeDrawable<WireframeMesh>();
         mainNode->addDrawable(mainCollisionMesh);
 
+        auto testNode = std::make_shared<SceneNode>();
+        testNode->setOverlay(true);
+        mainNode->addChild(testNode);
+        WireframeModel wireframeModel;
+        wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
+        {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
+        {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
+        wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
+        auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
+        testNode->addDrawable(testMesh);
+
         tireCollisionMesh =
             openglView->getRenderer().makeDrawable<WireframeMesh>();
         for (auto& wheel : wheelSteerMeshNodes) {

@@ -175,3 +175,11 @@ void SceneNode::setShaderProgram(
 std::shared_ptr<ShaderProgram> SceneNode::getShaderProgram() const {
     return m_shaderProgram;
 }
+
+void SceneNode::setOverlay(bool newValue) {
+    overlay = newValue;
+}
+
+bool SceneNode::isOverlay() const {
+    return overlay;
+}

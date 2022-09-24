@@ -59,6 +59,9 @@ public:
 
     void setShaderProgram(const std::shared_ptr<ShaderProgram>& newProgram);
     std::shared_ptr<ShaderProgram> getShaderProgram() const;
+    
+    void setOverlay(bool newValue);
+    bool isOverlay() const;
 private:
     Transform transform;
 
@@ -66,4 +69,5 @@ private:
     std::vector<std::shared_ptr<SceneNode>> m_childrens;
     std::vector<std::shared_ptr<Drawable>> m_drawables;
     std::shared_ptr<ShaderProgram> m_shaderProgram;
+    bool overlay = false;
 };

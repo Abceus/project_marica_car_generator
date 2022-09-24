@@ -1,4 +1,5 @@
 #include "render_system/scene.h"
+#include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "glm/trigonometric.hpp"
@@ -29,8 +30,15 @@ void Scene::clear() {
 }
 
 void Scene::draw() {
-    drawNode(m_rootNode);
+    std::list<std::shared_ptr<SceneNode>> overlayList;
+    drawNodeRecurse(m_rootNode, overlayList);
+    glDisable(GL_DEPTH_TEST);
+    for (const auto& overlay : overlayList) {
+        drawNode(overlay);
+    }
+    glEnable(GL_DEPTH_TEST);
     m_shaderProgram->unbind();
+    m_shaderProgram = nullptr;
 }
 
 void Scene::resizeScreen(int w, int h) {
@@ -40,7 +48,6 @@ void Scene::resizeScreen(int w, int h) {
 
     // Reset projection
     m_projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
-    // m_projection = glm::mat4(1);
 }
 
 std::shared_ptr<SceneNode>
@@ -49,8 +56,7 @@ Scene::addNode(const std::shared_ptr<SceneNode>& newNode) {
     return newNode;
 }
 
-void Scene::drawNode(const std::shared_ptr<SceneNode>& node,
-                     const Transform& parentTransform) {
+void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
     bool shaderChanged = false;
     if (node->getShaderProgram()) {
         if (m_shaderProgram != node->getShaderProgram()) {
@@ -83,18 +89,21 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node,
     model = model.scale(model, node->getGlobalScale());
     m_shaderProgram->setUniform("model", model.getGLMat());
 
-    // glm::mat4 m(1.0f);
-
-    // m = glm::translate(m, node->getLocation().toGLVec3());
-    // m_shaderProgram->setUniform("model", m);
-
     for (auto i = node->drawableBegin(); i != node->drawableEnd(); i++) {
         (*i)->draw(m_shaderProgram.get());
     }
+}
+
+void Scene::drawNodeRecurse(const std::shared_ptr<SceneNode>& node,
+                     std::list<std::shared_ptr<SceneNode>>& overlayList) {
+    drawNode(node);
 
     for (const auto& childNode : *node) {
-        //        drawNode( childNode, parentMatrix, f, ef );
-        drawNode(childNode);
+        if(childNode->isOverlay()) {
+            overlayList.emplace_back(childNode);
+        } else {
+            drawNodeRecurse(childNode, overlayList);
+        }
     }
 }
 

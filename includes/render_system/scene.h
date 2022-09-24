@@ -4,8 +4,9 @@
 #include "render_system/scene_node.h"
 #include "render_system/shader_program.h"
 #include "render_system/transform.h"
+#include "utils/math/matrix.h"
+#include <list>
 #include <memory>
-
 
 class Scene {
 public:
@@ -25,8 +26,9 @@ public:
     std::shared_ptr<SceneNode> getActiveCamera() const;
 
 private:
-    void drawNode(const std::shared_ptr<SceneNode>& node,
-                  const Transform& parentTransform = Transform());
+    void drawNode(const std::shared_ptr<SceneNode>& node);
+    void drawNodeRecurse(const std::shared_ptr<SceneNode>& node,
+                  std::list<std::shared_ptr<SceneNode>>& overlayList);
 
     std::shared_ptr<SceneNode> m_rootNode;
 
