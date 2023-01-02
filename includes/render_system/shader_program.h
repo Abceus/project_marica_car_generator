@@ -3,7 +3,7 @@
 #include "render_system/vertex_shader.h"
 #include <memory>
 #include <string>
-#include <utils/gl.h>
+#include <mul_opengl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <type_traits>

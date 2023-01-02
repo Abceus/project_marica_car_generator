@@ -5,7 +5,7 @@
 #include "render_system/scene.h"
 #include "render_system/shader_program.h"
 #include "updatable.h"
-#include "utils/gl.h"
+#include <mul_opengl.h>
 #include <chrono>
 #include <memory>
 #include <optional>

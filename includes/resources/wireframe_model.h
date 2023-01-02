@@ -3,7 +3,7 @@
 #include "resources/model.h"
 #include <vector>
 
-#include "utils/gl.h"
+#include <mul_opengl.h>
 
 struct Edge {
     GLuint vertexes[2];

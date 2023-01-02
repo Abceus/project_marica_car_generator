@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <utils/gl.h>
+#include <mul_opengl.h>
 
 class FragmentShader {
 public:

@@ -1,219 +1,219 @@
 #include "widgets/mainwindow.h"
-#include "render_system/scene_node.h"
-#include "resources/dds_info.h"
-#include "resources/wireframe_model.h"
-#include "utils/math/angle.h"
-#include "utils/math/quaternion.h"
-#include "utils/math/rot3.h"
-#include "utils/math/utils.h"
-#include "utils/math/vec3.h"
-#include "utils/shapes/convex_hull.h"
-#include "utils/shapes/shape.h"
-#include "widgets/configuration_widget.h"
-#include "widgets/event_data/indexed_texture.h"
-#include "widgets/openglview.h"
-#include "wx/button.h"
-#include "wx/event.h"
-#include "wx/msw/window.h"
-#include "wx/panel.h"
-#include "wx/sizer.h"
-#include "wx/splitter.h"
-#include "wx/textctrl.h"
+// #include "render_system/scene_node.h"
+// #include "resources/dds_info.h"
+// #include "resources/wireframe_model.h"
+// #include "utils/math/angle.h"
+// #include "utils/math/quaternion.h"
+// #include "utils/math/rot3.h"
+// #include "utils/math/utils.h"
+// #include "utils/math/vec3.h"
+// #include "utils/shapes/convex_hull.h"
+// #include "utils/shapes/shape.h"
+// #include "widgets/configuration_widget.h"
+// #include "widgets/event_data/indexed_texture.h"
+// #include "widgets/openglview.h"
+#include <widgets/mul_button.h>
+// #include "wx/event.h"
+// #include "wx/msw/window.h"
+// #include "wx/panel.h"
+// #include "wx/sizer.h"
+// #include "wx/splitter.h"
+// #include "wx/textctrl.h"
 
-#include "render_system/camera/free_camera_controller.h"
-#include "render_system/wireframe.h"
-#include "resources/model.h"
-#include <memory>
-#include <vector>
+// #include "render_system/camera/free_camera_controller.h"
+// #include "render_system/wireframe.h"
+// #include "resources/model.h"
+// #include <memory>
+// #include <vector>
 
 #ifdef WITH_PHYSICS
 #include "physics/physicworld.h"
 #include "physics/physobject.h"
 #endif
 
-#include "utils/shapes/box.h"
-#include "utils/shapes/sphere.h"
+// #include "utils/shapes/box.h"
+// #include "utils/shapes/sphere.h"
 
-#include "widgets/event_data/float.h"
+// #include "widgets/event_data/float.h"
 
-MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
-    auto mainSizer = new wxBoxSizer(wxVERTICAL);
-    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
-    splitter->SetSashGravity(0.5);
-    mainSizer->Add(splitter, 1, wxEXPAND, 0);
+MainWindow::MainWindow() : MulWindow() {
+    // auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    // wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
+    // splitter->SetSashGravity(0.5);
+    // mainSizer->Add(splitter, 1, wxEXPAND, 0);
 
-    auto leftWindow = new wxWindow(splitter, wxID_ANY);
+    // auto leftWindow = new wxWindow(splitter, wxID_ANY);
 
-    auto leftSizer = new wxBoxSizer(wxVERTICAL);
-    openglView = new OpenglView(leftWindow);
-    leftSizer->Add(openglView, 1, wxEXPAND, 0);
-    leftWindow->SetSizer(leftSizer);
+    // auto leftSizer = new wxBoxSizer(wxVERTICAL);
+    // openglView = new OpenglView(leftWindow);
+    // leftSizer->Add(openglView, 1, wxEXPAND, 0);
+    // leftWindow->SetSizer(leftSizer);
 
-    auto rightWindow = new wxWindow(splitter, wxID_ANY);
+    // auto rightWindow = new wxWindow(splitter, wxID_ANY);
 
-    auto rightSizer = new wxBoxSizer(wxVERTICAL);
-    auto configurationWidget = new ConfigurationWidget(rightWindow);
-    rightSizer->Add(configurationWidget, 1, wxEXPAND, 0);
-    rightWindow->SetSizer(rightSizer);
+    // auto rightSizer = new wxBoxSizer(wxVERTICAL);
+    // auto configurationWidget = new ConfigurationWidget(rightWindow);
+    // rightSizer->Add(configurationWidget, 1, wxEXPAND, 0);
+    // rightWindow->SetSizer(rightSizer);
 
-    splitter->SplitVertically(leftWindow, rightWindow);
+    // splitter->SplitVertically(leftWindow, rightWindow);
 
-    SetSizer(mainSizer);
+    // SetSizer(mainSizer);
 
-    mainEditorCameraController =
-        std::make_unique<FreeCameraController>(openglView);
-    openglView->Bind(wxEVT_ENTER_WINDOW,
-                     &MainWindow::onOpenglEditorMouseFocusEvent, this);
-    openglView->Bind(wxEVT_LEAVE_WINDOW,
-                     &MainWindow::onOpenglEditorMouseFocusEvent, this);
+    // mainEditorCameraController =
+    //     std::make_unique<FreeCameraController>(openglView);
+    // openglView->Bind(wxEVT_ENTER_WINDOW,
+    //                  &MainWindow::onOpenglEditorMouseFocusEvent, this);
+    // openglView->Bind(wxEVT_LEAVE_WINDOW,
+    //                  &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
-    openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
-        auto shaderProgram = openglView->getRenderer().getShaderProgram(
-            ".\\resources\\shaders\\meshvertexshader.vert",
-            ".\\resources\\shaders\\meshfragmentshader.frag");
+    // openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
+    //     auto shaderProgram = openglView->getRenderer().getShaderProgram(
+    //         ".\\resources\\shaders\\meshvertexshader.vert",
+    //         ".\\resources\\shaders\\meshfragmentshader.frag");
 
-        mainNode = std::make_shared<SceneNode>();
-        mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
-        mainNode->setShaderProgram(shaderProgram);
-        mainNode->addDrawable(mainMesh);
-        mainCollisionMesh =
-            openglView->getRenderer().makeDrawable<WireframeMesh>();
-        mainNode->addDrawable(mainCollisionMesh);
+    //     mainNode = std::make_shared<SceneNode>();
+    //     mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+    //     mainNode->setShaderProgram(shaderProgram);
+    //     mainNode->addDrawable(mainMesh);
+    //     mainCollisionMesh =
+    //         openglView->getRenderer().makeDrawable<WireframeMesh>();
+    //     mainNode->addDrawable(mainCollisionMesh);
 
-        auto testNode = std::make_shared<SceneNode>();
-        testNode->setOverlay(true);
-        mainNode->addChild(testNode);
-        WireframeModel wireframeModel;
-        wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
-        {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
-        {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
-        wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
-        auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
-        testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
-        testNode->addDrawable(testMesh);
+    //     auto testNode = std::make_shared<SceneNode>();
+    //     testNode->setOverlay(true);
+    //     mainNode->addChild(testNode);
+    //     WireframeModel wireframeModel;
+    //     wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
+    //     {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
+    //     {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
+    //     wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
+    //     auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+    //     testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
+    //     testNode->addDrawable(testMesh);
 
-        tireCollisionMesh =
-            openglView->getRenderer().makeDrawable<WireframeMesh>();
-        for (auto& wheel : wheelSteerMeshNodes) {
-            wheel = std::make_shared<SceneNode>();
-            mainNode->addChild(wheel);
-            wheel->addDrawable(tireCollisionMesh);
-        }
+    //     tireCollisionMesh =
+    //         openglView->getRenderer().makeDrawable<WireframeMesh>();
+    //     for (auto& wheel : wheelSteerMeshNodes) {
+    //         wheel = std::make_shared<SceneNode>();
+    //         mainNode->addChild(wheel);
+    //         wheel->addDrawable(tireCollisionMesh);
+    //     }
 
-        for (auto& wheel : wheelEngMeshNodes) {
-            wheel = std::make_shared<SceneNode>();
-            mainNode->addChild(wheel);
-            wheel->addDrawable(tireCollisionMesh);
-        }
+    //     for (auto& wheel : wheelEngMeshNodes) {
+    //         wheel = std::make_shared<SceneNode>();
+    //         mainNode->addChild(wheel);
+    //         wheel->addDrawable(tireCollisionMesh);
+    //     }
 
-        auto scene = openglView->getScene();
-        if (auto lockedScene = scene.lock()) {
-            lockedScene->addNode(mainNode);
-        }
-    });
+    //     auto scene = openglView->getScene();
+    //     if (auto lockedScene = scene.lock()) {
+    //         lockedScene->addNode(mainNode);
+    //     }
+    // });
 
-    configurationWidget->Bind(
-        MESH_CHANGED, [this, configurationWidget](const wxCommandEvent& event) {
-            mainModel = Model::readPSK(event.GetString());
-            mainMesh->init(mainModel);
-            configurationWidget->resizeTextureArray(mainModel.materials.size());
-            for (size_t i = 0; i < mainModel.materials.size(); ++i) {
-                configurationWidget->setTexture(i, mainModel.materials[i]);
-            }
-        });
+    // configurationWidget->Bind(
+    //     MESH_CHANGED, [this, configurationWidget](const wxCommandEvent& event) {
+    //         mainModel = Model::readPSK(event.GetString());
+    //         mainMesh->init(mainModel);
+    //         configurationWidget->resizeTextureArray(mainModel.materials.size());
+    //         for (size_t i = 0; i < mainModel.materials.size(); ++i) {
+    //             configurationWidget->setTexture(i, mainModel.materials[i]);
+    //         }
+    //     });
 
-    configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event) {
-        if (auto IndexedTextureDataData =
-                static_cast<IndexedTextureData*>(event.GetClientObject())) {
-            if (wxFileExists(IndexedTextureDataData->path.string())) {
-                auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
-                auto extension = IndexedTextureDataData->path.extension().string();
-                std::transform(extension.begin(), extension.end(), extension.begin(),
-                    [](unsigned char c){ return std::tolower(c); });
-                auto currentContext = openglView->getRenderer().pushContextScoped();
-                if(extension == ".dds") {
-                    newTexture->init(DDSInfo::loadDDS(IndexedTextureDataData->path.string()));
-                }
-                else {
-                    newTexture->init(wxImage(IndexedTextureDataData->path.string()));
-                }
-                mainMesh->setTexture(newTexture, IndexedTextureDataData->index);
-            }
-        }
-    });
+    // configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event) {
+    //     if (auto IndexedTextureDataData =
+    //             static_cast<IndexedTextureData*>(event.GetClientObject())) {
+    //         if (wxFileExists(IndexedTextureDataData->path.string())) {
+    //             auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
+    //             auto extension = IndexedTextureDataData->path.extension().string();
+    //             std::transform(extension.begin(), extension.end(), extension.begin(),
+    //                 [](unsigned char c){ return std::tolower(c); });
+    //             auto currentContext = openglView->getRenderer().pushContextScoped();
+    //             if(extension == ".dds") {
+    //                 newTexture->init(DDSInfo::loadDDS(IndexedTextureDataData->path.string()));
+    //             }
+    //             else {
+    //                 newTexture->init(wxImage(IndexedTextureDataData->path.string()));
+    //             }
+    //             mainMesh->setTexture(newTexture, IndexedTextureDataData->index);
+    //         }
+    //     }
+    // });
 
-    configurationWidget->Bind(
-        COLLISION_CHANGED, [this](const wxCommandEvent& event) {
-            // auto models = Model::readASE(event.GetString());
-            // if (!models.empty()) {
-            //     mainCollision = WireframeModel::fromModel(models[0]);
-            // } else {
-            //     mainCollision = WireframeModel();
-            // }
-            auto model = Model::readPSK(event.GetString());
-            mainCollision = WireframeModel::fromModel(model);
-            mainCollisionMesh->init(mainCollision);
-        });
+    // configurationWidget->Bind(
+    //     COLLISION_CHANGED, [this](const wxCommandEvent& event) {
+    //         // auto models = Model::readASE(event.GetString());
+    //         // if (!models.empty()) {
+    //         //     mainCollision = WireframeModel::fromModel(models[0]);
+    //         // } else {
+    //         //     mainCollision = WireframeModel();
+    //         // }
+    //         auto model = Model::readPSK(event.GetString());
+    //         mainCollision = WireframeModel::fromModel(model);
+    //         mainCollisionMesh->init(mainCollision);
+    //     });
 
-    configurationWidget->Bind(
-        TIRE_CHANGED, [this](const wxCommandEvent& event) {
-            // auto models = Model::readASE(event.GetString());
-            // if (!models.empty()) {
-            //     tireCollision = WireframeModel::fromModel(models[0]);
-            // } else {
-            //     tireCollision = WireframeModel();
-            // }
-            auto model = Model::readPSK(event.GetString());
-            tireCollision = WireframeModel::fromModel(model);
-            tireCollisionMesh->init(tireCollision);
-        });
+    // configurationWidget->Bind(
+    //     TIRE_CHANGED, [this](const wxCommandEvent& event) {
+    //         // auto models = Model::readASE(event.GetString());
+    //         // if (!models.empty()) {
+    //         //     tireCollision = WireframeModel::fromModel(models[0]);
+    //         // } else {
+    //         //     tireCollision = WireframeModel();
+    //         // }
+    //         auto model = Model::readPSK(event.GetString());
+    //         tireCollision = WireframeModel::fromModel(model);
+    //         tireCollisionMesh->init(tireCollision);
+    //     });
 
-    configurationWidget->Bind(
-        WHEEL_STEER_ACROSS_CHANGED, [this](wxCommandEvent& event) {
-            if (auto floatData =
-                    static_cast<FloatData*>(event.GetClientObject())) {
-                // setWheelSteerAcross(floatData->value);
-                // mainMesh->rotateBone("LeftFrontTIRE",
-                // Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(floatData->value))));
-                mainMesh->transposeBone("LeftFrontTIRE", {floatData->value});
-            }
-        });
+    // configurationWidget->Bind(
+    //     WHEEL_STEER_ACROSS_CHANGED, [this](wxCommandEvent& event) {
+    //         if (auto floatData =
+    //                 static_cast<FloatData*>(event.GetClientObject())) {
+    //             // setWheelSteerAcross(floatData->value);
+    //             // mainMesh->rotateBone("LeftFrontTIRE",
+    //             // Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(floatData->value))));
+    //             mainMesh->transposeBone("LeftFrontTIRE", {floatData->value});
+    //         }
+    //     });
 
-    configurationWidget->Bind(
-        WHEEL_STEER_ALONG_CHANGED, [this](wxCommandEvent& event) {
-            if (auto floatData =
-                    static_cast<FloatData*>(event.GetClientObject())) {
-                // setWheelSteerAlong(floatData->value);
-                mainMesh->rotateBone("LeftFrontTIRE",
-                                     Quaternion::fromEulerAngles(Rotor3(
-                                         Angle::fromDegrees(0.0),
-                                         Angle::fromDegrees(floatData->value),
-                                         Angle::fromDegrees(0.0))));
-            }
-        });
+    // configurationWidget->Bind(
+    //     WHEEL_STEER_ALONG_CHANGED, [this](wxCommandEvent& event) {
+    //         if (auto floatData =
+    //                 static_cast<FloatData*>(event.GetClientObject())) {
+    //             // setWheelSteerAlong(floatData->value);
+    //             mainMesh->rotateBone("LeftFrontTIRE",
+    //                                  Quaternion::fromEulerAngles(Rotor3(
+    //                                      Angle::fromDegrees(0.0),
+    //                                      Angle::fromDegrees(floatData->value),
+    //                                      Angle::fromDegrees(0.0))));
+    //         }
+    //     });
 
-    configurationWidget->Bind(
-        WHEEL_ENG_ACROSS_CHANGED, [this](wxCommandEvent& event) {
-            if (auto floatData =
-                    static_cast<FloatData*>(event.GetClientObject())) {
-                setWheelEngAcross(floatData->value);
-            }
-        });
+    // configurationWidget->Bind(
+    //     WHEEL_ENG_ACROSS_CHANGED, [this](wxCommandEvent& event) {
+    //         if (auto floatData =
+    //                 static_cast<FloatData*>(event.GetClientObject())) {
+    //             setWheelEngAcross(floatData->value);
+    //         }
+    //     });
 
-    configurationWidget->Bind(
-        WHEEL_ENG_ALONG_CHANGED, [this](wxCommandEvent& event) {
-            if (auto floatData =
-                    static_cast<FloatData*>(event.GetClientObject())) {
-                setWheelEngAlong(floatData->value);
-            }
-        });
+    // configurationWidget->Bind(
+    //     WHEEL_ENG_ALONG_CHANGED, [this](wxCommandEvent& event) {
+    //         if (auto floatData =
+    //                 static_cast<FloatData*>(event.GetClientObject())) {
+    //             setWheelEngAlong(floatData->value);
+    //         }
+    //     });
 
-    configurationWidget->Bind(WHEEL_VERT_CHANGED, [this](
-                                                      wxCommandEvent& event) {
-        if (auto floatData = static_cast<FloatData*>(event.GetClientObject())) {
-            setWheelVert(floatData->value);
-        }
-    });
+    // configurationWidget->Bind(WHEEL_VERT_CHANGED, [this](
+    //                                                   wxCommandEvent& event) {
+    //     if (auto floatData = static_cast<FloatData*>(event.GetClientObject())) {
+    //         setWheelVert(floatData->value);
+    //     }
+    // });
 
 #ifdef WITH_PHYSICS
     configurationWidget->Bind(
@@ -222,13 +222,24 @@ MainWindow::MainWindow() : wxFrame(nullptr, wxID_ANY, "Main Window") {
 #endif
 }
 
-void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {
-    if (event.Leaving()) {
-        SetCursor(*wxSTANDARD_CURSOR);
-    } else if (event.Entering()) {
-        SetCursor(*wxCROSS_CURSOR);
-    }
+void MainWindow::init() {
+    MulWindow::init("Test window", {100, 100});
+
+    auto button = std::make_shared<MulButton>();
+    click = button->addClickCallback([this](){ 
+        std::cout << "Click" << std::endl;
+        click->remove();
+    });
+    addChild(button);
 }
+
+// void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {
+//     if (event.Leaving()) {
+        // SetCursor(*wxSTANDARD_CURSOR);
+    // } else if (event.Entering()) {
+        // SetCursor(*wxCROSS_CURSOR);
+    // }
+// }
 
 void MainWindow::setMainModel(const Model& model) {
     mainModel = model;

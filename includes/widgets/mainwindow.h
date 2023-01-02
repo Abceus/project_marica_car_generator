@@ -2,19 +2,24 @@
 #ifdef WITH_PHYSICS
 #include "physics/physobject.h"
 #endif
-#include "render_system/camera/camera_controller.h"
+// #include "render_system/camera/camera_controller.h"
 #include "render_system/scene_node.h"
 #include "render_system/wireframe.h"
-#include "widgets/openglview.h"
-#include "wx/msw/window.h"
+#include "render_system/mesh.h"
+// #include "widgets/openglview.h"
+// #include "wx/msw/window.h"
 #include <memory>
-#include <wx/frame.h>
+// #include <wx/frame.h>
+#include <mul_window.h>
+#include <mul_callback_owner.h>
 
-class MainWindow : public wxFrame {
+class MainWindow : public MulWindow {
 public:
     MainWindow();
 
-    void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
+    void init();
+
+    // void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
 
     void setMainModel(const Model& model);
     void setMainCollision(const Model& model);
@@ -37,8 +42,8 @@ private:
     WireframeModel mainCollision;
     WireframeModel tireCollision;
 
-    OpenglView* openglView = nullptr;
-    wxWindow* simulateWindow = nullptr;
+    // OpenglView* openglView = nullptr;
+    // wxWindow* simulateWindow = nullptr;
 
     std::shared_ptr<SceneNode> mainNode;
     std::shared_ptr<Mesh> mainMesh;
@@ -47,10 +52,9 @@ private:
 
     std::array<std::shared_ptr<SceneNode>, 2> wheelSteerMeshNodes;
     std::array<std::shared_ptr<SceneNode>, 2> wheelEngMeshNodes;
-    //
 
-    std::unique_ptr<CameraController> mainEditorCameraController;
-    std::unique_ptr<CameraController> simulationEditorCameraController;
+    // std::unique_ptr<CameraController> mainEditorCameraController;
+    // std::unique_ptr<CameraController> simulationEditorCameraController;
 
     std::vector<Vec3f> tirePositions = {{100.0f, 100.0f, -50.0f},
                                         {-100.0f, 100.0f, -50.0f},
@@ -62,4 +66,6 @@ private:
 
     std::shared_ptr<PhysObject> mainPhysic;
 #endif
+
+    std::shared_ptr<MulCallbackOwner<>> click;
 };

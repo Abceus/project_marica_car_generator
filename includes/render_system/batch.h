@@ -1,7 +1,7 @@
 #pragma once
 #include "render_system/texture.h"
 #include "render_system/triangle_array.h"
-#include "utils/gl.h"
+#include <mul_opengl.h>
 #include <memory>
 
 class Batch {

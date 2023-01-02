@@ -4,80 +4,73 @@ project( ProjectMaricaCarGenerator )
 
 set( CMAKE_CXX_STANDARD 20 )
 
-set(BUILD_SHARED_LIBS OFF)
-set(wxUSE_STL ON)
-set(_CRT_SECURE_NO_WARNINGS ON)
-if(CMAKE_BUILD_TYPE STREQUAL  "Debug")
-        set(wxUSE_EXCEPTIONS OFF)
-else()
-        set(wxUSE_EXCEPTIONS ON)
-endif()
-add_subdirectory(3rd_party/wxWidgets)
+add_subdirectory(3rd_party/mul)
 
 set(SOURCES sources/main.cpp
 
-        sources/widgets/app.cpp
+        # sources/widgets/app.cpp
         sources/widgets/mainwindow.cpp
-        sources/widgets/openglview.cpp
-        sources/widgets/configuration_widget.cpp
+        # sources/widgets/openglview.cpp
+        # sources/widgets/configuration_widget.cpp
 
-        sources/widgets/pgproperties/texture_array_pgproperty.cpp
-        sources/widgets/pgproperties/vec3f_pgproperty.cpp
+        # sources/widgets/pgproperties/texture_array_pgproperty.cpp
+        # sources/widgets/pgproperties/vec3f_pgproperty.cpp
 
-        sources/widgets/variants/vec3f.cpp
+        # sources/widgets/variants/vec3f.cpp
 
-        sources/render_system/texture.cpp
-        sources/render_system/batch.cpp
-        sources/render_system/element_buffer.cpp
-        sources/render_system/fragment_shader.cpp
-        sources/render_system/triangle_array.cpp
-        sources/render_system/edge_array.cpp
-        sources/render_system/vertex_buffer.cpp
-        sources/render_system/vertex_shader.cpp
-        sources/render_system/shader_program.cpp
-        sources/render_system/mesh.cpp
-        sources/render_system/wireframe.cpp
-        sources/render_system/camera.cpp
-        sources/render_system/camera_manager.cpp
-        sources/render_system/scene.cpp
+        # sources/render_system/texture.cpp
+        # sources/render_system/batch.cpp
+        # sources/render_system/element_buffer.cpp
+        # sources/render_system/fragment_shader.cpp
+        # sources/render_system/triangle_array.cpp
+        # sources/render_system/edge_array.cpp
+        # sources/render_system/vertex_buffer.cpp
+        # sources/render_system/vertex_shader.cpp
+        # sources/render_system/shader_program.cpp
+        # sources/render_system/mesh.cpp
+        # sources/render_system/wireframe.cpp
+        # sources/render_system/camera.cpp
+        # sources/render_system/camera_manager.cpp
+        # sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        sources/render_system/renderer.cpp
-        sources/render_system/garbage_collector.cpp
-        sources/render_system/color.cpp
+        # sources/render_system/renderer.cpp
+        # sources/render_system/garbage_collector.cpp
+        # sources/render_system/color.cpp
         sources/render_system/transform.cpp
 
-        sources/render_system/camera/free_camera_controller.cpp
+        # sources/render_system/camera/free_camera_controller.cpp
         
-        sources/resources/model.cpp
+        # sources/resources/model.cpp
         sources/resources/wireframe_model.cpp
-        sources/resources/unanimation.cpp
-        sources/resources/resource_manager.cpp
-        sources/resources/skeletal.cpp
-        sources/resources/dds_info.cpp
+        # sources/resources/unanimation.cpp
+        # sources/resources/resource_manager.cpp
+        # sources/resources/skeletal.cpp
+        # sources/resources/dds_info.cpp
 
-        sources/resources/ase_reader/ase_reader_node.cpp
-        sources/resources/ase_reader/ase_reader_node_analyzer.cpp
-        sources/resources/ase_reader/ase_reader.cpp
-        sources/resources/ase_reader/ase_tokenizer.cpp
-        sources/resources/ase_reader/rules/lambda.cpp
-        sources/resources/ase_reader/rules/int.cpp
-        sources/resources/ase_reader/rules/string.cpp
-        sources/resources/ase_reader/rules/dict.cpp
-        sources/resources/ase_reader/rules/float.cpp
-        sources/resources/ase_reader/rules/set.cpp
-        sources/resources/ase_reader/rules/value.cpp
+        # sources/resources/ase_reader/ase_reader_node.cpp
+        # sources/resources/ase_reader/ase_reader_node_analyzer.cpp
+        # sources/resources/ase_reader/ase_reader.cpp
+        # sources/resources/ase_reader/ase_tokenizer.cpp
+        # sources/resources/ase_reader/rules/lambda.cpp
+        # sources/resources/ase_reader/rules/int.cpp
+        # sources/resources/ase_reader/rules/string.cpp
+        # sources/resources/ase_reader/rules/dict.cpp
+        # sources/resources/ase_reader/rules/float.cpp
+        # sources/resources/ase_reader/rules/set.cpp
+        # sources/resources/ase_reader/rules/value.cpp
         
         sources/utils/math/angle.cpp
         sources/utils/math/rot3.cpp
         sources/utils/math/utils.cpp
         sources/utils/math/quaternion.cpp
-        sources/utils/math/geometry_prototype.cpp
-        sources/utils/math/line.cpp
-        sources/utils/math/plane.cpp
+        # sources/utils/math/geometry_prototype.cpp
+        # sources/utils/math/line.cpp
+        # sources/utils/math/plane.cpp
 
-        sources/utils/shapes/box.cpp
-        sources/utils/shapes/sphere.cpp
-        sources/utils/shapes/convex_hull.cpp)
+        # sources/utils/shapes/box.cpp
+        # sources/utils/shapes/sphere.cpp
+        # sources/utils/shapes/convex_hull.cpp
+        )
 
 set(PHYSIC_SOURCES
         sources/physics/physicworld.cpp
@@ -87,18 +80,10 @@ if(WITH_PHYSICS)
         set(SOURCES ${SOURCES} ${PHYSIC_SOURCES})
 endif()
 
-if(WIN32)
-        add_executable( ProjectMaricaCarGenerator WIN32
-                ${SOURCES})
-else()
-        add_executable( ProjectMaricaCarGenerator
-                ${SOURCES})
-endif()
+add_executable( ProjectMaricaCarGenerator
+        ${SOURCES})
 
 find_package(OpenGL REQUIRED)
-
-set(GLEW_USE_STATIC_LIBS TRUE)
-add_subdirectory(3rd_party/glew)
 
 add_subdirectory(3rd_party/glm)
 
@@ -131,7 +116,7 @@ endif()
 target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes)
 
-target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
+target_link_libraries(ProjectMaricaCarGenerator mul glm::glm OpenGL::GL)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

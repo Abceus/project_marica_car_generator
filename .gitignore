@@ -36,3 +36,4 @@ TODO
 .vscode
 build
 3rd_party/glew/glew-2.2.0
+imgui.ini

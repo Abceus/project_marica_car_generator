@@ -8,7 +8,7 @@
 #include <map>
 
 #include "resources/skeletal.h"
-#include "utils/gl.h"
+#include <mul_opengl.h>
 
 struct Vertex {
     GLfloat X, Y, Z;

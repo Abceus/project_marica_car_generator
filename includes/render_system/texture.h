@@ -1,11 +1,11 @@
 #pragma once
-#include "utils/gl.h"
-#include <wx/image.h>
+#include <mul_opengl.h>
+#include <mul_image.h>
 #include "resources/dds_info.h"
 
 class Texture {
 public:
-    void init(const wxImage& image);
+    void init(const MulImage& image);
     void init(const DDSInfo& ddsInfo);
     void destroy();
 
