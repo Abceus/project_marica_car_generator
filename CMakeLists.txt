@@ -10,54 +10,54 @@ set(SOURCES sources/main.cpp
 
         # sources/widgets/app.cpp
         sources/widgets/mainwindow.cpp
-        # sources/widgets/openglview.cpp
-        # sources/widgets/configuration_widget.cpp
+        sources/widgets/openglview.cpp
+        sources/widgets/configuration_widget.cpp
 
         # sources/widgets/pgproperties/texture_array_pgproperty.cpp
         # sources/widgets/pgproperties/vec3f_pgproperty.cpp
 
         # sources/widgets/variants/vec3f.cpp
 
-        # sources/render_system/texture.cpp
-        # sources/render_system/batch.cpp
-        # sources/render_system/element_buffer.cpp
-        # sources/render_system/fragment_shader.cpp
-        # sources/render_system/triangle_array.cpp
-        # sources/render_system/edge_array.cpp
-        # sources/render_system/vertex_buffer.cpp
-        # sources/render_system/vertex_shader.cpp
-        # sources/render_system/shader_program.cpp
-        # sources/render_system/mesh.cpp
-        # sources/render_system/wireframe.cpp
-        # sources/render_system/camera.cpp
-        # sources/render_system/camera_manager.cpp
-        # sources/render_system/scene.cpp
+        sources/render_system/texture.cpp
+        sources/render_system/batch.cpp
+        sources/render_system/element_buffer.cpp
+        sources/render_system/fragment_shader.cpp
+        sources/render_system/triangle_array.cpp
+        sources/render_system/edge_array.cpp
+        sources/render_system/vertex_buffer.cpp
+        sources/render_system/vertex_shader.cpp
+        sources/render_system/shader_program.cpp
+        sources/render_system/mesh.cpp
+        sources/render_system/wireframe.cpp
+        sources/render_system/camera.cpp
+        sources/render_system/camera_manager.cpp
+        sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        # sources/render_system/renderer.cpp
-        # sources/render_system/garbage_collector.cpp
-        # sources/render_system/color.cpp
+        sources/render_system/renderer.cpp
+        sources/render_system/garbage_collector.cpp
+        sources/render_system/color.cpp
         sources/render_system/transform.cpp
 
         # sources/render_system/camera/free_camera_controller.cpp
         
-        # sources/resources/model.cpp
+        sources/resources/model.cpp
         sources/resources/wireframe_model.cpp
-        # sources/resources/unanimation.cpp
+        sources/resources/unanimation.cpp
         # sources/resources/resource_manager.cpp
-        # sources/resources/skeletal.cpp
-        # sources/resources/dds_info.cpp
+        sources/resources/skeletal.cpp
+        sources/resources/dds_info.cpp
 
-        # sources/resources/ase_reader/ase_reader_node.cpp
-        # sources/resources/ase_reader/ase_reader_node_analyzer.cpp
-        # sources/resources/ase_reader/ase_reader.cpp
-        # sources/resources/ase_reader/ase_tokenizer.cpp
-        # sources/resources/ase_reader/rules/lambda.cpp
-        # sources/resources/ase_reader/rules/int.cpp
-        # sources/resources/ase_reader/rules/string.cpp
-        # sources/resources/ase_reader/rules/dict.cpp
-        # sources/resources/ase_reader/rules/float.cpp
-        # sources/resources/ase_reader/rules/set.cpp
-        # sources/resources/ase_reader/rules/value.cpp
+        sources/resources/ase_reader/ase_reader_node.cpp
+        sources/resources/ase_reader/ase_reader_node_analyzer.cpp
+        sources/resources/ase_reader/ase_reader.cpp
+        sources/resources/ase_reader/ase_tokenizer.cpp
+        sources/resources/ase_reader/rules/lambda.cpp
+        sources/resources/ase_reader/rules/int.cpp
+        sources/resources/ase_reader/rules/string.cpp
+        sources/resources/ase_reader/rules/dict.cpp
+        sources/resources/ase_reader/rules/float.cpp
+        sources/resources/ase_reader/rules/set.cpp
+        sources/resources/ase_reader/rules/value.cpp
         
         sources/utils/math/angle.cpp
         sources/utils/math/rot3.cpp

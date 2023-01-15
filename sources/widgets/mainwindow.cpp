@@ -1,4 +1,12 @@
 #include "widgets/mainwindow.h"
+#include "mul_common.h"
+#include "widgets/configuration_widget.h"
+#include "widgets/mul_combobox.h"
+#include "widgets/mul_grid_layout.h"
+#include "widgets/mul_label.h"
+#include "widgets/mul_opengl_canvas.h"
+#include "widgets/mul_splitter.h"
+#include "widgets/openglview.h"
 // #include "render_system/scene_node.h"
 // #include "resources/dds_info.h"
 // #include "resources/wireframe_model.h"
@@ -12,7 +20,12 @@
 // #include "widgets/configuration_widget.h"
 // #include "widgets/event_data/indexed_texture.h"
 // #include "widgets/openglview.h"
+#include <filesystem>
+#include <memory>
 #include <widgets/mul_button.h>
+#include <widgets/mul_checkbox.h>
+#include <widgets/mul_float_input.h>
+#include <widgets/mul_file_picker.h>
 // #include "wx/event.h"
 // #include "wx/msw/window.h"
 // #include "wx/panel.h"
@@ -36,7 +49,7 @@
 
 // #include "widgets/event_data/float.h"
 
-MainWindow::MainWindow() : MulWindow() {
+//MainWindow::MainWindow() : MulWindow() {
     // auto mainSizer = new wxBoxSizer(wxVERTICAL);
     // wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
     // splitter->SetSashGravity(0.5);
@@ -67,60 +80,6 @@ MainWindow::MainWindow() : MulWindow() {
     // openglView->Bind(wxEVT_LEAVE_WINDOW,
     //                  &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
-    // openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
-    //     auto shaderProgram = openglView->getRenderer().getShaderProgram(
-    //         ".\\resources\\shaders\\meshvertexshader.vert",
-    //         ".\\resources\\shaders\\meshfragmentshader.frag");
-
-    //     mainNode = std::make_shared<SceneNode>();
-    //     mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
-    //     mainNode->setShaderProgram(shaderProgram);
-    //     mainNode->addDrawable(mainMesh);
-    //     mainCollisionMesh =
-    //         openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //     mainNode->addDrawable(mainCollisionMesh);
-
-    //     auto testNode = std::make_shared<SceneNode>();
-    //     testNode->setOverlay(true);
-    //     mainNode->addChild(testNode);
-    //     WireframeModel wireframeModel;
-    //     wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
-    //     {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
-    //     {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
-    //     wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
-    //     auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //     testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
-    //     testNode->addDrawable(testMesh);
-
-    //     tireCollisionMesh =
-    //         openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //     for (auto& wheel : wheelSteerMeshNodes) {
-    //         wheel = std::make_shared<SceneNode>();
-    //         mainNode->addChild(wheel);
-    //         wheel->addDrawable(tireCollisionMesh);
-    //     }
-
-    //     for (auto& wheel : wheelEngMeshNodes) {
-    //         wheel = std::make_shared<SceneNode>();
-    //         mainNode->addChild(wheel);
-    //         wheel->addDrawable(tireCollisionMesh);
-    //     }
-
-    //     auto scene = openglView->getScene();
-    //     if (auto lockedScene = scene.lock()) {
-    //         lockedScene->addNode(mainNode);
-    //     }
-    // });
-
-    // configurationWidget->Bind(
-    //     MESH_CHANGED, [this, configurationWidget](const wxCommandEvent& event) {
-    //         mainModel = Model::readPSK(event.GetString());
-    //         mainMesh->init(mainModel);
-    //         configurationWidget->resizeTextureArray(mainModel.materials.size());
-    //         for (size_t i = 0; i < mainModel.materials.size(); ++i) {
-    //             configurationWidget->setTexture(i, mainModel.materials[i]);
-    //         }
-    //     });
 
     // configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event) {
     //     if (auto IndexedTextureDataData =
@@ -220,17 +179,150 @@ MainWindow::MainWindow() : MulWindow() {
         EMULATE_BUTTON_CLICKED,
         [this](const wxCommandEvent& event) { openEmulationWindow(); });
 #endif
-}
+//}
 
-void MainWindow::init() {
-    MulWindow::init("Test window", {100, 100});
+void MainWindow::onInit() {
 
-    auto button = std::make_shared<MulButton>();
-    click = button->addClickCallback([this](){ 
-        std::cout << "Click" << std::endl;
-        click->remove();
+    auto splitter = MulMakeWidget<MulSplitter>();
+    addChild(splitter);
+
+    openglView = MulMakeWidget<OpenglView>();
+
+    auto configurationWidget = MulMakeWidget<ConfigurationWidget>();
+
+    splitter->setFirstWidget(openglView);
+    splitter->setSecondWidget(configurationWidget);
+
+    configurationWidget->addMeshChangedCallback(meshChangeHandler, [this, configurationWidget](const std::filesystem::path& path) {
+        mainModel = Model::readPSK(path);
+        mainMesh->init(mainModel);
+        configurationWidget->resizeTextureArray(mainModel.materials.size());
+        for (size_t i = 0; i < mainModel.materials.size(); ++i) {
+            configurationWidget->setTexture(i, mainModel.materials[i]);
+        }
     });
-    addChild(button);
+
+    //openglView->addOpenglInitedCallback(openglInitedCallback, [this](){
+        auto shaderProgram = openglView->getRenderer().getShaderProgram(
+            ".\\resources\\shaders\\meshvertexshader.vert",
+            ".\\resources\\shaders\\meshfragmentshader.frag");
+
+        mainNode = std::make_shared<SceneNode>();
+        mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+        mainNode->setShaderProgram(shaderProgram);
+        mainNode->addDrawable(mainMesh);
+        mainCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        mainNode->addDrawable(mainCollisionMesh);
+
+        auto testNode = std::make_shared<SceneNode>();
+        testNode->setOverlay(true);
+        mainNode->addChild(testNode);
+        WireframeModel wireframeModel;
+        wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
+        {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
+        {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
+        wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
+        auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
+        testNode->addDrawable(testMesh);
+
+        tireCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        for (auto& wheel : wheelSteerMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
+        }
+
+        for (auto& wheel : wheelEngMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
+        }
+
+        auto scene = openglView->getScene();
+        if (auto lockedScene = scene.lock()) {
+            lockedScene->addNode(mainNode);
+        }
+    //});
+
+    // auto button = std::make_shared<MulButton>();
+    // click = button->addClickCallback([this](){ 
+    //     std::cout << "Click" << std::endl;
+
+    //     auto openglcanvas = std::make_shared<MulOpenglCanvas>();
+    //     openglcanvas->init();
+    //     openglcanvas->setDrawFunction([](){
+    //         glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    //         glClear(GL_COLOR_BUFFER_BIT);
+    //     });
+    //     addChild(openglcanvas);
+    // });
+    // button->setText("Button");
+    // addChild(button);
+
+    // auto checkbox = std::make_shared<MulCheckbox>();
+    // checkboxClick = checkbox->addChangeValueCallback([](bool b) {
+    //     if(b) {
+    //         std::cout << "Check" << std::endl;
+    //     }
+    //     else {
+    //         std::cout << "Uncheck" << std::endl;
+    //     }
+    // });
+    // addChild(checkbox);
+
+    // auto combobox = std::make_shared<MulCombobox>();
+    // combobox->setVariants({"First", "Second", "Third"});
+    // comboboxClick = combobox->addChangeValueCallback([](size_t, const std::string& value) {
+    //     std::cout << value << std::endl;
+    // });
+    // addChild(combobox);
+
+    // auto floatinput = std::make_shared<MulFloatInput>();
+    // floatinput->setValue(22.8f);
+    // floatInputClick = floatinput->addChangeValueCallback([](float value) {
+    //     std::cout << value << std::endl;
+    // });
+    // addChild(floatinput);
+
+    // auto filepicker = std::make_shared<MulFilePicker>();
+    // filepicker->init();
+    // filePickerClick = filepicker->addChangePathCallback([](const std::filesystem::path& path){
+    //     std::cout << path << std::endl;
+    // });
+    // addChild(filepicker);
+
+    // auto splitter = std::make_shared<MulSplitter>();
+    // addChild(splitter);
+
+    // auto leftButton = std::make_shared<MulButton>();
+    // leftButton->setText("Left");
+    // splitter->setFirstWidget(leftButton);
+
+    // auto rightButton = std::make_shared<MulButton>();
+    // rightButton->setText("Right");
+    // splitter->setSecondWidget(rightButton);
+
+    // auto gridLayout = std::make_shared<MulGridLayout>();
+    // gridLayout->setColumns(2);
+    // addChild(gridLayout);
+
+    // auto label1 = std::make_shared<MulLabel>();
+    // label1->setText("Mesh");
+    // gridLayout->addChild(label1);
+
+    // auto button1 = std::make_shared<MulFilePicker>();
+    // button1->init();
+    // gridLayout->addChild(button1);
+
+    // auto label2 = std::make_shared<MulLabel>();
+    // label2->setText("Huita");
+    // gridLayout->addChild(label2);
+
+    // auto button2 = std::make_shared<MulFloatInput>();
+    // gridLayout->addChild(button2);
 }
 
 // void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {

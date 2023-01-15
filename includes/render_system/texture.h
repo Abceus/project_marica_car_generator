@@ -5,7 +5,7 @@
 
 class Texture {
 public:
-    void init(const MulImage& image);
+    void init(const std::shared_ptr<MulImage>& image);
     void init(const DDSInfo& ddsInfo);
     void destroy();
 

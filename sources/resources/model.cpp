@@ -8,7 +8,7 @@
 #include "resources/ase_reader/ase_reader.h"
 #include "utils/math/quaternion.h"
 
-Model Model::readPSK(const std::string& filename) {
+Model Model::readPSK(const std::filesystem::path& path) {
     auto newModel = Model();
 
     VChunkHeader GeneralHeader;
@@ -25,7 +25,7 @@ Model Model::readPSK(const std::string& filename) {
     VChunkHeader InfluencesHeader;
     std::vector<VRawBoneInfluence> InfluencesData;
 
-    std::ifstream file(filename, std::ios_base::in | std::ios_base::binary);
+    std::ifstream file(path, std::ios_base::in | std::ios_base::binary);
     if (!file.is_open())
         return newModel;
 
@@ -142,9 +142,9 @@ Model Model::readPSK(const std::string& filename) {
     return newModel;
 }
 
-std::vector<Model> Model::readASE(const std::string& filename) {
+std::vector<Model> Model::readASE(const std::filesystem::path& path) {
     ASEReader reader;
-    reader.init(filename);
+    reader.init(path);
 
     std::vector<Model> result;
     if (auto lockedRootNode = reader.getRootNode().lock()) {

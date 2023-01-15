@@ -6,14 +6,14 @@
 #include <memory>
 
 #include <mul_context.h>
+#include <mul_common.h>
 #include "widgets/mainwindow.h"
 
 int main() {
     auto& context = MulContext::getCurrentContext();
     context.init();
 
-    auto mainWindow = new MainWindow();
-    mainWindow->init();
+    auto mainWindow = MulMakeWidget<MainWindow>("Test window", Vec2I{500, 500});
     mainWindow->show();
 
     context.run();

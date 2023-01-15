@@ -2,7 +2,7 @@
 #include "resources/dds_info.h"
 #include <algorithm>
 
-void Texture::init(const MulImage& image) {
+void Texture::init(const std::shared_ptr<MulImage>& image) {
     if (isValid()) {
         destroy();
     }
@@ -11,9 +11,9 @@ void Texture::init(const MulImage& image) {
     activate();
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, image.getComponents(), image.getWidth(),
-                 image.getHeight(), 0, image.getComponents() >= 4 ? GL_RGBA : GL_RGB,
-                 GL_UNSIGNED_BYTE, image.getData());
+    glTexImage2D(GL_TEXTURE_2D, 0, image->getComponents(), image->getWidth(),
+                 image->getHeight(), 0, image->getComponents() >= 4 ? GL_RGBA : GL_RGB,
+                 GL_UNSIGNED_BYTE, image->getData());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

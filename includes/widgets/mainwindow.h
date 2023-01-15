@@ -1,4 +1,7 @@
 #pragma once
+#include "widgets/mul_opengl_canvas.h"
+#include "widgets/openglview.h"
+#include <filesystem>
 #ifdef WITH_PHYSICS
 #include "physics/physobject.h"
 #endif
@@ -12,12 +15,11 @@
 // #include <wx/frame.h>
 #include <mul_window.h>
 #include <mul_callback_owner.h>
+#include "widgets/configuration_widget.h"
 
 class MainWindow : public MulWindow {
 public:
-    MainWindow();
-
-    void init();
+    void onInit() override;
 
     // void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
 
@@ -42,7 +44,8 @@ private:
     WireframeModel mainCollision;
     WireframeModel tireCollision;
 
-    // OpenglView* openglView = nullptr;
+    OpenglView::OpenglInitedCallbackType openglInitedCallback;
+    std::shared_ptr<OpenglView> openglView;
     // wxWindow* simulateWindow = nullptr;
 
     std::shared_ptr<SceneNode> mainNode;
@@ -68,4 +71,10 @@ private:
 #endif
 
     std::shared_ptr<MulCallbackOwner<>> click;
+    std::shared_ptr<MulCallbackOwner<bool>> checkboxClick;
+    std::shared_ptr<MulCallbackOwner<size_t, std::string>> comboboxClick;
+    std::shared_ptr<MulCallbackOwner<float>> floatInputClick;
+    std::shared_ptr<MulCallbackOwner<std::filesystem::path>> filePickerClick;
+
+    ConfigurationWidget::MeshChangedCallbackType meshChangeHandler;
 };

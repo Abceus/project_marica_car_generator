@@ -2,12 +2,13 @@
 
 #include <memory>
 #include <string>
+#include <filesystem>
 
 #include "resources/ase_reader/ase_reader_node.h"
 
 class ASEReader {
 public:
-    void init(const std::string& path);
+    void init(const std::filesystem::path& path);
     std::weak_ptr<ASEReaderNode> getRootNode() const;
 
 private:

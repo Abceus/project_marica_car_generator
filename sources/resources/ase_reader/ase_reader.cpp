@@ -9,7 +9,7 @@
 #include "resources/ase_reader/ase_tokenizer.h"
 #include "resources/ase_reader/rules/dict.h"
 
-void ASEReader::init(const std::string& path) {
+void ASEReader::init(const std::filesystem::path& path) {
     std::ifstream t(path);
     std::stringstream buffer;
     buffer << t.rdbuf();

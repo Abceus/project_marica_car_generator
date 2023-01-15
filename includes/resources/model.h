@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <set>
 #include <string>
@@ -29,6 +30,6 @@ struct Model {
     std::map<size_t, std::set<std::string>> vlinks;
     std::map<std::string, std::vector<std::pair<size_t, float>>> blinks;
 
-    static Model readPSK(const std::string& filename);
-    static std::vector<Model> readASE(const std::string& filename);
+    static Model readPSK(const std::filesystem::path& path);
+    static std::vector<Model> readASE(const std::filesystem::path& path);
 };

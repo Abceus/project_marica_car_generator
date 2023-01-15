@@ -9,12 +9,11 @@
 #include "utils/scope_guard.h"
 #include <map>
 #include <stack>
-#include <wx/glcanvas.h>
 
 
 class Renderer {
 public:
-    Renderer(wxGLContext* context = nullptr, wxGLCanvas* surface = nullptr);
+    // Renderer(wxGLContext* context = nullptr, wxGLCanvas* surface = nullptr);
     void draw(const std::shared_ptr<Scene>& scene);
 
     template <typename T, typename... Args>
@@ -35,13 +34,13 @@ public:
     static void popRenderer();
     static Renderer* getCurrentRenderer();
 
-    void setContext(wxGLContext* context);
-    void setSurface(wxGLCanvas* surface);
+    // void setContext(wxGLContext* context);
+    // void setSurface(wxGLCanvas* surface);
 private:
     void makeCurrent();
     void done();
-    wxGLContext* m_context;
-    wxGLCanvas* m_surface;
+    // wxGLContext* m_context;
+    // wxGLCanvas* m_surface;
     GarbageCollector gc;
 
     // TODO: rework
