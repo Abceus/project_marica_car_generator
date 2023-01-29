@@ -44,7 +44,8 @@ void ConfigurationWidget::onInit() {
     grid->addChild(meshLabel);
 
     auto meshPicker = MulMakeWidget<MulFilePicker>();
-    meshPicker->setFilter("PSK (*.psk)|*.psk");
+    //meshPicker->setFilter("PSK (*.psk)|*.psk");
+    meshPicker->setFilter("psk");
     meshPicker->addChangePathCallback(meshModelSelect, [this](const std::filesystem::path& path) {
         meshChangedCallbackCollection.call(path);
     });
