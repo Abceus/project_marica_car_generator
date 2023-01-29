@@ -35,9 +35,9 @@
 // #endif
 
 void ConfigurationWidget::onInit() {
-    auto grid = MulMakeWidget<MulGridLayout>();
+    auto grid = std::make_shared<MulGridLayout>();
     grid->setColumns(2);
-    addChild(grid);
+    setLayout(grid);
 
     auto meshLabel = MulMakeWidget<MulLabel>();
     meshLabel->setText("Mesh: ");

@@ -3,6 +3,7 @@
 #include "widgets/configuration_widget.h"
 #include "widgets/mul_combobox.h"
 #include "widgets/mul_grid_layout.h"
+#include "widgets/mul_vertical_layout.h"
 #include "widgets/mul_label.h"
 #include "widgets/mul_opengl_canvas.h"
 #include "widgets/mul_splitter.h"
@@ -182,9 +183,11 @@
 //}
 
 void MainWindow::onInit() {
+    auto layout = std::make_shared<MulVerticalLayout>();
+    setLayout(layout);
 
     auto splitter = MulMakeWidget<MulSplitter>();
-    addChild(splitter);
+    layout->addChild(splitter);
 
     openglView = MulMakeWidget<OpenglView>();
 

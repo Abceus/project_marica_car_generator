@@ -8,12 +8,20 @@
 #include <mul_context.h>
 #include <mul_common.h>
 #include "widgets/mainwindow.h"
+#include "widgets/mul_vertical_layout.h"
 
 int main() {
     auto& context = MulContext::getCurrentContext();
     context.init();
 
-    auto mainWindow = MulMakeWidget<MainWindow>("Test window", Vec2I{500, 500});
+    //auto mainWindow = MulMakeWidget<MainWindow>("Test window", Vec2I{500, 500});
+    //mainWindow->show();
+
+    auto mainWindow = MulMakeWidget<MulWindow>("Test window", Vec2I{500, 500});
+    auto layout = std::make_shared<MulVerticalLayout>();
+    mainWindow->setLayout(layout);
+    auto filepicker = MulMakeWidget<MulFilePicker>();
+    layout->addChild(filepicker);
     mainWindow->show();
 
     context.run();
