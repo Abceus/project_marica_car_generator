@@ -129,7 +129,8 @@ if(WITH_PHYSICS)
 endif()
 
 target_include_directories( ProjectMaricaCarGenerator
-        PRIVATE includes)
+        PRIVATE includes
+        PRIVATE ${GLEW_INCLUDE_DIR})
 
 target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
 

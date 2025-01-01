@@ -6,3 +6,5 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/glew-2.2.0)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glew-2.2.0/build/cmake)
+
+set( GLEW_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glew-2.2.0/include PARENT_SCOPE )
