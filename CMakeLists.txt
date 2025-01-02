@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.9 )
+cmake_minimum_required( VERSION 3.31 )
 
 project( ProjectMaricaCarGenerator )
 
@@ -12,7 +12,16 @@ if(CMAKE_BUILD_TYPE STREQUAL  "Debug")
 else()
         set(wxUSE_EXCEPTIONS ON)
 endif()
-add_subdirectory(3rd_party/wxWidgets)
+
+include(FetchContent)
+FetchContent_Declare(
+        wxWidgets
+        GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+        GIT_TAG        d0e4aa761cf716f17875a648dff5effd55a05c6a
+        FIND_PACKAGE_ARGS
+)
+
+FetchContent_MakeAvailable(wxWidgets)
 
 set(SOURCES sources/main.cpp
 
@@ -98,9 +107,18 @@ endif()
 find_package(OpenGL REQUIRED)
 
 set(GLEW_USE_STATIC_LIBS TRUE)
-add_subdirectory(3rd_party/glew)
+find_package(GLEW QUIET)
+if(NOT GLEW_FOUND)
+        add_subdirectory(3rd_party/glew)
+endif()
 
-add_subdirectory(3rd_party/glm)
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG        bf71a834948186f4097caa076cd2663c69a10e1e
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(glm)
 
 if(WITH_PHYSICS)
         set(USE_GRAPHICAL_BENCHMARK OFF CACHE BOOL "Use Graphical Benchmark" FORCE)
@@ -118,7 +136,14 @@ if(WITH_PHYSICS)
         set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC Runtime Library DLL (/MD or /MDd)" FORCE)
         set(USE_MSVC_RELEASE_RUNTIME_ALWAYS OFF CACHE BOOL "Use MSVC Release Runtime Library even in Debug" FORCE)
         set(BUILD_BULLET3 OFF CACHE BOOL "Set when you want to build Bullet 3" FORCE)
-        add_subdirectory(3rd_party/bullet-physics)
+
+        FetchContent_Declare(
+                Bullet
+                GIT_REPOSITORY https://github.com/bulletphysics/bullet3.git
+                GIT_TAG        7dee3436e747958e7088dfdcea0e4ae031ce619e
+                FIND_PACKAGE_ARGS
+        )
+        FetchContent_MakeAvailable(Bullet)
 
         target_include_directories( ProjectMaricaCarGenerator
                 PRIVATE ${BULLET_PHYSICS_SOURCE_DIR}/src)
@@ -130,7 +155,7 @@ endif()
 
 target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes
-        PRIVATE ${GLEW_INCLUDE_DIR})
+        PRIVATE ${GLEW_INCLUDE_DIRS})
 
 target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
 
