@@ -5,12 +5,12 @@
 #include "render_system/element_buffer.h"
 #include "render_system/triangle_array.h"
 #include "render_system/vertex_buffer.h"
+#include "resources/image_info.h"
 #include "resources/skeletal.h"
 #include "utils/math/matrix.h"
 #include "utils/math/quaternion.h"
 
 void Mesh::init(const Model& m) {
-    return;
     model = m;
     // batches.resize(model.materials.size());
     // for(auto& batch: batches) {
@@ -46,13 +46,13 @@ void Mesh::init(const Model& m) {
         vertexArray->init(vertexBuffer, newElementBuffer);
 
         auto texture = std::make_shared<Texture>();
-        // wxImage image;
+        ImageInfo image;
         // if (wxFileExists(model.materials[i])) {
-        //     image = wxImage(model.materials[i]);
+        // image = wxImage(model.materials[i]);
         // } else {
-        //     image = wxImage(".\\resources\\textures\\test.jpg");
+        image = ImageInfo(".\\resources\\textures\\test.jpg");
         // }
-        // texture->init(image);
+        texture->init(image);
 
         batches.emplace_back(std::make_unique<Batch>(vertexArray, texture));
         ++i;

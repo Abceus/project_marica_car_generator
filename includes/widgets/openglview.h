@@ -1,4 +1,5 @@
 #pragma once
+#include "imgui.h"
 #include "render_system/batch.h"
 #include "render_system/drawable.h"
 #include "render_system/mesh.h"
@@ -7,7 +8,9 @@
 #include "render_system/shader_program.h"
 #include "updatable.h"
 #include "utils/gl.h"
+#include "utils/math/vec3.h"
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <set>
@@ -15,11 +18,13 @@
 // wxDECLARE_EVENT(OPENGL_INITED, wxCommandEvent);
 class OpenglView {
 public:
+    using OpenglInitedCallbackType = std::function<void()>;
+
+public:
     OpenglView();
 
     void draw();
 
-    // void OnSize(wxSizeEvent& event);
     // void OnPaint(wxPaintEvent& event);
 
     // void onKeyDown(wxKeyEvent& event);
@@ -34,11 +39,18 @@ public:
     void removeUpdatable(const std::shared_ptr<IUpdatable>& updatable);
     void clearUpdatables();
 
+    void setOpenglInitedCallback(const OpenglInitedCallbackType& callback) {
+        openglInitedCallback = callback;
+    }
+
 private:
     Renderer m_renderer;
 
     void InitGL();
     void ResetProjectionMode();
+    void OnResize(const ImVec2& newSize);
+
+    ImVec2 prevAvailSize;
 
     bool inited = false;
 
@@ -60,4 +72,10 @@ private:
     std::set<std::shared_ptr<IUpdatable>> updatables;
 
     std::chrono::time_point<std::chrono::steady_clock> lastUpdate;
+
+    unsigned int fbo;
+    unsigned int texture;
+    unsigned int rbo;
+
+    OpenglInitedCallbackType openglInitedCallback;
 };

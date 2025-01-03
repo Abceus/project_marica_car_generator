@@ -221,6 +221,6 @@ void ConfigurationWidget::setTexture(size_t index, const std::string& newPath) {
 }
 
 void ConfigurationWidget::setMeshChangedCallback(
-    const MeshChangedCallbackFunction& callback) {
+    const MeshChangedCallbackType& callback) {
     meshChangedCallback = callback;
 }

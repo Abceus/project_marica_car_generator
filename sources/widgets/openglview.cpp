@@ -1,4 +1,5 @@
 #include "widgets/openglview.h"
+#include "imgui.h"
 #include "render_system/element_buffer.h"
 #include "render_system/mesh.h"
 #include "render_system/scene_node.h"
@@ -33,7 +34,30 @@ OpenglView::OpenglView() {
     // m_renderer.setSurface(this);
 }
 
-void OpenglView::draw() {}
+void OpenglView::draw() {
+    if (!inited) {
+        glewInit();
+        InitGL();
+        inited = true;
+    }
+
+    const auto newAvailSize = ImGui::GetContentRegionAvail();
+    if (prevAvailSize.x != newAvailSize.x ||
+        prevAvailSize.y != newAvailSize.y) {
+        OnResize(newAvailSize);
+        prevAvailSize = newAvailSize;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_renderer.draw(scene);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    ImGui::Image((ImTextureID)texture, ImGui::GetContentRegionAvail(),
+                 ImVec2(0, 1), ImVec2(1, 0));
+}
 
 // void OpenglView::OnSize(wxSizeEvent& WXUNUSED(event)) {
 //     // Reset the OpenGL view aspect.
@@ -85,23 +109,79 @@ void OpenglView::ResetProjectionMode() {
     // settings.
     // // In order to avoid extensive context switching, consider doing this in
     // // OnPaint() rather than here, though.
+    // ImVec2 ClientSize = ImGui::GetWindowSize();
+    // ImVec2 ClientSize = ImVec2{100, 100};
+    // ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+    // ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+    // // ImVec2 ClientSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
+    // ImVec2 ClientSize = ImGui::GetContentRegionAvail();
     // glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     // scene->resizeScreen(ClientSize.x, ClientSize.y);
 }
 
+void OpenglView::OnResize(const ImVec2& newSize) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, newSize.x, newSize.y, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                           texture, 0);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, newSize.x,
+                          newSize.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                              GL_RENDERBUFFER, rbo);
+
+    glViewport(0, 0, newSize.x, newSize.y);
+
+    scene->resizeScreen(newSize.x, newSize.y);
+}
+
 void OpenglView::InitGL() {
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    const int width = 100;
+    const int height = 100;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                           texture, 0);
+
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                              GL_RENDERBUFFER, rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
+                  << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
     // glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     // glEnable(GL_DEPTH_TEST);
 
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // auto shaderProgram = m_renderer.getShaderProgram(
-    //     ".\\resources\\shaders\\defaultvertexshader.vert",
-    //     ".\\resources\\shaders\\defaultfragmentshader.frag");
+    auto shaderProgram = m_renderer.getShaderProgram(
+        ".\\resources\\shaders\\defaultvertexshader.vert",
+        ".\\resources\\shaders\\defaultfragmentshader.frag");
 
-    // scene->init(shaderProgram);
+    scene->init(shaderProgram);
 
     // redrawTimer.SetOwner(this);
     // redrawTimer.Start(1000.0f / 60.0f);
@@ -111,7 +191,9 @@ void OpenglView::InitGL() {
 
     // lastUpdate = std::chrono::steady_clock::now();
 
-    // wxPostEvent(this, wxCommandEvent(OPENGL_INITED));
+    if (openglInitedCallback) {
+        openglInitedCallback();
+    }
 }
 
 // void OpenglView::onKeyDown(wxKeyEvent& event) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resources/image_info.h"
 #include "utils/concepts/can_call.h"
 #include <functional>
 #include <map>
@@ -38,13 +39,13 @@ public:
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager& operator=(const ResourceManager&) = delete;
 
-    // FileResourceHolder<wxImage>& getImageManager();
+    FileResourceHolder<ImageInfo>& getImageManager();
 
 private:
     ResourceManager();
     ~ResourceManager() = default;
 
-    // FileResourceHolder<wxImage> imageManager;
+    FileResourceHolder<ImageInfo> imageManager;
 };
 
 template <typename Key, typename Value, typename... Args>

@@ -1,11 +1,11 @@
 #pragma once
 #include "resources/dds_info.h"
+#include "resources/image_info.h"
 #include "utils/gl.h"
-
 
 class Texture {
 public:
-    // void init(const wxImage& image);
+    void init(const ImageInfo& image);
     void init(const DDSInfo& ddsInfo);
     void destroy();
 

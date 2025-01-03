@@ -61,7 +61,7 @@ private:
                                         {100.0f, -100.0f, -50.0f},
                                         {-100.0f, -100.0f, -50.0f}};
 
-    int currentSplitterPosition = 500;
+    float currentSplitterPosition = 500.0f;
 
 #ifdef WITH_PHYSICS
     std::vector<std::weak_ptr<btSliderConstraint>> contsts;

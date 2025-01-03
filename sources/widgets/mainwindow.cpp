@@ -1,4 +1,5 @@
 #include "widgets/mainwindow.h"
+#include "imgui_internal.h"
 #include "render_system/scene_node.h"
 #include "resources/dds_info.h"
 #include "resources/wireframe_model.h"
@@ -57,51 +58,51 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
     //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
     //     openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
-    //         auto shaderProgram = openglView->getRenderer().getShaderProgram(
-    //             ".\\resources\\shaders\\meshvertexshader.vert",
-    //             ".\\resources\\shaders\\meshfragmentshader.frag");
+    openglView->setOpenglInitedCallback([this]() {
+        auto shaderProgram = openglView->getRenderer().getShaderProgram(
+            ".\\resources\\shaders\\meshvertexshader.vert",
+            ".\\resources\\shaders\\meshfragmentshader.frag");
 
-    //         mainNode = std::make_shared<SceneNode>();
-    mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
-    //         mainNode->setShaderProgram(shaderProgram);
-    //         mainNode->addDrawable(mainMesh);
-    //         mainCollisionMesh =
-    //             openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //         mainNode->addDrawable(mainCollisionMesh);
+        mainNode = std::make_shared<SceneNode>();
+        mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+        mainNode->setShaderProgram(shaderProgram);
+        mainNode->addDrawable(mainMesh);
+        mainCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        mainNode->addDrawable(mainCollisionMesh);
 
-    //         auto testNode = std::make_shared<SceneNode>();
-    //         testNode->setOverlay(true);
-    //         mainNode->addChild(testNode);
-    //         WireframeModel wireframeModel;
-    //         wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0,
-    //         0.0, 0.0, 0.0, 0.0, 0}, {0.0, -10.0, 0.0, 0.0, 0.0, 0},
-    //         {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0},
-    //         {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
-    //         wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
-    //         auto testMesh =
-    //         openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //         testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
-    //         testNode->addDrawable(testMesh);
+        auto testNode = std::make_shared<SceneNode>();
+        testNode->setOverlay(true);
+        mainNode->addChild(testNode);
+        WireframeModel wireframeModel;
+        wireframeModel.vertices = {
+            {-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
+            {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0},
+            {0.0, 0.0, -10.0, 0.0, 0.0, 0}, {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
+        wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
+        auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
+        testNode->addDrawable(testMesh);
 
-    //         tireCollisionMesh =
-    //             openglView->getRenderer().makeDrawable<WireframeMesh>();
-    //         for (auto& wheel : wheelSteerMeshNodes) {
-    //             wheel = std::make_shared<SceneNode>();
-    //             mainNode->addChild(wheel);
-    //             wheel->addDrawable(tireCollisionMesh);
-    //         }
+        tireCollisionMesh =
+            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        for (auto& wheel : wheelSteerMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
+        }
 
-    //         for (auto& wheel : wheelEngMeshNodes) {
-    //             wheel = std::make_shared<SceneNode>();
-    //             mainNode->addChild(wheel);
-    //             wheel->addDrawable(tireCollisionMesh);
-    //         }
+        for (auto& wheel : wheelEngMeshNodes) {
+            wheel = std::make_shared<SceneNode>();
+            mainNode->addChild(wheel);
+            wheel->addDrawable(tireCollisionMesh);
+        }
 
-    //         auto scene = openglView->getScene();
-    //         if (auto lockedScene = scene.lock()) {
-    //             lockedScene->addNode(mainNode);
-    //         }
-    //     });
+        auto scene = openglView->getScene();
+        if (auto lockedScene = scene.lock()) {
+            lockedScene->addNode(mainNode);
+        }
+    });
 
     configurationWidget->setMeshChangedCallback(
         [this](const std::string& filePath) {
@@ -249,6 +250,34 @@ void MainWindow::onDraw() {
 
     ImGui::BeginChild("Left Main Subframe", ImVec2(currentSplitterPosition, 0),
                       true);
+
+    const auto cursorPosition = ImGui::GetMousePos();
+    const auto currentSize = ImGui::GetContentRegionAvail();
+    const auto isActive =
+        cursorPosition.x >= ImGui::GetCursorPosX() +
+                                ImGui::GetStyle().FramePadding.x +
+                                ImGui::GetStyle().ItemInnerSpacing.x &&
+        cursorPosition.x < ImGui::GetCursorPosX() + currentSize.x +
+                               ImGui::GetStyle().FramePadding.x +
+                               ImGui::GetStyle().ItemInnerSpacing.x &&
+        cursorPosition.y > ImGui::GetCursorPosY() +
+                               ImGui::GetStyle().FramePadding.y +
+                               ImGui::GetStyle().ItemInnerSpacing.y &&
+        cursorPosition.y < ImGui::GetCursorPosY() + currentSize.y +
+                               ImGui::GetStyle().FramePadding.y +
+                               ImGui::GetStyle().ItemInnerSpacing.y;
+    if (mainNode && isActive) {
+        auto currentNodePosition = mainNode->getLocation();
+        currentNodePosition.setX(currentNodePosition.getX() +
+                                 ImGui::GetIO().MouseWheel);
+        mainNode->setLocation(currentNodePosition);
+
+        // auto currentNodePosition = mainNode->getScale();
+        // currentNodePosition.setX(currentNodePosition.getX() +
+        //                          ImGui::GetIO().MouseWheel);
+        // mainNode->setScale(currentNodePosition);
+    }
+
     openglView->draw();
     ImGui::EndChild();
 

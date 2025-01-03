@@ -18,6 +18,7 @@ FetchContent_MakeAvailable(glfw)
 
 add_subdirectory(3rd_party/imgui)
 add_subdirectory(3rd_party/imgui-file-dialog)
+add_subdirectory(3rd_party/stb)
 
 set(SOURCES sources/main.cpp
 
@@ -60,6 +61,7 @@ set(SOURCES sources/main.cpp
         sources/resources/resource_manager.cpp
         sources/resources/skeletal.cpp
         sources/resources/dds_info.cpp
+        sources/resources/image_info.cpp
 
         sources/resources/ase_reader/ase_reader_node.cpp
         sources/resources/ase_reader/ase_reader_node_analyzer.cpp
@@ -157,7 +159,8 @@ target_link_libraries(ProjectMaricaCarGenerator
         imgui::glfw 
         imgui::opengl3 
         glfw
-        imgui::file-dialog)
+        imgui::file-dialog
+        stb::image)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )
