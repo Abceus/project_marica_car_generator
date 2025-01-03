@@ -14,14 +14,24 @@ else()
 endif()
 
 include(FetchContent)
+
 FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
         GIT_TAG        d0e4aa761cf716f17875a648dff5effd55a05c6a
         FIND_PACKAGE_ARGS
 )
-
 FetchContent_MakeAvailable(wxWidgets)
+
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        3.4
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(glfw)
+
+add_subdirectory(3rd_party/imgui)
 
 set(SOURCES sources/main.cpp
 
@@ -96,13 +106,8 @@ if(WITH_PHYSICS)
         set(SOURCES ${SOURCES} ${PHYSIC_SOURCES})
 endif()
 
-if(WIN32)
-        add_executable( ProjectMaricaCarGenerator WIN32
-                ${SOURCES})
-else()
-        add_executable( ProjectMaricaCarGenerator
-                ${SOURCES})
-endif()
+add_executable( ProjectMaricaCarGenerator
+        ${SOURCES})
 
 find_package(OpenGL REQUIRED)
 
@@ -157,7 +162,18 @@ target_include_directories( ProjectMaricaCarGenerator
         PRIVATE includes
         PRIVATE ${GLEW_INCLUDE_DIRS})
 
-target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
+target_link_libraries(ProjectMaricaCarGenerator 
+        wx::core 
+        wx::base 
+        wx::gl 
+        wx::propgrid 
+        glew_s 
+        glm::glm 
+        OpenGL::GL 
+        imgui::core 
+        imgui::glfw 
+        imgui::opengl3 
+        glfw)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )
