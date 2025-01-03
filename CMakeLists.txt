@@ -17,6 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glfw)
 
 add_subdirectory(3rd_party/imgui)
+add_subdirectory(3rd_party/imgui-file-dialog)
 
 set(SOURCES sources/main.cpp
 
@@ -155,7 +156,8 @@ target_link_libraries(ProjectMaricaCarGenerator
         imgui::core 
         imgui::glfw 
         imgui::opengl3 
-        glfw)
+        glfw
+        imgui::file-dialog)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

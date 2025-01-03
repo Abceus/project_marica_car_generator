@@ -4,6 +4,7 @@
 #include "widgets/event_data/indexed_texture.h"
 #include "widgets/pgproperties/texture_array_pgproperty.h"
 #include "widgets/pgproperties/vec3f_pgproperty.h"
+#include <ImGuiFileDialog.h>
 #include <limits>
 
 // wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
@@ -183,7 +184,24 @@ ConfigurationWidget::ConfigurationWidget() {
 }
 
 void ConfigurationWidget::draw() {
-    ImGui::Button("Open Mesh");
+    if (ImGui::Button("Open Mesh")) {
+        IGFD::FileDialogConfig config;
+        config.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey",
+                                                "Choose Mesh", ".psk", config);
+    }
+
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePathName =
+                ImGuiFileDialog::Instance()->GetFilePathName();
+            if (meshChangedCallback) {
+                meshChangedCallback(filePathName);
+            }
+        }
+
+        ImGuiFileDialog::Instance()->Close();
+    }
 }
 
 void ConfigurationWidget::resizeTextureArray(size_t newSize) {
@@ -200,4 +218,9 @@ void ConfigurationWidget::setTexture(size_t index, const std::string& newPath) {
     //     value[index] = newPath;
     //     textureArrayProperty->SetValue(value);
     // }
+}
+
+void ConfigurationWidget::setMeshChangedCallback(
+    const MeshChangedCallbackFunction& callback) {
+    meshChangedCallback = callback;
 }

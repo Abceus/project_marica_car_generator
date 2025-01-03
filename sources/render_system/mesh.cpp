@@ -10,6 +10,7 @@
 #include "utils/math/quaternion.h"
 
 void Mesh::init(const Model& m) {
+    return;
     model = m;
     // batches.resize(model.materials.size());
     // for(auto& batch: batches) {

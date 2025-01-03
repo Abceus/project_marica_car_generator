@@ -62,7 +62,7 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
     //             ".\\resources\\shaders\\meshfragmentshader.frag");
 
     //         mainNode = std::make_shared<SceneNode>();
-    //         mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+    mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
     //         mainNode->setShaderProgram(shaderProgram);
     //         mainNode->addDrawable(mainMesh);
     //         mainCollisionMesh =
@@ -103,17 +103,15 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
     //         }
     //     });
 
-    //     configurationWidget->Bind(
-    //         MESH_CHANGED, [this, configurationWidget](const wxCommandEvent&
-    //         event) {
-    //             mainModel = Model::readPSK(event.GetString());
-    //             mainMesh->init(mainModel);
-    //             configurationWidget->resizeTextureArray(mainModel.materials.size());
-    //             for (size_t i = 0; i < mainModel.materials.size(); ++i) {
-    //                 configurationWidget->setTexture(i,
-    //                 mainModel.materials[i]);
-    //             }
-    //         });
+    configurationWidget->setMeshChangedCallback(
+        [this](const std::string& filePath) {
+            mainModel = Model::readPSK(filePath);
+            mainMesh->init(mainModel);
+            configurationWidget->resizeTextureArray(mainModel.materials.size());
+            for (size_t i = 0; i < mainModel.materials.size(); ++i) {
+                configurationWidget->setTexture(i, mainModel.materials[i]);
+            }
+        });
 
     //     configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event)
     //     {

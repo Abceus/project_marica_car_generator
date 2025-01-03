@@ -15,9 +15,13 @@
 wxDECLARE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 #endif
 
+#include <functional>
 #include <string>
 
 class ConfigurationWidget {
+public:
+    using MeshChangedCallbackFunction = std::function<void(const std::string&)>;
+
 public:
     ConfigurationWidget();
 
@@ -26,6 +30,8 @@ public:
     void resizeTextureArray(size_t newSize);
     void setTexture(size_t index, const std::string& newPath);
 
+    void setMeshChangedCallback(const MeshChangedCallbackFunction& callback);
+
 private:
-    // wxPGProperty* textureArrayProperty = nullptr;
+    MeshChangedCallbackFunction meshChangedCallback;
 };
