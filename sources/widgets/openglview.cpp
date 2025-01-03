@@ -47,6 +47,7 @@ void OpenglView::draw() {
         OnResize(newAvailSize);
         prevAvailSize = newAvailSize;
     }
+    ResetProjectionMode();
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -96,28 +97,10 @@ void OpenglView::draw() {
 // }
 
 void OpenglView::ResetProjectionMode() {
-    // if (!IsShownOnScreen())
-    //     return;
+    const auto availRegion = ImGui::GetContentRegionAvail();
 
-    // // This is normally only necessary if there is more than one wxGLCanvas
-    // // or more than one wxGLContext in the application.
-    // SetCurrent(*m_glRC);
-
-    // const wxSize ClientSize = GetClientSize() * GetContentScaleFactor();
-
-    // // It's up to the application code to update the OpenGL viewport
-    // settings.
-    // // In order to avoid extensive context switching, consider doing this in
-    // // OnPaint() rather than here, though.
-    // ImVec2 ClientSize = ImGui::GetWindowSize();
-    // ImVec2 ClientSize = ImVec2{100, 100};
-    // ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-    // ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-    // // ImVec2 ClientSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
-    // ImVec2 ClientSize = ImGui::GetContentRegionAvail();
-    // glViewport(0, 0, ClientSize.x, ClientSize.y);
-
-    // scene->resizeScreen(ClientSize.x, ClientSize.y);
+    glViewport(0, 0, availRegion.x, availRegion.y);
+    scene->resizeScreen(availRegion.x, availRegion.y);
 }
 
 void OpenglView::OnResize(const ImVec2& newSize) {
@@ -134,10 +117,7 @@ void OpenglView::OnResize(const ImVec2& newSize) {
                           newSize.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                               GL_RENDERBUFFER, rbo);
-
-    glViewport(0, 0, newSize.x, newSize.y);
-
-    scene->resizeScreen(newSize.x, newSize.y);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void OpenglView::InitGL() {

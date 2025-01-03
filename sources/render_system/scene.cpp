@@ -94,12 +94,13 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
     }
 }
 
-void Scene::drawNodeRecurse(const std::shared_ptr<SceneNode>& node,
-                     std::list<std::shared_ptr<SceneNode>>& overlayList) {
+void Scene::drawNodeRecurse(
+    const std::shared_ptr<SceneNode>& node,
+    std::list<std::shared_ptr<SceneNode>>& overlayList) {
     drawNode(node);
 
     for (const auto& childNode : *node) {
-        if(childNode->isOverlay()) {
+        if (childNode->isOverlay()) {
             overlayList.emplace_back(childNode);
         } else {
             drawNodeRecurse(childNode, overlayList);

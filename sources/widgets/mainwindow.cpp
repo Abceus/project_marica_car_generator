@@ -251,22 +251,22 @@ void MainWindow::onDraw() {
     ImGui::BeginChild("Left Main Subframe", ImVec2(currentSplitterPosition, 0),
                       true);
 
-    const auto cursorPosition = ImGui::GetMousePos();
-    const auto currentSize = ImGui::GetContentRegionAvail();
-    const auto isActive =
-        cursorPosition.x >= ImGui::GetCursorPosX() +
-                                ImGui::GetStyle().FramePadding.x +
-                                ImGui::GetStyle().ItemInnerSpacing.x &&
-        cursorPosition.x < ImGui::GetCursorPosX() + currentSize.x +
-                               ImGui::GetStyle().FramePadding.x +
-                               ImGui::GetStyle().ItemInnerSpacing.x &&
-        cursorPosition.y > ImGui::GetCursorPosY() +
-                               ImGui::GetStyle().FramePadding.y +
-                               ImGui::GetStyle().ItemInnerSpacing.y &&
-        cursorPosition.y < ImGui::GetCursorPosY() + currentSize.y +
-                               ImGui::GetStyle().FramePadding.y +
-                               ImGui::GetStyle().ItemInnerSpacing.y;
-    if (mainNode && isActive) {
+    // const auto cursorPosition = ImGui::GetMousePos();
+    // const auto currentSize = ImGui::GetContentRegionAvail();
+    // const auto isActive =
+    //     cursorPosition.x >= ImGui::GetCursorPosX() +
+    //                             ImGui::GetStyle().FramePadding.x +
+    //                             ImGui::GetStyle().ItemInnerSpacing.x &&
+    //     cursorPosition.x < ImGui::GetCursorPosX() + currentSize.x +
+    //                            ImGui::GetStyle().FramePadding.x +
+    //                            ImGui::GetStyle().ItemInnerSpacing.x &&
+    //     cursorPosition.y > ImGui::GetCursorPosY() +
+    //                            ImGui::GetStyle().FramePadding.y +
+    //                            ImGui::GetStyle().ItemInnerSpacing.y &&
+    //     cursorPosition.y < ImGui::GetCursorPosY() + currentSize.y +
+    //                            ImGui::GetStyle().FramePadding.y +
+    //                            ImGui::GetStyle().ItemInnerSpacing.y;
+    if (mainNode) {
         auto currentNodePosition = mainNode->getLocation();
         currentNodePosition.setX(currentNodePosition.getX() +
                                  ImGui::GetIO().MouseWheel);
