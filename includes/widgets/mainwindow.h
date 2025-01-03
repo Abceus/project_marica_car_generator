@@ -1,20 +1,23 @@
 #pragma once
+#include "widgets/configuration_widget.h"
+#include "widgets/opengl_glfw_window.h"
 #ifdef WITH_PHYSICS
 #include "physics/physobject.h"
 #endif
 #include "render_system/camera/camera_controller.h"
 #include "render_system/scene_node.h"
 #include "render_system/wireframe.h"
+#include "widgets/drawable.h"
 #include "widgets/openglview.h"
-#include "wx/msw/window.h"
 #include <memory>
-#include <wx/frame.h>
 
-class MainWindow : public wxFrame {
+class MainWindow : public OpenglGlfwWindow {
 public:
     MainWindow();
 
-    void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
+    void onDraw() override;
+
+    // void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
 
     void setMainModel(const Model& model);
     void setMainCollision(const Model& model);
@@ -37,8 +40,9 @@ private:
     WireframeModel mainCollision;
     WireframeModel tireCollision;
 
-    OpenglView* openglView = nullptr;
-    wxWindow* simulateWindow = nullptr;
+    std::unique_ptr<OpenglView> openglView;
+    std::unique_ptr<ConfigurationWidget> configurationWidget;
+    // wxWindow* simulateWindow = nullptr;
 
     std::shared_ptr<SceneNode> mainNode;
     std::shared_ptr<Mesh> mainMesh;
@@ -56,6 +60,8 @@ private:
                                         {-100.0f, 100.0f, -50.0f},
                                         {100.0f, -100.0f, -50.0f},
                                         {-100.0f, -100.0f, -50.0f}};
+
+    int currentSplitterPosition = 500;
 
 #ifdef WITH_PHYSICS
     std::vector<std::weak_ptr<btSliderConstraint>> contsts;

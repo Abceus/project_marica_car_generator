@@ -9,21 +9,20 @@
 #include "utils/scope_guard.h"
 #include <map>
 #include <stack>
-#include <wx/glcanvas.h>
-
 
 class Renderer {
 public:
-    Renderer(wxGLContext* context = nullptr, wxGLCanvas* surface = nullptr);
+    // Renderer(wxGLContext* context = nullptr, wxGLCanvas* surface = nullptr);
+    Renderer() = default;
     void draw(const std::shared_ptr<Scene>& scene);
 
     template <typename T, typename... Args>
     std::shared_ptr<T> makeDrawable(Args&&... args);
 
     // std::shared_ptr<VertexShader> loadVertexShader(const std::string& path);
-    // std::shared_ptr<FragmentShader> loadFragmentShader(const std::string& path);
-    // std::shared_ptr<ShaderProgram>
-    // getShaderProgram(const std::shared_ptr<VertexShader>& vertexShader,
+    // std::shared_ptr<FragmentShader> loadFragmentShader(const std::string&
+    // path); std::shared_ptr<ShaderProgram> getShaderProgram(const
+    // std::shared_ptr<VertexShader>& vertexShader,
     //                  const std::shared_ptr<FragmentShader>& fragmentShader);
     std::shared_ptr<ShaderProgram>
     getShaderProgram(const std::string& vertexShaderPath,
@@ -35,13 +34,13 @@ public:
     static void popRenderer();
     static Renderer* getCurrentRenderer();
 
-    void setContext(wxGLContext* context);
-    void setSurface(wxGLCanvas* surface);
+    // void setContext(wxGLContext* context);
+    // void setSurface(wxGLCanvas* surface);
 private:
     void makeCurrent();
     void done();
-    wxGLContext* m_context;
-    wxGLCanvas* m_surface;
+    // wxGLContext* m_context;
+    // wxGLCanvas* m_surface;
     GarbageCollector gc;
 
     // TODO: rework

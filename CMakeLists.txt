@@ -5,23 +5,8 @@ project( ProjectMaricaCarGenerator )
 set( CMAKE_CXX_STANDARD 20 )
 
 set(BUILD_SHARED_LIBS OFF)
-set(wxUSE_STL ON)
-set(_CRT_SECURE_NO_WARNINGS ON)
-if(CMAKE_BUILD_TYPE STREQUAL  "Debug")
-        set(wxUSE_EXCEPTIONS OFF)
-else()
-        set(wxUSE_EXCEPTIONS ON)
-endif()
 
 include(FetchContent)
-
-FetchContent_Declare(
-        wxWidgets
-        GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-        GIT_TAG        d0e4aa761cf716f17875a648dff5effd55a05c6a
-        FIND_PACKAGE_ARGS
-)
-FetchContent_MakeAvailable(wxWidgets)
 
 FetchContent_Declare(
         glfw
@@ -35,6 +20,7 @@ add_subdirectory(3rd_party/imgui)
 
 set(SOURCES sources/main.cpp
 
+        sources/widgets/opengl_glfw_window.cpp
         sources/widgets/app.cpp
         sources/widgets/mainwindow.cpp
         sources/widgets/openglview.cpp
@@ -163,10 +149,6 @@ target_include_directories( ProjectMaricaCarGenerator
         PRIVATE ${GLEW_INCLUDE_DIRS})
 
 target_link_libraries(ProjectMaricaCarGenerator 
-        wx::core 
-        wx::base 
-        wx::gl 
-        wx::propgrid 
         glew_s 
         glm::glm 
         OpenGL::GL 

@@ -9,8 +9,6 @@
 #include "utils/math/matrix.h"
 #include "utils/math/quaternion.h"
 
-#include <wx/filefn.h>
-
 void Mesh::init(const Model& m) {
     model = m;
     // batches.resize(model.materials.size());
@@ -47,14 +45,13 @@ void Mesh::init(const Model& m) {
         vertexArray->init(vertexBuffer, newElementBuffer);
 
         auto texture = std::make_shared<Texture>();
-        wxImage image;
-        if (wxFileExists(model.materials[i])) {
-            image = wxImage(model.materials[i]);
-        } else {
-            image = wxImage(
-                ".\\resources\\textures\\test.jpg");
-        }
-        texture->init(image);
+        // wxImage image;
+        // if (wxFileExists(model.materials[i])) {
+        //     image = wxImage(model.materials[i]);
+        // } else {
+        //     image = wxImage(".\\resources\\textures\\test.jpg");
+        // }
+        // texture->init(image);
 
         batches.emplace_back(std::make_unique<Batch>(vertexArray, texture));
         ++i;

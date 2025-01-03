@@ -1,5 +1,6 @@
 #pragma once
 #include "render_system/batch.h"
+#include "render_system/drawable.h"
 #include "render_system/mesh.h"
 #include "render_system/renderer.h"
 #include "render_system/scene.h"
@@ -10,21 +11,21 @@
 #include <memory>
 #include <optional>
 #include <set>
-#include <wx/glcanvas.h>
-#include <wx/timer.h>
 
-wxDECLARE_EVENT(OPENGL_INITED, wxCommandEvent);
-class OpenglView : public wxGLCanvas {
+// wxDECLARE_EVENT(OPENGL_INITED, wxCommandEvent);
+class OpenglView {
 public:
-    OpenglView(wxWindow* parent);
+    OpenglView();
 
-    void OnSize(wxSizeEvent& event);
-    void OnPaint(wxPaintEvent& event);
+    void draw();
 
-    void onKeyDown(wxKeyEvent& event);
-    void onKeyUp(wxKeyEvent& event);
+    // void OnSize(wxSizeEvent& event);
+    // void OnPaint(wxPaintEvent& event);
 
-    void onTimer(wxTimerEvent& event);
+    // void onKeyDown(wxKeyEvent& event);
+    // void onKeyUp(wxKeyEvent& event);
+
+    // void onTimer(wxTimerEvent& event);
 
     std::weak_ptr<Scene> getScene() const;
     Renderer& getRenderer();
@@ -41,14 +42,14 @@ private:
 
     bool inited = false;
 
-    wxGLContext* m_glRC = nullptr;
+    // wxGLContext* m_glRC = nullptr;
 
     // std::shared_ptr<ShaderProgram> shaderProgram;
     // std::shared_ptr<Mesh> mesh;
     std::shared_ptr<Scene> scene;
 
-    wxTimer redrawTimer;
-    wxTimer updateTimer;
+    // wxTimer redrawTimer;
+    // wxTimer updateTimer;
 
     // glm::mat4 projectionMatrix;
 

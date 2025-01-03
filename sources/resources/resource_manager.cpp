@@ -5,11 +5,11 @@ ResourceManager& ResourceManager::Instance() {
     return instance;
 }
 
-FileResourceHolder<wxImage>& ResourceManager::getImageManager() {
-    return imageManager;
-}
+// FileResourceHolder<wxImage>& ResourceManager::getImageManager() {
+//     return imageManager;
+// }
 
 ResourceManager::ResourceManager() {
-    imageManager.setDefaultResource(
-        std::make_shared<wxImage>("./resources/textures/test.jpg"));
+    //     imageManager.setDefaultResource(
+    //         std::make_shared<wxImage>("./resources/textures/test.jpg"));
 }

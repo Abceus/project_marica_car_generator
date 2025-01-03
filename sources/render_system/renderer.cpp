@@ -5,8 +5,8 @@
 
 std::stack<Renderer*> Renderer::rendererStack;
 
-Renderer::Renderer(wxGLContext* context, wxGLCanvas* surface)
-    : m_context(context), m_surface(surface) {}
+// Renderer::Renderer(wxGLContext* context, wxGLCanvas* surface)
+//     : m_context(context), m_surface(surface) {}
 
 void Renderer::draw(const std::shared_ptr<Scene>& scene) {
     auto contextGuard = pushContextScoped();
@@ -107,7 +107,7 @@ Renderer::getShaderProgram(const std::string& vertexShaderPath,
 }
 
 void Renderer::makeCurrent() {
-    m_context->SetCurrent(*m_surface);
+    // m_context->SetCurrent(*m_surface);
 }
 
 void Renderer::done() {
@@ -136,10 +136,10 @@ Renderer* Renderer::getCurrentRenderer() {
     return rendererStack.top();
 }
 
-void Renderer::setContext(wxGLContext* context) {
-    m_context = context;
-}
+// void Renderer::setContext(wxGLContext* context) {
+//     m_context = context;
+// }
 
-void Renderer::setSurface(wxGLCanvas* surface) {
-    m_surface = surface;
-}
+// void Renderer::setSurface(wxGLCanvas* surface) {
+//     m_surface = surface;
+// }
