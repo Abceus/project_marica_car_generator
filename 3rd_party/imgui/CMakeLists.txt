@@ -1,8 +1,8 @@
 project( imgui )
-set( IMGUI_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.91.6 )
+set( IMGUI_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.91.6-docking )
 
 if(NOT EXISTS ${IMGUI_ROOT})
-	file(DOWNLOAD https://github.com/ocornut/imgui/archive/refs/tags/v1.91.6.zip ${CMAKE_CURRENT_BINARY_DIR}/imgui.zip)
+	file(DOWNLOAD https://github.com/ocornut/imgui/archive/refs/tags/v1.91.6-docking.zip ${CMAKE_CURRENT_BINARY_DIR}/imgui.zip)
 
 	file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/imgui.zip
 	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,6 +1,7 @@
 #pragma once
 #include "imgui.h"
 #include "render_system/batch.h"
+#include "render_system/camera/camera_controller.h"
 #include "render_system/drawable.h"
 #include "render_system/mesh.h"
 #include "render_system/renderer.h"
@@ -43,6 +44,10 @@ public:
         openglInitedCallback = callback;
     }
 
+    void setCameraController(std::unique_ptr<CameraController>&& controller) {
+        cameraController = std::move(controller);
+    }
+
 private:
     Renderer m_renderer;
 
@@ -78,4 +83,6 @@ private:
     unsigned int rbo;
 
     OpenglInitedCallbackType openglInitedCallback;
+
+    std::unique_ptr<CameraController> cameraController;
 };

@@ -33,7 +33,8 @@
 
 #include <imgui.h>
 
-MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
+MainWindow::MainWindow()
+    : OpenglGlfwWindow("Main Window") {
     openglView = std::make_unique<OpenglView>();
     configurationWidget = std::make_unique<ConfigurationWidget>();
     //     leftSizer->Add(openglView, 1, wxEXPAND, 0);
@@ -50,8 +51,7 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
 
     //     SetSizer(mainSizer);
 
-    //     mainEditorCameraController =
-    //         std::make_unique<FreeCameraController>(openglView);
+    openglView->setCameraController(std::make_unique<FreeCameraController>());
     //     openglView->Bind(wxEVT_ENTER_WINDOW,
     //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
     //     openglView->Bind(wxEVT_LEAVE_WINDOW,
@@ -60,32 +60,26 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
     //     openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
     openglView->setOpenglInitedCallback([this]() {
         auto shaderProgram = openglView->getRenderer().getShaderProgram(
-            ".\\resources\\shaders\\meshvertexshader.vert",
-            ".\\resources\\shaders\\meshfragmentshader.frag");
+            ".\\resources\\shaders\\meshvertexshader.vert", ".\\resources\\shaders\\meshfragmentshader.frag");
 
         mainNode = std::make_shared<SceneNode>();
         mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
         mainNode->setShaderProgram(shaderProgram);
         mainNode->addDrawable(mainMesh);
-        mainCollisionMesh =
-            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        mainCollisionMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
         mainNode->addDrawable(mainCollisionMesh);
 
         auto testNode = std::make_shared<SceneNode>();
         testNode->setOverlay(true);
         mainNode->addChild(testNode);
         WireframeModel wireframeModel;
-        wireframeModel.vertices = {
-            {-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0},
-            {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0},
-            {0.0, 0.0, -10.0, 0.0, 0.0, 0}, {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
+        wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0}, {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0}, {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
         wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
         auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
         testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
         testNode->addDrawable(testMesh);
 
-        tireCollisionMesh =
-            openglView->getRenderer().makeDrawable<WireframeMesh>();
+        tireCollisionMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
         for (auto& wheel : wheelSteerMeshNodes) {
             wheel = std::make_shared<SceneNode>();
             mainNode->addChild(wheel);
@@ -104,15 +98,14 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
         }
     });
 
-    configurationWidget->setMeshChangedCallback(
-        [this](const std::string& filePath) {
-            mainModel = Model::readPSK(filePath);
-            mainMesh->init(mainModel);
-            configurationWidget->resizeTextureArray(mainModel.materials.size());
-            for (size_t i = 0; i < mainModel.materials.size(); ++i) {
-                configurationWidget->setTexture(i, mainModel.materials[i]);
-            }
-        });
+    configurationWidget->setMeshChangedCallback([this](const std::string& filePath) {
+        mainModel = Model::readPSK(filePath);
+        mainMesh->init(mainModel);
+        configurationWidget->resizeTextureArray(mainModel.materials.size());
+        for (size_t i = 0; i < mainModel.materials.size(); ++i) {
+            configurationWidget->setTexture(i, mainModel.materials[i]);
+        }
+    });
 
     //     configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event)
     //     {
@@ -234,66 +227,62 @@ MainWindow::MainWindow() : OpenglGlfwWindow("Main Window") {
 // }
 
 void MainWindow::onDraw() {
-#ifdef IMGUI_HAS_VIEWPORT
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->GetWorkPos());
-    ImGui::SetNextWindowSize(viewport->GetWorkSize());
-    ImGui::SetNextWindowViewport(viewport->ID);
-#else
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-#endif
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     bool open = true;
-    ImGui::Begin("Main Frame", &open,
-                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
 
-    ImGui::BeginChild("Left Main Subframe", ImVec2(currentSplitterPosition, 0),
-                      true);
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |=
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-    // const auto cursorPosition = ImGui::GetMousePos();
-    // const auto currentSize = ImGui::GetContentRegionAvail();
-    // const auto isActive =
-    //     cursorPosition.x >= ImGui::GetCursorPosX() +
-    //                             ImGui::GetStyle().FramePadding.x +
-    //                             ImGui::GetStyle().ItemInnerSpacing.x &&
-    //     cursorPosition.x < ImGui::GetCursorPosX() + currentSize.x +
-    //                            ImGui::GetStyle().FramePadding.x +
-    //                            ImGui::GetStyle().ItemInnerSpacing.x &&
-    //     cursorPosition.y > ImGui::GetCursorPosY() +
-    //                            ImGui::GetStyle().FramePadding.y +
-    //                            ImGui::GetStyle().ItemInnerSpacing.y &&
-    //     cursorPosition.y < ImGui::GetCursorPosY() + currentSize.y +
-    //                            ImGui::GetStyle().FramePadding.y +
-    //                            ImGui::GetStyle().ItemInnerSpacing.y;
-    if (mainNode) {
-        auto currentNodePosition = mainNode->getLocation();
-        currentNodePosition.setX(currentNodePosition.getX() +
-                                 ImGui::GetIO().MouseWheel);
-        mainNode->setLocation(currentNodePosition);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &open, window_flags);
+    ImGui::PopStyleVar();
 
-        // auto currentNodePosition = mainNode->getScale();
-        // currentNodePosition.setX(currentNodePosition.getX() +
-        //                          ImGui::GetIO().MouseWheel);
-        // mainNode->setScale(currentNodePosition);
+    ImGui::PopStyleVar(2);
+
+    if (ImGui::DockBuilderGetNode(ImGui::GetID("MyDockspace")) == NULL) {
+        ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+        ImGui::DockBuilderRemoveNode(dockspace_id);
+        ImGui::DockBuilderAddNode(dockspace_id);
+
+        ImGuiID dock_main_id = dockspace_id;
+        ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, NULL, &dock_main_id);
+        ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
+
+        ImGui::DockBuilderDockWindow("Main Viewport", dock_id_left);
+        ImGui::DockBuilderDockWindow("Configuration", dock_id_right);
+        ImGui::DockBuilderFinish(dockspace_id);
     }
 
+    ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), 0);
+    ImGui::End();
+
+    ImGui::Begin("Main Viewport", &open, 0);
+
     openglView->draw();
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-    ImGui::InvisibleButton("Main Vertical Splitter",
-                           ImVec2(8.0f, ImGui::GetContentRegionAvail().y));
-    if (ImGui::IsItemActive())
-        currentSplitterPosition += ImGui::GetIO().MouseDelta.x;
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Right Main Subframe", ImVec2(0, 0), true);
-    configurationWidget->draw();
-    ImGui::EndChild();
 
     ImGui::End();
-    ImGui::PopStyleVar();
+
+    ImGui::Begin("Configuration", &open, 0);
+    configurationWidget->draw();
+    ImGui::End();
+
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Options")) {
+            if (ImGui::MenuItem("Preferences", "")) {
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
 }
 
 void MainWindow::setMainModel(const Model& model) {
@@ -367,34 +356,26 @@ void MainWindow::openEmulationWindow() {
         auto physicWorld = std::make_shared<PhysicWorld>();
         simulateWidget->addUpdatable(physicWorld);
 
-        simulationEditorCameraController =
-            std::make_unique<FreeCameraController>(simulateWidget);
-        simulateWidget->Bind(wxEVT_ENTER_WINDOW,
-                             &MainWindow::onOpenglEditorMouseFocusEvent, this);
-        simulateWidget->Bind(wxEVT_LEAVE_WINDOW,
-                             &MainWindow::onOpenglEditorMouseFocusEvent, this);
+        simulationEditorCameraController = std::make_unique<FreeCameraController>(simulateWidget);
+        simulateWidget->Bind(wxEVT_ENTER_WINDOW, &MainWindow::onOpenglEditorMouseFocusEvent, this);
+        simulateWidget->Bind(wxEVT_LEAVE_WINDOW, &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
         auto simMainNode = std::make_shared<SceneNode>();
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(simMainNode);
         }
-        auto simMainCollisionMesh =
-            simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        auto simMainCollisionMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
         simMainCollisionMesh->init(mainCollision);
         simMainNode->addDrawable(simMainCollisionMesh);
 
-        auto mainCollisionShape =
-            std::make_shared<ConvexHull>(mainCollision.vertices);
-        mainPhysic =
-            std::make_shared<PhysObject>(simMainNode, mainCollisionShape);
+        auto mainCollisionShape = std::make_shared<ConvexHull>(mainCollision.vertices);
+        mainPhysic = std::make_shared<PhysObject>(simMainNode, mainCollisionShape);
         mainPhysic->setMass(500.0f);
-        mainPhysic->setPhysic(
-            physicWorld->addBody(mainPhysic->getConstructionInfo()));
+        mainPhysic->setPhysic(physicWorld->addBody(mainPhysic->getConstructionInfo()));
         simulateWidget->addUpdatable(mainPhysic);
 
         auto shaderProgram = simulateWidget->getRenderer().getShaderProgram(
-            ".\\resources\\shaders\\meshvertexshader.vert",
-            ".\\resources\\shaders\\meshfragmentshader.frag");
+            ".\\resources\\shaders\\meshvertexshader.vert", ".\\resources\\shaders\\meshfragmentshader.frag");
         auto simMainMeshNode = std::make_shared<SceneNode>();
         simMainMeshNode->setShaderProgram(shaderProgram);
         auto simMainMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
@@ -402,14 +383,12 @@ void MainWindow::openEmulationWindow() {
         simMainMeshNode->addDrawable(simMainMesh);
         simMainNode->addChild(simMainMeshNode);
 
-        auto wheelMesh =
-            simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        auto wheelMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
         wheelMesh->init(tireCollision);
 
         auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
 
-        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {
-            wheelSteerMeshNodes, wheelEngMeshNodes};
+        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {wheelSteerMeshNodes, wheelEngMeshNodes};
 
         for (const auto& nodes : wheels) {
             for (const auto& wheel : nodes) {
@@ -420,29 +399,22 @@ void MainWindow::openEmulationWindow() {
                     lockedScene->addNode(wheelNode);
                 }
 
-                auto tirePhysBody =
-                    std::make_shared<PhysObject>(wheelNode, tireShape);
+                auto tirePhysBody = std::make_shared<PhysObject>(wheelNode, tireShape);
                 tirePhysBody->setMass(3.0f);
                 tirePhysBody->setFriction(1.0f);
-                tirePhysBody->setPhysic(
-                    physicWorld->addBody(tirePhysBody->getConstructionInfo()));
-                tirePhysBody->getPhysics()->setIgnoreCollisionCheck(
-                    mainPhysic->getPhysics().get(), true);
+                tirePhysBody->setPhysic(physicWorld->addBody(tirePhysBody->getConstructionInfo()));
+                tirePhysBody->getPhysics()->setIgnoreCollisionCheck(mainPhysic->getPhysics().get(), true);
                 simulateWidget->addUpdatable(tirePhysBody);
 
                 auto bodyJointTransform = btTransform::getIdentity();
-                bodyJointTransform.setOrigin(
-                    wheelNode->getLocation().toBtVec3());
+                bodyJointTransform.setOrigin(wheelNode->getLocation().toBtVec3());
 
-                auto constraint =
-                    physicWorld->addConstraint<btSliderConstraint>(
-                        *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(),
-                        bodyJointTransform, btTransform::getIdentity(), true);
+                auto constraint = physicWorld->addConstraint<btSliderConstraint>(
+                    *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(), bodyJointTransform,
+                    btTransform::getIdentity(), true);
 
-                constraint->setUpperAngLimit(
-                    Angle::fromDegrees(180.0f).getRadians());
-                constraint->setLowerAngLimit(
-                    Angle::fromDegrees(-180.0f).getRadians());
+                constraint->setUpperAngLimit(Angle::fromDegrees(180.0f).getRadians());
+                constraint->setLowerAngLimit(Angle::fromDegrees(-180.0f).getRadians());
                 constraint->setLowerLinLimit(0.0f);
                 constraint->setUpperLinLimit(0.0f);
                 constraint->setMaxAngMotorForce(15000.0f);
@@ -465,8 +437,7 @@ void MainWindow::openEmulationWindow() {
             mainPhysic.reset();
             event.Skip();
         });
-        simulateWindow->SetWindowStyleFlag(
-            simulateWindow->GetWindowStyleFlag() | wxWANTS_CHARS);
+        simulateWindow->SetWindowStyleFlag(simulateWindow->GetWindowStyleFlag() | wxWANTS_CHARS);
         simulateWindow->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& event) {
             mainPhysic->getPhysics()->activate(true);
             auto force = 100.0f;

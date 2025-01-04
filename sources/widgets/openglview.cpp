@@ -58,6 +58,10 @@ void OpenglView::draw() {
 
     ImGui::Image((ImTextureID)texture, ImGui::GetContentRegionAvail(),
                  ImVec2(0, 1), ImVec2(1, 0));
+
+    if (ImGui::IsItemHovered() && cameraController && scene->getActiveCamera()) {
+        cameraController->update(scene->getActiveCamera());
+    }
 }
 
 // void OpenglView::OnSize(wxSizeEvent& WXUNUSED(event)) {

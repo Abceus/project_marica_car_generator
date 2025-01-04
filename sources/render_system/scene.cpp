@@ -43,7 +43,7 @@ void Scene::draw() {
 
 void Scene::resizeScreen(int w, int h) {
     // Calculate aspect ratio
-    const float aspect = static_cast<float>(w) / h;
+    const float aspect = h == 0 ? 0 : static_cast<float>(w) / h;
     const float zNear = 1.0f, zFar = 10000.f, fov = 90.f;
 
     // Reset projection

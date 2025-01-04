@@ -1,7 +1,8 @@
 #pragma once
 
+#include "render_system/scene.h"
+
 class CameraController {
 public:
-    // virtual void onKeyPressed(wxKeyEvent& event) = 0;
-    // virtual void onMouseEvent(wxMouseEvent& event) = 0;
+    virtual void update(std::shared_ptr<SceneNode> camera) = 0;
 };

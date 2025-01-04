@@ -91,6 +91,9 @@ int main(int, char**) {
     ImGui_ImplOpenGL3_Init(glsl_version);
     glfwSwapInterval(1); // Enable vsync
 
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
     // Main loop
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not
@@ -164,6 +167,11 @@ int main(int, char**) {
         // }
 
         // Rendering
+        // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        //     ImGui::UpdatePlatformWindows();
+        //     ImGui::RenderPlatformWindowsDefault();
+        //     // TODO for OpenGL: restore current GL context.
+        // }
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
