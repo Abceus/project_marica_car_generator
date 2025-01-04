@@ -11,8 +11,7 @@
 #include <vector>
 
 ImageInfo::ImageInfo(const std::string& path) {
-    unsigned char* image =
-        stbi_load(path.c_str(), &width, &height, &componentAmount, 3);
+    unsigned char* image = stbi_load(path.c_str(), &width, &height, &componentAmount, 0);
     const auto dataSize = getHeight() * getWidth() * getComponentAmount();
     data.resize(dataSize);
     memcpy(data.data(), image, dataSize);

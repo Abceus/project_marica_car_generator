@@ -2,6 +2,7 @@
 #include "imgui_internal.h"
 #include "render_system/scene_node.h"
 #include "resources/dds_info.h"
+#include "resources/image_info.h"
 #include "resources/wireframe_model.h"
 #include "utils/math/angle.h"
 #include "utils/math/quaternion.h"
@@ -18,6 +19,7 @@
 #include "render_system/camera/free_camera_controller.h"
 #include "render_system/wireframe.h"
 #include "resources/model.h"
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -107,32 +109,24 @@ MainWindow::MainWindow()
         }
     });
 
-    //     configurationWidget->Bind(SKIN_CHANGED, [this](wxCommandEvent& event)
-    //     {
-    //         if (auto IndexedTextureDataData =
-    //                 static_cast<IndexedTextureData*>(event.GetClientObject()))
-    //                 {
-    //             if (wxFileExists(IndexedTextureDataData->path.string())) {
-    //                 auto newTexture =
-    //                 openglView->getRenderer().makeDrawable<Texture>(); auto
-    //                 extension =
-    //                 IndexedTextureDataData->path.extension().string();
-    //                 std::transform(extension.begin(), extension.end(),
-    //                 extension.begin(),
-    //                     [](unsigned char c){ return std::tolower(c); });
-    //                 auto currentContext =
-    //                 openglView->getRenderer().pushContextScoped();
-    //                 if(extension == ".dds") {
-    //                     newTexture->init(DDSInfo::loadDDS(IndexedTextureDataData->path.string()));
-    //                 }
-    //                 else {
-    //                     newTexture->init(wxImage(IndexedTextureDataData->path.string()));
-    //                 }
-    //                 mainMesh->setTexture(newTexture,
-    //                 IndexedTextureDataData->index);
-    //             }
-    //         }
-    //     });
+    configurationWidget->setSkinChangedCallback([this](size_t index, const std::filesystem::path& skinPath) {
+        if (std::filesystem::exists(skinPath)) {
+            auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
+            auto extension = skinPath.extension().string();
+            std::transform(extension.begin(),
+                           extension.end(),
+                           extension.begin(),
+                           [](unsigned char c) { return std::tolower(c); });
+            auto currentContext = openglView->getRenderer().pushContextScoped();
+            if (extension == ".dds") {
+                newTexture->init(DDSInfo::loadDDS(skinPath.string()));
+            } else {
+                newTexture->init(ImageInfo(skinPath.string()));
+            }
+            mainMesh->setTexture(newTexture, index);
+            configurationWidget->setTexture(index, skinPath);
+        }
+    });
 
     //     configurationWidget->Bind(
     //         COLLISION_CHANGED, [this](const wxCommandEvent& event) {

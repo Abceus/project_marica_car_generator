@@ -16,22 +16,12 @@
 #include <optional>
 #include <set>
 
-// wxDECLARE_EVENT(OPENGL_INITED, wxCommandEvent);
 class OpenglView {
 public:
     using OpenglInitedCallbackType = std::function<void()>;
 
 public:
-    OpenglView();
-
     void draw();
-
-    // void OnPaint(wxPaintEvent& event);
-
-    // void onKeyDown(wxKeyEvent& event);
-    // void onKeyUp(wxKeyEvent& event);
-
-    // void onTimer(wxTimerEvent& event);
 
     std::weak_ptr<Scene> getScene() const;
     Renderer& getRenderer();
@@ -59,20 +49,7 @@ private:
 
     bool inited = false;
 
-    // wxGLContext* m_glRC = nullptr;
-
-    // std::shared_ptr<ShaderProgram> shaderProgram;
-    // std::shared_ptr<Mesh> mesh;
-    std::shared_ptr<Scene> scene;
-
-    // wxTimer redrawTimer;
-    // wxTimer updateTimer;
-
-    // glm::mat4 projectionMatrix;
-
-    // std::shared_ptr<SceneNode> newNode;
-
-    // std::optional<glm::vec2> prevMousePosition;
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
     std::set<std::shared_ptr<IUpdatable>> updatables;
 

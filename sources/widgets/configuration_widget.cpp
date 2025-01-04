@@ -5,6 +5,7 @@
 #include "widgets/pgproperties/texture_array_pgproperty.h"
 #include "widgets/pgproperties/vec3f_pgproperty.h"
 #include <ImGuiFileDialog.h>
+#include <format>
 #include <limits>
 
 // wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
@@ -21,27 +22,6 @@ wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 #endif
 
 ConfigurationWidget::ConfigurationWidget() {
-    // auto sizer = new wxBoxSizer(wxVERTICAL);
-    // // sizer->SetSizeHints(this);
-    // SetSizer(sizer);
-
-    // auto grid = new wxPropertyGrid(this);
-    // sizer->Add(grid, 1, wxEXPAND, 0);
-
-    // auto meshPicker = grid->Append(new wxFileProperty("Mesh"));
-    // auto wildcard = wxVariant(wxString("PSK (*.psk)|*.psk"));
-    // meshPicker->DoSetAttribute("Wildcard", wildcard);
-    // auto showFullPath = wxVariant(1);
-    // meshPicker->DoSetAttribute("ShowFullPath", showFullPath);
-    // grid->Bind(
-    //     wxEVT_PG_CHANGED, [this, meshPicker](wxPropertyGridEvent& event) {
-    //         if (event.GetProperty() == meshPicker) {
-    //             wxCommandEvent meshEvent(MESH_CHANGED);
-    //             meshEvent.SetString(event.GetPropertyValue().GetString());
-    //             wxPostEvent(this, meshEvent);
-    //         }
-    //     });
-
     // textureArrayProperty = grid->Append(new TextureArrayPGProperty("Skins"));
     // grid->Bind(wxEVT_PG_CHANGED, [this](wxPropertyGridEvent& event) {
     //     if (event.GetMainParent() != textureArrayProperty) {
@@ -202,22 +182,54 @@ void ConfigurationWidget::draw() {
 
         ImGuiFileDialog::Instance()->Close();
     }
+
+    ImGui::BeginTable("Skins", 2);
+
+    for (auto i = 0; i < skinsArray.size(); ++i) {
+        ImGui::PushID(i);
+
+        ImGui::Text("%d", i);
+        ImGui::TableNextColumn();
+
+        const auto fileDialogId = std::format("Skin %d", i);
+        if (ImGui::Button(skinsArray[i].string().c_str())) {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+            ImGuiFileDialog::Instance()->OpenDialog(fileDialogId.c_str(),
+                                                    "Choose Skin",
+                                                    ".dds,.tga",
+                                                    config);
+        }
+
+        if (ImGuiFileDialog::Instance()->Display(fileDialogId.c_str())) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                if (skinChangedCallback) {
+                    skinChangedCallback(i, filePathName);
+                }
+            }
+
+            ImGuiFileDialog::Instance()->Close();
+        }
+
+        ImGui::TableNextRow();
+
+        ImGui::PopID();
+    }
+
+    ImGui::EndTable();
 }
 
 void ConfigurationWidget::resizeTextureArray(size_t newSize) {
-    // if (textureArrayProperty) {
-    //     wxArrayString value;
-    //     value.resize(newSize);
-    //     textureArrayProperty->SetValue(value);
-    // }
+    skinsArray.resize(newSize);
 }
 
-void ConfigurationWidget::setTexture(size_t index, const std::string& newPath) {
-    // if (textureArrayProperty) {
-    //     wxArrayString value = textureArrayProperty->GetValue();
-    //     value[index] = newPath;
-    //     textureArrayProperty->SetValue(value);
-    // }
+void ConfigurationWidget::setTexture(size_t index, const std::filesystem::path& newPath) {
+    if (index >= skinsArray.size()) {
+        return;
+    }
+
+    skinsArray[index] = newPath;
 }
 
 void ConfigurationWidget::setMeshChangedCallback(

@@ -15,12 +15,14 @@
 wxDECLARE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 #endif
 
+#include <filesystem>
 #include <functional>
 #include <string>
 
 class ConfigurationWidget {
 public:
     using MeshChangedCallbackType = std::function<void(const std::string&)>;
+    using SkinChangedCallbackType = std::function<void(size_t, const std::filesystem::path&)>;
 
 public:
     ConfigurationWidget();
@@ -28,10 +30,16 @@ public:
     void draw();
 
     void resizeTextureArray(size_t newSize);
-    void setTexture(size_t index, const std::string& newPath);
+    void setTexture(size_t index, const std::filesystem::path& newPath);
 
     void setMeshChangedCallback(const MeshChangedCallbackType& callback);
+    void setSkinChangedCallback(const SkinChangedCallbackType& callback) {
+        skinChangedCallback = callback;
+    }
 
 private:
     MeshChangedCallbackType meshChangedCallback;
+    SkinChangedCallbackType skinChangedCallback;
+
+    std::vector<std::filesystem::path> skinsArray;
 };

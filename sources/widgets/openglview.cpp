@@ -13,27 +13,6 @@
 #include <optional>
 #include <sstream>
 
-// wxDEFINE_EVENT(OPENGL_INITED, wxCommandEvent);
-
-OpenglView::OpenglView() {
-    // m_glRC = new wxGLContext(this);
-
-    // Bind(wxEVT_SIZE, &OpenglView::OnSize, this);
-
-    // Bind(wxEVT_PAINT, &OpenglView::OnPaint, this);
-
-    // Bind(wxEVT_CHAR_HOOK, &OpenglView::onKeyDown, this);
-    // Bind(wxEVT_KEY_UP, &OpenglView::onKeyUp, this);
-
-    // Bind(wxEVT_TIMER, &OpenglView::onTimer, this);
-
-    // SetWindowStyleFlag(GetWindowStyleFlag() | wxWANTS_CHARS);
-
-    scene = std::make_shared<Scene>();
-    // m_renderer.setContext(m_glRC);
-    // m_renderer.setSurface(this);
-}
-
 void OpenglView::draw() {
     if (!inited) {
         glewInit();
@@ -63,42 +42,6 @@ void OpenglView::draw() {
         cameraController->update(scene->getActiveCamera());
     }
 }
-
-// void OpenglView::OnSize(wxSizeEvent& WXUNUSED(event)) {
-//     // Reset the OpenGL view aspect.
-//     // This is OK only because there is only one canvas that uses the
-//     context.
-//     // See the cube sample for that case that multiple canvases are made
-//     current
-//     // with one context.
-//     ResetProjectionMode();
-// }
-
-// void OpenglView::OnPaint(wxPaintEvent& WXUNUSED(event)) {
-// // must always be here
-// wxPaintDC dc(this);
-
-// SetCurrent(*m_glRC);
-
-// // Initialize OpenGL
-// if (!inited) {
-//     glewInit();
-//     InitGL();
-//     ResetProjectionMode();
-//     inited = true;
-// }
-
-// // Clear
-// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-// m_renderer.draw(scene);
-
-// // Flush
-// glFlush();
-
-// // Swap
-// SwapBuffers();
-// }
 
 void OpenglView::ResetProjectionMode() {
     const auto availRegion = ImGui::GetContentRegionAvail();
@@ -179,15 +122,6 @@ void OpenglView::InitGL() {
         openglInitedCallback();
     }
 }
-
-// void OpenglView::onKeyDown(wxKeyEvent& event) {
-//     wxLogDebug("Key down");
-//     event.Skip();
-// }
-
-// void OpenglView::onKeyUp(wxKeyEvent& event) {
-//     wxLogDebug("Key up");
-// }
 
 // void OpenglView::onTimer(wxTimerEvent& event) {
 // if (event.GetTimer().GetId() == updateTimer.GetId()) {
