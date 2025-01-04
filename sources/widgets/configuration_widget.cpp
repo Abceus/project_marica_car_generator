@@ -8,7 +8,6 @@
 #include <format>
 #include <limits>
 
-// wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(COLLISION_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(TIRE_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(WHEEL_STEER_ACROSS_CHANGED, wxCommandEvent);
@@ -16,57 +15,11 @@
 // wxDEFINE_EVENT(WHEEL_ENG_ACROSS_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
-// wxDEFINE_EVENT(SKIN_CHANGED, wxCommandEvent);
 #ifdef WITH_PHYSICS
 wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 #endif
 
 ConfigurationWidget::ConfigurationWidget() {
-    // textureArrayProperty = grid->Append(new TextureArrayPGProperty("Skins"));
-    // grid->Bind(wxEVT_PG_CHANGED, [this](wxPropertyGridEvent& event) {
-    //     if (event.GetMainParent() != textureArrayProperty) {
-    //         event.Skip();
-    //         return;
-    //     }
-    //     auto data = new IndexedTextureData();
-    //     data->index =
-    //     event.GetProperty()->GetAttribute("index").GetInteger(); data->path =
-    //     event.GetValue().GetString().ToStdString(); wxCommandEvent
-    //     newEvent(SKIN_CHANGED); newEvent.SetClientObject(data);
-    //     wxPostEvent(this, newEvent);
-    // });
-
-    // // textureArrayWidget = new TextureArrayWidget(this);
-    // // sizer->Add(textureArrayWidget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // // textureArrayWidget->Bind(TEXTURE_CHANGED,
-    // //                  [this](const wxCommandEvent& event) {
-    // //                      wxPostEvent(this, event);
-    // //                  });
-
-    // auto vec3Property = grid->Append(new Vec3fPGProperty("Coords"));
-    // grid->Bind(wxEVT_PG_CHANGED, [vec3Property](wxPropertyGridEvent& event) {
-    //     if (event.GetMainParent() != vec3Property) {
-    //         event.Skip();
-    //         return;
-    //     }
-    // });
-
-    // auto collisionPicker = new wxFilePickerCtrl(
-    //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
-    //     // (*.ase)|*.ase");
-    //     this, wxID_ANY, wxEmptyString, "Select collision", "PSK
-    //     (*.psk)|*.psk");
-    // collisionPicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
-    //                                     wxFLP_FILE_MUST_EXIST);
-    // sizer->Add(collisionPicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // collisionPicker->Bind(wxEVT_FILEPICKER_CHANGED,
-    //                       [this](const wxFileDirPickerEvent& event) {
-    //                           wxCommandEvent
-    //                           collisionEvent(COLLISION_CHANGED);
-    //                           collisionEvent.SetString(event.GetPath());
-    //                           wxPostEvent(this, collisionEvent);
-    //                       });
-
     // auto tirePicker = new wxFilePickerCtrl(
     //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
     //     // (*.ase)|*.ase");
@@ -164,60 +117,89 @@ ConfigurationWidget::ConfigurationWidget() {
 }
 
 void ConfigurationWidget::draw() {
-    if (ImGui::Button("Open Mesh")) {
-        IGFD::FileDialogConfig config;
-        config.path = ".";
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey",
-                                                "Choose Mesh", ".psk", config);
-    }
-
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
-        if (ImGuiFileDialog::Instance()->IsOk()) {
-            std::string filePathName =
-                ImGuiFileDialog::Instance()->GetFilePathName();
-            if (meshChangedCallback) {
-                meshChangedCallback(filePathName);
-            }
-        }
-
-        ImGuiFileDialog::Instance()->Close();
-    }
-
-    ImGui::BeginTable("Skins", 2);
-
-    for (auto i = 0; i < skinsArray.size(); ++i) {
-        ImGui::PushID(i);
-
-        ImGui::Text("%d", i);
-        ImGui::TableNextColumn();
-
-        const auto fileDialogId = std::format("Skin %d", i);
-        if (ImGui::Button(skinsArray[i].string().c_str())) {
+    // Mesh
+    {
+        if (ImGui::Button("Open Mesh")) {
             IGFD::FileDialogConfig config;
             config.path = ".";
-            ImGuiFileDialog::Instance()->OpenDialog(fileDialogId.c_str(),
-                                                    "Choose Skin",
-                                                    ".dds,.tga",
+            ImGuiFileDialog::Instance()->OpenDialog("MeshFileDlgKey",
+                                                    "Choose Mesh",
+                                                    ".psk",
                                                     config);
         }
 
-        if (ImGuiFileDialog::Instance()->Display(fileDialogId.c_str())) {
+        if (ImGuiFileDialog::Instance()->Display("MeshFileDlgKey")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-                if (skinChangedCallback) {
-                    skinChangedCallback(i, filePathName);
+                if (meshChangedCallback) {
+                    meshChangedCallback(filePathName);
                 }
             }
 
             ImGuiFileDialog::Instance()->Close();
         }
-
-        ImGui::TableNextRow();
-
-        ImGui::PopID();
     }
 
-    ImGui::EndTable();
+    // Collision
+    {
+        if (ImGui::Button("Open Collision")) {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+            ImGuiFileDialog::Instance()->OpenDialog("CollisionFileDlgKey",
+                                                    "Choose Mesh",
+                                                    ".psk",
+                                                    config);
+        }
+
+        if (ImGuiFileDialog::Instance()->Display("CollisionFileDlgKey")) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                if (collisionChangedCallback) {
+                    collisionChangedCallback(filePathName);
+                }
+            }
+
+            ImGuiFileDialog::Instance()->Close();
+        }
+    }
+
+    // Skins
+    {
+        ImGui::BeginTable("Skins", 2);
+
+        for (auto i = 0; i < skinsArray.size(); ++i) {
+            ImGui::PushID(i);
+
+            ImGui::TableNextColumn();
+            ImGui::Text("%d", i);
+
+            ImGui::TableNextColumn();
+            const auto fileDialogId = std::format("SkinFileDlgKey %d", i);
+            if (ImGui::Button(skinsArray[i].string().c_str())) {
+                IGFD::FileDialogConfig config;
+                config.path = ".";
+                ImGuiFileDialog::Instance()->OpenDialog(fileDialogId.c_str(),
+                                                        "Choose Skin",
+                                                        ".dds,.tga",
+                                                        config);
+            }
+
+            if (ImGuiFileDialog::Instance()->Display(fileDialogId.c_str())) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                    std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                    if (skinChangedCallback) {
+                        skinChangedCallback(i, filePathName);
+                    }
+                }
+
+                ImGuiFileDialog::Instance()->Close();
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::EndTable();
+    }
 }
 
 void ConfigurationWidget::resizeTextureArray(size_t newSize) {

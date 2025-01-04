@@ -128,18 +128,18 @@ MainWindow::MainWindow()
         }
     });
 
-    //     configurationWidget->Bind(
-    //         COLLISION_CHANGED, [this](const wxCommandEvent& event) {
-    //             // auto models = Model::readASE(event.GetString());
-    //             // if (!models.empty()) {
-    //             //     mainCollision = WireframeModel::fromModel(models[0]);
-    //             // } else {
-    //             //     mainCollision = WireframeModel();
-    //             // }
-    //             auto model = Model::readPSK(event.GetString());
-    //             mainCollision = WireframeModel::fromModel(model);
-    //             mainCollisionMesh->init(mainCollision);
-    //         });
+    configurationWidget->setCollisionChangedCallback([this](const std::string& filePath) {
+        // auto models = Model::readASE(event.GetString());
+        // if (!models.empty()) {
+        //     mainCollision = WireframeModel::fromModel(models[0]);
+        // } else {
+        //     mainCollision = WireframeModel();
+        // }
+
+        auto model = Model::readPSK(filePath);
+        mainCollision = WireframeModel::fromModel(model);
+        mainCollisionMesh->init(mainCollision);
+    });
 
     //     configurationWidget->Bind(
     //         TIRE_CHANGED, [this](const wxCommandEvent& event) {

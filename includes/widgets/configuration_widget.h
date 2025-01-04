@@ -33,12 +33,16 @@ public:
     void setTexture(size_t index, const std::filesystem::path& newPath);
 
     void setMeshChangedCallback(const MeshChangedCallbackType& callback);
+    void setCollisionChangedCallback(const MeshChangedCallbackType& callback) {
+        collisionChangedCallback = callback;
+    }
     void setSkinChangedCallback(const SkinChangedCallbackType& callback) {
         skinChangedCallback = callback;
     }
 
 private:
     MeshChangedCallbackType meshChangedCallback;
+    MeshChangedCallbackType collisionChangedCallback;
     SkinChangedCallbackType skinChangedCallback;
 
     std::vector<std::filesystem::path> skinsArray;
