@@ -14,6 +14,15 @@
 #include <sstream>
 
 void OpenglView::draw() {
+    auto currentTime = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdate);
+    if (elapsed.count() >= 1000.0f / 60.0f) {
+        for (auto& updatable : updatables) {
+            updatable->update(elapsed);
+        }
+        lastUpdate = currentTime;
+    }
+
     if (!inited) {
         glewInit();
         InitGL();

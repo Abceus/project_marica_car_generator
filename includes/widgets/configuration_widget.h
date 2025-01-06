@@ -11,9 +11,9 @@
 // wxDECLARE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
 // wxDECLARE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
 // wxDECLARE_EVENT(SKIN_CHANGED, wxCommandEvent);
-#ifdef WITH_PHYSICS
-wxDECLARE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
-#endif
+// #ifdef WITH_PHYSICS
+// wxDECLARE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
+// #endif
 
 #include <filesystem>
 #include <functional>
@@ -23,6 +23,7 @@ class ConfigurationWidget {
 public:
     using MeshChangedCallbackType = std::function<void(const std::string&)>;
     using SkinChangedCallbackType = std::function<void(size_t, const std::filesystem::path&)>;
+    using ButtonClickCallbackType = std::function<void()>;
 
 public:
     ConfigurationWidget();
@@ -39,11 +40,15 @@ public:
     void setSkinChangedCallback(const SkinChangedCallbackType& callback) {
         skinChangedCallback = callback;
     }
+    void setEmulateButtonPressedCallback(const ButtonClickCallbackType& callback) {
+        emulateButtonPressed = callback;
+    }
 
 private:
     MeshChangedCallbackType meshChangedCallback;
     MeshChangedCallbackType collisionChangedCallback;
     SkinChangedCallbackType skinChangedCallback;
+    ButtonClickCallbackType emulateButtonPressed;
 
     std::vector<std::filesystem::path> skinsArray;
 };

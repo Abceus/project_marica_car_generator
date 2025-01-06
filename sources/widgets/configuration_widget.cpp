@@ -15,9 +15,9 @@
 // wxDEFINE_EVENT(WHEEL_ENG_ACROSS_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
 // wxDEFINE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
-#ifdef WITH_PHYSICS
-wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
-#endif
+// #ifdef WITH_PHYSICS
+// wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
+// #endif
 
 ConfigurationWidget::ConfigurationWidget() {
     // auto tirePicker = new wxFilePickerCtrl(
@@ -103,17 +103,6 @@ ConfigurationWidget::ConfigurationWidget() {
     //     newEvent.SetClientObject(data);
     //     wxPostEvent(this, newEvent);
     // });
-
-#ifdef WITH_PHYSICS
-    auto emulateButton = new wxButton(this, wxID_ANY);
-    emulateButton->SetLabel("Emulate");
-    sizer->Add(emulateButton, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-
-    emulateButton->Bind(wxEVT_BUTTON, [this](const auto& event) {
-        wxCommandEvent collisionEvent(EMULATE_BUTTON_CLICKED);
-        wxPostEvent(this, collisionEvent);
-    });
-#endif
 }
 
 void ConfigurationWidget::draw() {
@@ -199,6 +188,17 @@ void ConfigurationWidget::draw() {
         }
 
         ImGui::EndTable();
+    }
+
+    // Emulate button
+    {
+#ifdef WITH_PHYSICS
+        if (ImGui::Button("Emulate")) {
+            if (emulateButtonPressed) {
+                emulateButtonPressed();
+            }
+        }
+#endif
     }
 }
 

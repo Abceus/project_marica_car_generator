@@ -205,11 +205,10 @@ MainWindow::MainWindow()
     //         }
     //     });
 
-    // #ifdef WITH_PHYSICS
-    //     configurationWidget->Bind(
-    //         EMULATE_BUTTON_CLICKED,
-    //         [this](const wxCommandEvent& event) { openEmulationWindow(); });
-    // #endif
+#ifdef WITH_PHYSICS
+    configurationWidget->setEmulateButtonPressedCallback(
+        [this]() { simWinOpened = !simWinOpened; });
+#endif
 }
 
 // void MainWindow::onOpenglEditorMouseFocusEvent(wxMouseEvent& event) {
@@ -267,6 +266,18 @@ void MainWindow::onDraw() {
     ImGui::Begin("Configuration", &open, 0);
     configurationWidget->draw();
     ImGui::End();
+
+#ifdef WITH_PHYSICS
+    ImGui::Begin("Simulation", &simWinOpened);
+    drawEmulationWindow();
+    ImGui::End();
+
+    if (!simWinOpened && simulateWidget) {
+        simulationEditorCameraController.reset();
+        mainPhysic.reset();
+        simulateWidget = nullptr;
+    }
+#endif
 
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Options")) {
@@ -341,18 +352,20 @@ void MainWindow::setWheelVert(float value) {
     }
 }
 
+void MainWindow::drawEmulationWindow() {
 #ifdef WITH_PHYSICS
-void MainWindow::openEmulationWindow() {
-    if (!simulateWindow) {
-        simulateWindow = new wxFrame(this, wxID_ANY, "Simulation");
-        auto simulateWidget = new OpenglView(simulateWindow);
+    if (!simWinOpened) {
+        return;
+    }
+
+    if (!simulateWidget) {
+        simulateWidget = std::make_unique<OpenglView>();
         auto scene = simulateWidget->getScene();
         auto physicWorld = std::make_shared<PhysicWorld>();
         simulateWidget->addUpdatable(physicWorld);
 
-        simulationEditorCameraController = std::make_unique<FreeCameraController>(simulateWidget);
-        simulateWidget->Bind(wxEVT_ENTER_WINDOW, &MainWindow::onOpenglEditorMouseFocusEvent, this);
-        simulateWidget->Bind(wxEVT_LEAVE_WINDOW, &MainWindow::onOpenglEditorMouseFocusEvent, this);
+        simulationEditorCameraController = std::make_unique<FreeCameraController>();
+        simulateWidget->setCameraController(std::move(simulationEditorCameraController));
 
         auto simMainNode = std::make_shared<SceneNode>();
         if (auto lockedScene = scene.lock()) {
@@ -377,45 +390,45 @@ void MainWindow::openEmulationWindow() {
         simMainMeshNode->addDrawable(simMainMesh);
         simMainNode->addChild(simMainMeshNode);
 
-        auto wheelMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
-        wheelMesh->init(tireCollision);
+        // auto wheelMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        // wheelMesh->init(tireCollision);
 
-        auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
+        // auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
 
-        std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {wheelSteerMeshNodes, wheelEngMeshNodes};
+        // std::vector<std::array<std::shared_ptr<SceneNode>, 2>> wheels = {wheelSteerMeshNodes, wheelEngMeshNodes};
 
-        for (const auto& nodes : wheels) {
-            for (const auto& wheel : nodes) {
-                auto wheelNode = std::make_shared<SceneNode>();
-                wheelNode->setLocation(wheel->getLocation());
-                wheelNode->addDrawable(wheelMesh);
-                if (auto lockedScene = scene.lock()) {
-                    lockedScene->addNode(wheelNode);
-                }
+        // for (const auto& nodes : wheels) {
+        //     for (const auto& wheel : nodes) {
+        //         auto wheelNode = std::make_shared<SceneNode>();
+        //         wheelNode->setLocation(wheel->getLocation());
+        //         wheelNode->addDrawable(wheelMesh);
+        //         if (auto lockedScene = scene.lock()) {
+        //             lockedScene->addNode(wheelNode);
+        //         }
 
-                auto tirePhysBody = std::make_shared<PhysObject>(wheelNode, tireShape);
-                tirePhysBody->setMass(3.0f);
-                tirePhysBody->setFriction(1.0f);
-                tirePhysBody->setPhysic(physicWorld->addBody(tirePhysBody->getConstructionInfo()));
-                tirePhysBody->getPhysics()->setIgnoreCollisionCheck(mainPhysic->getPhysics().get(), true);
-                simulateWidget->addUpdatable(tirePhysBody);
+        //         auto tirePhysBody = std::make_shared<PhysObject>(wheelNode, tireShape);
+        //         tirePhysBody->setMass(3.0f);
+        //         tirePhysBody->setFriction(1.0f);
+        //         tirePhysBody->setPhysic(physicWorld->addBody(tirePhysBody->getConstructionInfo()));
+        //         tirePhysBody->getPhysics()->setIgnoreCollisionCheck(mainPhysic->getPhysics().get(), true);
+        //         simulateWidget->addUpdatable(tirePhysBody);
 
-                auto bodyJointTransform = btTransform::getIdentity();
-                bodyJointTransform.setOrigin(wheelNode->getLocation().toBtVec3());
+        //         auto bodyJointTransform = btTransform::getIdentity();
+        //         bodyJointTransform.setOrigin(wheelNode->getLocation().toBtVec3());
 
-                auto constraint = physicWorld->addConstraint<btSliderConstraint>(
-                    *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(), bodyJointTransform,
-                    btTransform::getIdentity(), true);
+        //         auto constraint = physicWorld->addConstraint<btSliderConstraint>(
+        //             *mainPhysic->getPhysics(), *tirePhysBody->getPhysics(), bodyJointTransform,
+        //             btTransform::getIdentity(), true);
 
-                constraint->setUpperAngLimit(Angle::fromDegrees(180.0f).getRadians());
-                constraint->setLowerAngLimit(Angle::fromDegrees(-180.0f).getRadians());
-                constraint->setLowerLinLimit(0.0f);
-                constraint->setUpperLinLimit(0.0f);
-                constraint->setMaxAngMotorForce(15000.0f);
-                constraint->setPoweredAngMotor(true);
-                contsts.emplace_back(constraint);
-            }
-        }
+        //         constraint->setUpperAngLimit(Angle::fromDegrees(180.0f).getRadians());
+        //         constraint->setLowerAngLimit(Angle::fromDegrees(-180.0f).getRadians());
+        //         constraint->setLowerLinLimit(0.0f);
+        //         constraint->setUpperLinLimit(0.0f);
+        //         constraint->setMaxAngMotorForce(15000.0f);
+        //         constraint->setPoweredAngMotor(true);
+        //         contsts.emplace_back(constraint);
+        //     }
+        // }
 
         std::shared_ptr<SceneNode> camera;
         if (auto lockedScene = scene.lock()) {
@@ -425,74 +438,74 @@ void MainWindow::openEmulationWindow() {
         camera->setLocation({-100.0f, 0.0f, 100.0f});
         camera->setRotation({0.0f, 0.0f, 0.0f});
 
-        simulateWindow->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& event) {
-            simulateWindow = nullptr;
-            simulationEditorCameraController.reset();
-            mainPhysic.reset();
-            event.Skip();
-        });
-        simulateWindow->SetWindowStyleFlag(simulateWindow->GetWindowStyleFlag() | wxWANTS_CHARS);
-        simulateWindow->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& event) {
-            mainPhysic->getPhysics()->activate(true);
-            auto force = 100.0f;
-            Vec3f forceVec;
-            if (event.GetKeyCode() == WXK_UP) {
-                // forceVec.setX(force);
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setTargetAngMotorVelocity(150.0f);
-                    }
-                }
-            } else if (event.GetKeyCode() == WXK_DOWN) {
-                // forceVec.setX(-force);
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setTargetAngMotorVelocity(-150.0f);
-                    }
-                }
-            } else if (event.GetKeyCode() == WXK_LEFT) {
-                forceVec.setY(force);
-            } else if (event.GetKeyCode() == WXK_RIGHT) {
-                forceVec.setY(-force);
-            } else if (event.GetKeyCode() == WXK_SPACE) {
-                // forceVec.setZ(force);
+        // simulateWindow->Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& event) {
+        //     simulateWindow = nullptr;
+        //     simulationEditorCameraController.reset();
+        //     mainPhysic.reset();
+        //     event.Skip();
+        // });
+        // simulateWindow->SetWindowStyleFlag(simulateWindow->GetWindowStyleFlag() | wxWANTS_CHARS);
+        // simulateWindow->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& event) {
+        //     mainPhysic->getPhysics()->activate(true);
+        //     auto force = 100.0f;
+        //     Vec3f forceVec;
+        //     if (event.GetKeyCode() == WXK_UP) {
+        //         // forceVec.setX(force);
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setTargetAngMotorVelocity(150.0f);
+        //             }
+        //         }
+        //     } else if (event.GetKeyCode() == WXK_DOWN) {
+        //         // forceVec.setX(-force);
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setTargetAngMotorVelocity(-150.0f);
+        //             }
+        //         }
+        //     } else if (event.GetKeyCode() == WXK_LEFT) {
+        //         forceVec.setY(force);
+        //     } else if (event.GetKeyCode() == WXK_RIGHT) {
+        //         forceVec.setY(-force);
+        //     } else if (event.GetKeyCode() == WXK_SPACE) {
+        //         // forceVec.setZ(force);
 
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setPoweredAngMotor(false);
-                    }
-                }
-            } else if (event.GetKeyCode() == WXK_CONTROL) {
-                forceVec.setZ(-force);
-            }
-            mainPhysic->getPhysics()->applyCentralImpulse(forceVec.toBtVec3());
-        });
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setPoweredAngMotor(false);
+        //             }
+        //         }
+        //     } else if (event.GetKeyCode() == WXK_CONTROL) {
+        //         forceVec.setZ(-force);
+        //     }
+        //     mainPhysic->getPhysics()->applyCentralImpulse(forceVec.toBtVec3());
+        // });
 
-        simulateWidget->Bind(wxEVT_KEY_UP, [this](wxKeyEvent& event) {
-            if (event.GetKeyCode() == WXK_UP) {
-                // forceVec.setX(force);
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setTargetAngMotorVelocity(0.0f);
-                    }
-                }
-            } else if (event.GetKeyCode() == WXK_DOWN) {
-                // forceVec.setX(-force);
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setTargetAngMotorVelocity(0.0f);
-                    }
-                }
-            } else if (event.GetKeyCode() == WXK_SPACE) {
-                // forceVec.setZ(force);
+        // simulateWidget->Bind(wxEVT_KEY_UP, [this](wxKeyEvent& event) {
+        //     if (event.GetKeyCode() == WXK_UP) {
+        //         // forceVec.setX(force);
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setTargetAngMotorVelocity(0.0f);
+        //             }
+        //         }
+        //     } else if (event.GetKeyCode() == WXK_DOWN) {
+        //         // forceVec.setX(-force);
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setTargetAngMotorVelocity(0.0f);
+        //             }
+        //         }
+        //     } else if (event.GetKeyCode() == WXK_SPACE) {
+        //         // forceVec.setZ(force);
 
-                for (auto& c : contsts) {
-                    if (auto constraint = c.lock()) {
-                        constraint->setPoweredAngMotor(true);
-                    }
-                }
-            }
-        });
+        //         for (auto& c : contsts) {
+        //             if (auto constraint = c.lock()) {
+        //                 constraint->setPoweredAngMotor(true);
+        //             }
+        //         }
+        //     }
+        // });
 
         auto box = std::make_shared<Box>(Vec3f{1500.0f, 1500.0f, 10.0f});
         auto groundModel = box->getModel();
@@ -509,8 +522,7 @@ void MainWindow::openEmulationWindow() {
             lockedScene->addNode(groundMeshNode);
         }
         simulateWidget->addUpdatable(ground);
-
-        simulateWindow->Show();
     }
-}
+    simulateWidget->draw();
 #endif
+}

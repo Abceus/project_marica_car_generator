@@ -32,9 +32,7 @@ public:
     void setWheelVert(float value);
 
 private:
-#ifdef WITH_PHYSICS
-    void openEmulationWindow();
-#endif
+    void drawEmulationWindow();
 
     Model mainModel;
     WireframeModel mainCollision;
@@ -42,7 +40,7 @@ private:
 
     std::unique_ptr<OpenglView> openglView;
     std::unique_ptr<ConfigurationWidget> configurationWidget;
-    // wxWindow* simulateWindow = nullptr;
+    std::unique_ptr<OpenglView> simulateWidget;
 
     std::shared_ptr<SceneNode> mainNode;
     std::shared_ptr<Mesh> mainMesh;
@@ -67,5 +65,7 @@ private:
     std::vector<std::weak_ptr<btSliderConstraint>> contsts;
 
     std::shared_ptr<PhysObject> mainPhysic;
+
+    bool simWinOpened = false;
 #endif
 };
