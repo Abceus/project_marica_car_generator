@@ -6,7 +6,8 @@
 #include <corecrt_wstdio.h>
 #include <stdio.h>
 
-OpenglGlfwWindow::OpenglGlfwWindow(const std::string& title) : title(title) {}
+OpenglGlfwWindow::OpenglGlfwWindow(const std::string& title)
+    : title(title) {}
 
 OpenglGlfwWindow::~OpenglGlfwWindow() {
     deinit();

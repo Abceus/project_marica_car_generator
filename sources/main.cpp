@@ -19,7 +19,7 @@
 // legacy_stdio_definitions.lib, which we do using this pragma. Your own project
 // should not be affected, as you are likely to link with a newer binary of GLFW
 // that is adequate for your version of Visual Studio.
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) &&                                 \
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && \
     !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
@@ -118,11 +118,6 @@ int main(int, char**) {
         glfwPollEvents();
 
         mainWindow->draw();
-
-        // // 1. Show the big demo window (Most of the sample code is in
-        // ImGui::ShowDemoWindow()! You can browse its code to learn more about
-        // Dear ImGui!). if (show_demo_window)
-        //     ImGui::ShowDemoWindow(&show_demo_window);
 
         // // 2. Show a simple window that we create ourselves. We use a
         // Begin/End pair to create a named window.

@@ -38,28 +38,15 @@
 MainWindow::MainWindow()
     : OpenglGlfwWindow("Main Window") {
     openglView = std::make_unique<OpenglView>();
-    configurationWidget = std::make_unique<ConfigurationWidget>();
-    //     leftSizer->Add(openglView, 1, wxEXPAND, 0);
-    //     leftWindow->SetSizer(leftSizer);
-
-    //     auto rightWindow = new wxWindow(splitter, wxID_ANY);
-
-    //     auto rightSizer = new wxBoxSizer(wxVERTICAL);
-    //     auto configurationWidget = new ConfigurationWidget(rightWindow);
-    //     rightSizer->Add(configurationWidget, 1, wxEXPAND, 0);
-    //     rightWindow->SetSizer(rightSizer);
-
-    //     splitter->SplitVertically(leftWindow, rightWindow);
-
-    //     SetSizer(mainSizer);
-
     openglView->setCameraController(std::make_unique<FreeCameraController>());
+
+    configurationWidget = std::make_unique<ConfigurationWidget>();
+
     //     openglView->Bind(wxEVT_ENTER_WINDOW,
     //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
     //     openglView->Bind(wxEVT_LEAVE_WINDOW,
     //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
 
-    //     openglView->Bind(OPENGL_INITED, [this](wxCommandEvent& event) {
     openglView->setOpenglInitedCallback([this]() {
         auto shaderProgram = openglView->getRenderer().getShaderProgram(
             ".\\resources\\shaders\\meshvertexshader.vert", ".\\resources\\shaders\\meshfragmentshader.frag");
@@ -141,69 +128,47 @@ MainWindow::MainWindow()
         mainCollisionMesh->init(mainCollision);
     });
 
-    //     configurationWidget->Bind(
-    //         TIRE_CHANGED, [this](const wxCommandEvent& event) {
-    //             // auto models = Model::readASE(event.GetString());
-    //             // if (!models.empty()) {
-    //             //     tireCollision = WireframeModel::fromModel(models[0]);
-    //             // } else {
-    //             //     tireCollision = WireframeModel();
-    //             // }
-    //             auto model = Model::readPSK(event.GetString());
-    //             tireCollision = WireframeModel::fromModel(model);
-    //             tireCollisionMesh->init(tireCollision);
-    //         });
+    configurationWidget->setTireCollisionChangedCallback([this](const std::filesystem::path& filePath) {
+        // auto models = Model::readASE(event.GetString());
+        // if (!models.empty()) {
+        //     tireCollision = WireframeModel::fromModel(models[0]);
+        // } else {
+        //     tireCollision = WireframeModel();
+        // }
 
-    //     configurationWidget->Bind(
-    //         WHEEL_STEER_ACROSS_CHANGED, [this](wxCommandEvent& event) {
-    //             if (auto floatData =
-    //                     static_cast<FloatData*>(event.GetClientObject())) {
-    //                 // setWheelSteerAcross(floatData->value);
-    //                 // mainMesh->rotateBone("LeftFrontTIRE",
-    //                 //
-    //                 Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(floatData->value))));
-    //                 mainMesh->transposeBone("LeftFrontTIRE",
-    //                 {floatData->value});
-    //             }
-    //         });
+        auto model = Model::readPSK(filePath);
+        tireCollision = WireframeModel::fromModel(model);
+        tireCollisionMesh->init(tireCollision);
+    });
 
-    //     configurationWidget->Bind(
-    //         WHEEL_STEER_ALONG_CHANGED, [this](wxCommandEvent& event) {
-    //             if (auto floatData =
-    //                     static_cast<FloatData*>(event.GetClientObject())) {
-    //                 // setWheelSteerAlong(floatData->value);
-    //                 mainMesh->rotateBone("LeftFrontTIRE",
-    //                                      Quaternion::fromEulerAngles(Rotor3(
-    //                                          Angle::fromDegrees(0.0),
-    //                                          Angle::fromDegrees(floatData->value),
-    //                                          Angle::fromDegrees(0.0))));
-    //             }
-    //         });
+    configurationWidget->setWheelSteerAcrossChangedCallback([this](float value) {
+        setWheelSteerAcross(value);
+        // mainMesh->rotateBone("LeftFrontTIRE",
+        // Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(value))));
 
-    //     configurationWidget->Bind(
-    //         WHEEL_ENG_ACROSS_CHANGED, [this](wxCommandEvent& event) {
-    //             if (auto floatData =
-    //                     static_cast<FloatData*>(event.GetClientObject())) {
-    //                 setWheelEngAcross(floatData->value);
-    //             }
-    //         });
+        // mainMesh->transposeBone("LeftFrontTIRE", {floatData->value});
+    });
 
-    //     configurationWidget->Bind(
-    //         WHEEL_ENG_ALONG_CHANGED, [this](wxCommandEvent& event) {
-    //             if (auto floatData =
-    //                     static_cast<FloatData*>(event.GetClientObject())) {
-    //                 setWheelEngAlong(floatData->value);
-    //             }
-    //         });
+    configurationWidget->setWheelSteerAlongChangedCallback([this](float value) {
+        setWheelSteerAlong(value);
+        // mainMesh->rotateBone("LeftFrontTIRE",
+        //                      Quaternion::fromEulerAngles(Rotor3(
+        //                          Angle::fromDegrees(0.0),
+        //                          Angle::fromDegrees(value),
+        //                          Angle::fromDegrees(0.0))));
+    });
 
-    //     configurationWidget->Bind(WHEEL_VERT_CHANGED, [this](
-    //                                                       wxCommandEvent&
-    //                                                       event) {
-    //         if (auto floatData =
-    //         static_cast<FloatData*>(event.GetClientObject())) {
-    //             setWheelVert(floatData->value);
-    //         }
-    //     });
+    configurationWidget->setWheelEngAcrossChangedCallback([this](float value) {
+        setWheelEngAcross(value);
+    });
+
+    configurationWidget->setWheelEngAlongChangedCallback([this](float value) {
+        setWheelEngAlong(value);
+    });
+
+    configurationWidget->setWheelVertChangedCallback([this](float value) {
+        setWheelVert(value);
+    });
 
 #ifdef WITH_PHYSICS
     configurationWidget->setEmulateButtonPressedCallback(
@@ -221,6 +186,9 @@ MainWindow::MainWindow()
 
 void MainWindow::onDraw() {
     bool open = true;
+
+    // ImGui::ShowDemoWindow(&open);
+    // return;
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
     ImGuiViewport* viewport = ImGui::GetMainViewport();
