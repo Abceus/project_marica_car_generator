@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -7,7 +8,7 @@
 
 class ASEReader {
 public:
-    void init(const std::string& path);
+    void init(const std::filesystem::path& path);
     std::weak_ptr<ASEReaderNode> getRootNode() const;
 
 private:

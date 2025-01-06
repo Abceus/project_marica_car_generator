@@ -27,6 +27,7 @@ set(SOURCES sources/main.cpp
         sources/widgets/mainwindow.cpp
         sources/widgets/openglview.cpp
         sources/widgets/configuration_widget.cpp
+        sources/widgets/file_picker_widget.cpp
 
         sources/widgets/pgproperties/texture_array_pgproperty.cpp
         sources/widgets/pgproperties/vec3f_pgproperty.cpp

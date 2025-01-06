@@ -15,13 +15,14 @@
 // wxDECLARE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
 // #endif
 
+#include "widgets/file_picker_widget.h"
 #include <filesystem>
 #include <functional>
 #include <string>
 
 class ConfigurationWidget {
 public:
-    using MeshChangedCallbackType = std::function<void(const std::string&)>;
+    using MeshChangedCallbackType = std::function<void(const std::filesystem::path&)>;
     using SkinChangedCallbackType = std::function<void(size_t, const std::filesystem::path&)>;
     using ButtonClickCallbackType = std::function<void()>;
 
@@ -50,5 +51,8 @@ private:
     SkinChangedCallbackType skinChangedCallback;
     ButtonClickCallbackType emulateButtonPressed;
 
-    std::vector<std::filesystem::path> skinsArray;
+    std::vector<FilePickerWidget> skinsWidgets;
+
+    FilePickerWidget meshFilePicker{"MeshFilePicker"};
+    FilePickerWidget collisionFilePicker{"CollisionFilePicker"};
 };

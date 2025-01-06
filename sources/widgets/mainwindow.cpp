@@ -100,7 +100,7 @@ MainWindow::MainWindow()
         }
     });
 
-    configurationWidget->setMeshChangedCallback([this](const std::string& filePath) {
+    configurationWidget->setMeshChangedCallback([this](const std::filesystem::path& filePath) {
         mainModel = Model::readPSK(filePath);
         mainMesh->init(mainModel);
         configurationWidget->resizeTextureArray(mainModel.materials.size());
@@ -128,7 +128,7 @@ MainWindow::MainWindow()
         }
     });
 
-    configurationWidget->setCollisionChangedCallback([this](const std::string& filePath) {
+    configurationWidget->setCollisionChangedCallback([this](const std::filesystem::path& filePath) {
         // auto models = Model::readASE(event.GetString());
         // if (!models.empty()) {
         //     mainCollision = WireframeModel::fromModel(models[0]);
