@@ -44,7 +44,6 @@ set(SOURCES sources/main.cpp
         sources/render_system/camera_manager.cpp
         sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        sources/render_system/garbage_collector.cpp
         sources/render_system/color.cpp
         sources/render_system/transform.cpp
 
