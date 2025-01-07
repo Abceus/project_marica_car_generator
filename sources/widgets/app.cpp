@@ -19,9 +19,6 @@
 #include "resources/dds_info.h"
 
 // bool Application::OnInit() {
-//     wxImage::AddHandler(new wxTGAHandler());
-//     wxImage::AddHandler(new wxBMPHandler());
-//     wxImage::AddHandler(new wxPCXHandler());
 
 //     ASEReaderNodeAnalyzer::Instance().addRule(
 //         "3DSMAX_ASCIIEXPORT", std::make_shared<IntASEReaderNodeRule>());

@@ -29,11 +29,6 @@ set(SOURCES sources/main.cpp
         sources/widgets/configuration_widget.cpp
         sources/widgets/file_picker_widget.cpp
 
-        sources/widgets/pgproperties/texture_array_pgproperty.cpp
-        sources/widgets/pgproperties/vec3f_pgproperty.cpp
-
-        sources/widgets/variants/vec3f.cpp
-
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp
         sources/render_system/element_buffer.cpp
@@ -49,7 +44,6 @@ set(SOURCES sources/main.cpp
         sources/render_system/camera_manager.cpp
         sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        sources/render_system/renderer.cpp
         sources/render_system/garbage_collector.cpp
         sources/render_system/color.cpp
         sources/render_system/transform.cpp

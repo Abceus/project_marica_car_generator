@@ -4,7 +4,6 @@
 #include "render_system/camera/camera_controller.h"
 #include "render_system/drawable.h"
 #include "render_system/mesh.h"
-#include "render_system/renderer.h"
 #include "render_system/scene.h"
 #include "render_system/shader_program.h"
 #include "updatable.h"
@@ -26,7 +25,6 @@ public:
     void draw();
 
     std::weak_ptr<Scene> getScene() const;
-    Renderer& getRenderer();
 
     void addUpdatable(const std::shared_ptr<IUpdatable>& updatable);
     void removeUpdatable(const std::shared_ptr<IUpdatable>& updatable);
@@ -53,8 +51,6 @@ public:
     }
 
 private:
-    Renderer m_renderer;
-
     void InitGL();
     void ResetProjectionMode();
     void OnResize(const ImVec2& newSize);

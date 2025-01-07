@@ -1,9 +1,5 @@
 #include "widgets/configuration_widget.h"
 #include "imgui.h"
-#include "widgets/event_data/float.h"
-#include "widgets/event_data/indexed_texture.h"
-#include "widgets/pgproperties/texture_array_pgproperty.h"
-#include "widgets/pgproperties/vec3f_pgproperty.h"
 #include <filesystem>
 #include <format>
 #include <iterator>

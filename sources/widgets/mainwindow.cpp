@@ -1,6 +1,7 @@
 #include "widgets/mainwindow.h"
 #include "imgui_internal.h"
 #include "render_system/scene_node.h"
+#include "render_system/shader_program.h"
 #include "resources/dds_info.h"
 #include "resources/image_info.h"
 #include "resources/wireframe_model.h"
@@ -12,7 +13,6 @@
 #include "utils/shapes/convex_hull.h"
 #include "utils/shapes/shape.h"
 #include "widgets/configuration_widget.h"
-#include "widgets/event_data/indexed_texture.h"
 #include "widgets/opengl_glfw_window.h"
 #include "widgets/openglview.h"
 
@@ -31,8 +31,6 @@
 #include "utils/shapes/box.h"
 #include "utils/shapes/sphere.h"
 
-#include "widgets/event_data/float.h"
-
 #include <imgui.h>
 
 MainWindow::MainWindow()
@@ -42,20 +40,17 @@ MainWindow::MainWindow()
 
     configurationWidget = std::make_unique<ConfigurationWidget>();
 
-    //     openglView->Bind(wxEVT_ENTER_WINDOW,
-    //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
-    //     openglView->Bind(wxEVT_LEAVE_WINDOW,
-    //                      &MainWindow::onOpenglEditorMouseFocusEvent, this);
-
     openglView->setOpenglInitedCallback([this]() {
-        auto shaderProgram = openglView->getRenderer().getShaderProgram(
-            ".\\resources\\shaders\\meshvertexshader.vert", ".\\resources\\shaders\\meshfragmentshader.frag");
+        auto shaderProgram = std::make_shared<ShaderProgram>();
+        shaderProgram->init(
+            std::filesystem::path(".\\resources\\shaders\\meshvertexshader.vert"),
+            std::filesystem::path(".\\resources\\shaders\\meshfragmentshader.frag"));
 
         mainNode = std::make_shared<SceneNode>();
-        mainMesh = openglView->getRenderer().makeDrawable<Mesh>();
+        mainMesh = std::make_shared<Mesh>();
         mainNode->setShaderProgram(shaderProgram);
         mainNode->addDrawable(mainMesh);
-        mainCollisionMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        mainCollisionMesh = std::make_shared<WireframeMesh>();
         mainNode->addDrawable(mainCollisionMesh);
 
         auto testNode = std::make_shared<SceneNode>();
@@ -64,11 +59,11 @@ MainWindow::MainWindow()
         WireframeModel wireframeModel;
         wireframeModel.vertices = {{-10.0, 0.0, 0.0, 0.0, 0.0, 0}, {10.0, 0.0, 0.0, 0.0, 0.0, 0}, {0.0, -10.0, 0.0, 0.0, 0.0, 0}, {0.0, 10.0, 0.0, 0.0, 0.0, 0}, {0.0, 0.0, -10.0, 0.0, 0.0, 0}, {0.0, 0.0, 10.0, 0.0, 0.0, 0}};
         wireframeModel.edges = {{0, 1}, {2, 3}, {4, 5}};
-        auto testMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        auto testMesh = std::make_shared<WireframeMesh>();
         testMesh->init(wireframeModel, {1.0f, 0.0f, 0.0f});
         testNode->addDrawable(testMesh);
 
-        tireCollisionMesh = openglView->getRenderer().makeDrawable<WireframeMesh>();
+        tireCollisionMesh = std::make_shared<WireframeMesh>();
         for (auto& wheel : wheelSteerMeshNodes) {
             wheel = std::make_shared<SceneNode>();
             mainNode->addChild(wheel);
@@ -98,13 +93,13 @@ MainWindow::MainWindow()
 
     configurationWidget->setSkinChangedCallback([this](size_t index, const std::filesystem::path& skinPath) {
         if (std::filesystem::exists(skinPath)) {
-            auto newTexture = openglView->getRenderer().makeDrawable<Texture>();
+            auto newTexture = std::make_shared<Texture>();
             auto extension = skinPath.extension().string();
             std::transform(extension.begin(),
                            extension.end(),
                            extension.begin(),
                            [](unsigned char c) { return std::tolower(c); });
-            auto currentContext = openglView->getRenderer().pushContextScoped();
+
             if (extension == ".dds") {
                 newTexture->init(DDSInfo::loadDDS(skinPath.string()));
             } else {
@@ -331,7 +326,7 @@ void MainWindow::drawEmulationWindow() {
         if (auto lockedScene = scene.lock()) {
             lockedScene->addNode(simMainNode);
         }
-        auto simMainCollisionMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        auto simMainCollisionMesh = std::make_shared<WireframeMesh>();
         simMainCollisionMesh->init(mainCollision);
         simMainNode->addDrawable(simMainCollisionMesh);
 
@@ -341,16 +336,18 @@ void MainWindow::drawEmulationWindow() {
         mainPhysic->setPhysic(physicWorld->addBody(mainPhysic->getConstructionInfo()));
         simulateWidget->addUpdatable(mainPhysic);
 
-        auto shaderProgram = simulateWidget->getRenderer().getShaderProgram(
-            ".\\resources\\shaders\\meshvertexshader.vert", ".\\resources\\shaders\\meshfragmentshader.frag");
+        auto shaderProgram = std::make_shared<ShaderProgram>();
+        shaderProgram->init(
+            std::filesystem::path(".\\resources\\shaders\\meshvertexshader.vert"),
+            std::filesystem::path(".\\resources\\shaders\\meshfragmentshader.frag"));
         auto simMainMeshNode = std::make_shared<SceneNode>();
         simMainMeshNode->setShaderProgram(shaderProgram);
-        auto simMainMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        auto simMainMesh = std::make_shared<Mesh>();
         simMainMesh->init(mainModel);
         simMainMeshNode->addDrawable(simMainMesh);
         simMainNode->addChild(simMainMeshNode);
 
-        auto wheelMesh = simulateWidget->getRenderer().makeDrawable<WireframeMesh>();
+        auto wheelMesh = std::make_shared<WireframeMesh>();
         wheelMesh->init(tireCollision);
 
         auto tireShape = std::make_shared<ConvexHull>(tireCollision.vertices);
@@ -470,7 +467,7 @@ void MainWindow::drawEmulationWindow() {
 
         auto box = std::make_shared<Box>(Vec3f{1500.0f, 1500.0f, 10.0f});
         auto groundModel = box->getModel();
-        auto groundMesh = simulateWidget->getRenderer().makeDrawable<Mesh>();
+        auto groundMesh = std::make_shared<Mesh>();
         groundMesh->init(groundModel);
         auto groundMeshNode = std::make_shared<SceneNode>();
         groundMeshNode->addDrawable(groundMesh);

@@ -4,6 +4,7 @@
 #include "render_system/element_buffer.h"
 #include "render_system/mesh.h"
 #include "render_system/scene_node.h"
+#include "render_system/shader_program.h"
 #include "render_system/triangle_array.h"
 #include "utils/math/utils.h"
 #include <chrono>
@@ -41,7 +42,7 @@ void OpenglView::draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_renderer.draw(scene);
+    scene->draw();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -128,45 +129,22 @@ void OpenglView::InitGL() {
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto shaderProgram = m_renderer.getShaderProgram(
-        ".\\resources\\shaders\\defaultvertexshader.vert",
-        ".\\resources\\shaders\\defaultfragmentshader.frag");
+    auto shaderProgram = std::make_shared<ShaderProgram>();
+    shaderProgram->init(
+        std::filesystem::path(".\\resources\\shaders\\defaultvertexshader.vert"),
+        std::filesystem::path(".\\resources\\shaders\\defaultfragmentshader.frag"));
 
     scene->init(shaderProgram);
 
-    // redrawTimer.SetOwner(this);
-    // redrawTimer.Start(1000.0f / 60.0f);
-
-    // updateTimer.SetOwner(this);
-    // updateTimer.Start(1000.0f / 60.0f);
-
-    // lastUpdate = std::chrono::steady_clock::now();
+    lastUpdate = std::chrono::steady_clock::now();
 
     if (openglInitedCallback) {
         openglInitedCallback();
     }
 }
 
-// void OpenglView::onTimer(wxTimerEvent& event) {
-// if (event.GetTimer().GetId() == updateTimer.GetId()) {
-//     auto currentTime = std::chrono::steady_clock::now();
-//     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-//         currentTime - lastUpdate);
-//     for (auto& updatable : updatables) {
-//         updatable->update(elapsed);
-//     }
-//     lastUpdate = currentTime;
-// } else if (event.GetTimer().GetId() == redrawTimer.GetId()) {
-//     Refresh();
-// }
-// }
-
 std::weak_ptr<Scene> OpenglView::getScene() const {
     return scene;
-}
-
-Renderer& OpenglView::getRenderer() {
-    return m_renderer;
 }
 
 void OpenglView::addUpdatable(const std::shared_ptr<IUpdatable>& updatable) {

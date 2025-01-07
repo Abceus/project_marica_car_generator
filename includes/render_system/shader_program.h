@@ -1,18 +1,22 @@
 #pragma once
 #include "render_system/fragment_shader.h"
 #include "render_system/vertex_shader.h"
-#include <memory>
-#include <string>
-#include <utils/gl.h>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <memory>
+#include <string>
 #include <type_traits>
-
+#include <utils/gl.h>
 
 class ShaderProgram {
 public:
     void init(const std::string& vertexShaderText,
               const std::string& fragmentShaderText);
+
+    void init(const std::filesystem::path& vertexShaderPath,
+              const std::filesystem::path& fragmentShaderPath);
+
     void destroy();
 
     void bind() const;
@@ -34,10 +38,9 @@ private:
 template <typename T>
 void ShaderProgram::setUniform(const std::string& name, const T& value) {
     auto location = glGetUniformLocation(programIndex, name.c_str());
-    if constexpr(std::is_same_v<T, glm::mat4>) {
+    if constexpr (std::is_same_v<T, glm::mat4>) {
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
-    }
-    else if constexpr(std::is_same_v<T, glm::vec4>) {
+    } else if constexpr (std::is_same_v<T, glm::vec4>) {
         glUniform4fv(location, 1, glm::value_ptr(value));
     }
 }

@@ -17,8 +17,6 @@ public:
 
     void onDraw() override;
 
-    // void onOpenglEditorMouseFocusEvent(wxMouseEvent& event);
-
     void setMainModel(const Model& model);
     void setMainCollision(const Model& model);
     void setTireCollision(const Model& model);
