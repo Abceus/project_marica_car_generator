@@ -15,10 +15,12 @@
 #include <memory>
 #include <optional>
 #include <set>
+#include <vector>
 
 class OpenglView {
 public:
     using OpenglInitedCallbackType = std::function<void()>;
+    using KeyCallbackType = std::function<void(ImGuiKey)>;
 
 public:
     void draw();
@@ -36,6 +38,18 @@ public:
 
     void setCameraController(std::unique_ptr<CameraController>&& controller) {
         cameraController = std::move(controller);
+    }
+
+    void setPressKeyCallback(const KeyCallbackType& callback) {
+        pressKeyCallback = callback;
+    }
+
+    void setReleaseKeyCallback(const KeyCallbackType& callback) {
+        releaseKeyCallback = callback;
+    }
+
+    void addKeyForEventsEmit(ImGuiKey key) {
+        keysForEventsEmit.emplace_back(key);
     }
 
 private:
@@ -62,4 +76,8 @@ private:
     OpenglInitedCallbackType openglInitedCallback;
 
     std::unique_ptr<CameraController> cameraController;
+
+    std::vector<ImGuiKey> keysForEventsEmit;
+    KeyCallbackType pressKeyCallback;
+    KeyCallbackType releaseKeyCallback;
 };

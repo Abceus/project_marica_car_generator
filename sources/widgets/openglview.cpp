@@ -1,5 +1,6 @@
 #include "widgets/openglview.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "render_system/element_buffer.h"
 #include "render_system/mesh.h"
 #include "render_system/scene_node.h"
@@ -49,6 +50,20 @@ void OpenglView::draw() {
 
     if (ImGui::IsItemHovered() && cameraController && scene->getActiveCamera()) {
         cameraController->update(scene->getActiveCamera());
+    }
+
+    for (const auto& key : keysForEventsEmit) {
+        if (ImGui::IsKeyPressed(key, false)) {
+            if (pressKeyCallback) {
+                pressKeyCallback(key);
+            }
+        }
+
+        if (ImGui::IsKeyReleased(key)) {
+            if (releaseKeyCallback) {
+                releaseKeyCallback(key);
+            }
+        }
     }
 }
 

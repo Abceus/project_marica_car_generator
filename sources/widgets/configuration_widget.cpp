@@ -96,8 +96,8 @@ void ConfigurationWidget::draw() {
     {
 #ifdef WITH_PHYSICS
         if (ImGui::Button("Emulate")) {
-            if (emulateButtonPressed) {
-                emulateButtonPressed();
+            if (emulateButtonPressedCallback) {
+                emulateButtonPressedCallback();
             }
         }
 #endif
