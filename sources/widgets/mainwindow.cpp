@@ -82,7 +82,7 @@ MainWindow::MainWindow()
         }
     });
 
-    configurationWidget->setMeshChangedCallback([this](const std::filesystem::path& filePath) {
+    configurationWidget->getMeshReact().setCallback([this](const std::filesystem::path& filePath) {
         mainModel = Model::readPSK(filePath);
         mainMesh->init(mainModel);
         configurationWidget->resizeTextureArray(mainModel.materials.size());
@@ -106,11 +106,10 @@ MainWindow::MainWindow()
                 newTexture->init(ImageInfo(skinPath.string()));
             }
             mainMesh->setTexture(newTexture, index);
-            configurationWidget->setTexture(index, skinPath);
         }
     });
 
-    configurationWidget->setCollisionChangedCallback([this](const std::filesystem::path& filePath) {
+    configurationWidget->getCollisionReact().setCallback([this](const std::filesystem::path& filePath) {
         // auto models = Model::readASE(event.GetString());
         // if (!models.empty()) {
         //     mainCollision = WireframeModel::fromModel(models[0]);
@@ -123,7 +122,7 @@ MainWindow::MainWindow()
         mainCollisionMesh->init(mainCollision);
     });
 
-    configurationWidget->setTireCollisionChangedCallback([this](const std::filesystem::path& filePath) {
+    configurationWidget->getTireCollisionReact().setCallback([this](const std::filesystem::path& filePath) {
         // auto models = Model::readASE(event.GetString());
         // if (!models.empty()) {
         //     tireCollision = WireframeModel::fromModel(models[0]);
@@ -136,7 +135,7 @@ MainWindow::MainWindow()
         tireCollisionMesh->init(tireCollision);
     });
 
-    configurationWidget->setWheelSteerAcrossChangedCallback([this](float value) {
+    configurationWidget->getWheelSteerAcrossReact().setCallback([this](float value) {
         setWheelSteerAcross(value);
         // mainMesh->rotateBone("LeftFrontTIRE",
         // Quaternion::fromEulerAngles(Rotor3(Angle::fromDegrees(value))));
@@ -144,7 +143,7 @@ MainWindow::MainWindow()
         // mainMesh->transposeBone("LeftFrontTIRE", {floatData->value});
     });
 
-    configurationWidget->setWheelSteerAlongChangedCallback([this](float value) {
+    configurationWidget->getWheelSteerAlongReact().setCallback([this](float value) {
         setWheelSteerAlong(value);
         // mainMesh->rotateBone("LeftFrontTIRE",
         //                      Quaternion::fromEulerAngles(Rotor3(
@@ -153,15 +152,15 @@ MainWindow::MainWindow()
         //                          Angle::fromDegrees(0.0))));
     });
 
-    configurationWidget->setWheelEngAcrossChangedCallback([this](float value) {
+    configurationWidget->getWheelEngAcrossReact().setCallback([this](float value) {
         setWheelEngAcross(value);
     });
 
-    configurationWidget->setWheelEngAlongChangedCallback([this](float value) {
+    configurationWidget->getWheelEngAlongReact().setCallback([this](float value) {
         setWheelEngAlong(value);
     });
 
-    configurationWidget->setWheelVertChangedCallback([this](float value) {
+    configurationWidget->getWheelVertReact().setCallback([this](float value) {
         setWheelVert(value);
     });
 

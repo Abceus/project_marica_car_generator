@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/react/primitive.h"
 #include <ImGuiFileDialog.h>
 #include <filesystem>
 #include <functional>
@@ -7,16 +8,12 @@
 
 class FilePickerWidget {
 public:
-    using FilePickedCallbackType = std::function<void(const std::filesystem::path&)>;
+    using ReactType = ReactPrimitive<std::filesystem::path>;
 
 public:
     FilePickerWidget(const std::string& uniqueId);
 
     void draw();
-
-    void setFilePickedCallback(const FilePickedCallbackType& callback) {
-        filePickedCallback = callback;
-    }
 
     void setDefaultTitle(const std::string& value) {
         defaultTitle = value;
@@ -38,21 +35,16 @@ public:
         saveLastPath = value;
     }
 
-    void setPickedPath(const std::filesystem::path& path) {
-        pickedPath = path;
-    }
-
-    std::filesystem::path getPickedPath() const {
-        return pickedPath;
+    ReactType& getReact() {
+        return pathReact;
     }
 
 private:
     std::string id;
     std::string defaultTitle;
-    std::filesystem::path pickedPath;
+    ReactType pathReact{""};
     std::string dialogTitle = "Select File";
     std::string fileExtensions = "";
-    FilePickedCallbackType filePickedCallback;
     IGFD::FileDialogConfig config;
     bool saveLastPath = true;
 };

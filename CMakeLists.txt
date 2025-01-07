@@ -28,6 +28,7 @@ set(SOURCES sources/main.cpp
         sources/widgets/openglview.cpp
         sources/widgets/configuration_widget.cpp
         sources/widgets/file_picker_widget.cpp
+        sources/widgets/float_input.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp
@@ -108,6 +109,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.11.3
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 if(WITH_PHYSICS)
         set(USE_GRAPHICAL_BENCHMARK OFF CACHE BOOL "Use Graphical Benchmark" FORCE)
         set(ENABLE_VHACD OFF CACHE BOOL "Use VHACD in BulletRobotics and pybullet" FORCE)
@@ -154,7 +163,8 @@ target_link_libraries(ProjectMaricaCarGenerator
         imgui::opengl3 
         glfw
         imgui::file-dialog
-        stb::image)
+        stb::image
+        nlohmann_json::nlohmann_json)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

@@ -5,30 +5,17 @@
 #include <iterator>
 #include <limits>
 
+using json = nlohmann::json;
+
 ConfigurationWidget::ConfigurationWidget() {
     meshFilePicker.setFileExtensions(".psk");
     meshFilePicker.setDefaultTitle("Select Mesh");
-    meshFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
-        if (meshChangedCallback) {
-            meshChangedCallback(filePath);
-        }
-    });
 
     collisionFilePicker.setFileExtensions(".psk"); // ase
     collisionFilePicker.setDefaultTitle("Select Collision");
-    collisionFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
-        if (collisionChangedCallback) {
-            collisionChangedCallback(filePath);
-        }
-    });
 
     tireCollisionFilePicker.setFileExtensions(".psk"); // ase
     tireCollisionFilePicker.setDefaultTitle("Select Tire Collision");
-    tireCollisionFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
-        if (tireCollisionChangedCallback) {
-            tireCollisionChangedCallback(filePath);
-        }
-    });
 }
 
 void ConfigurationWidget::draw() {
@@ -58,35 +45,11 @@ void ConfigurationWidget::draw() {
     collisionFilePicker.draw();
     tireCollisionFilePicker.draw();
 
-    if (ImGui::InputFloat("Wheel Steer Across", &wheelSteerAcross, 0.01f, 1.0f)) {
-        if (wheelSteerAcrossChangedCallback) {
-            wheelSteerAcrossChangedCallback(wheelSteerAcross);
-        }
-    }
-
-    if (ImGui::InputFloat("Wheel Steer Along", &wheelSteerAlong, 0.01f, 1.0f)) {
-        if (wheelSteerAlongChangedCallback) {
-            wheelSteerAlongChangedCallback(wheelSteerAlong);
-        }
-    }
-
-    if (ImGui::InputFloat("Wheel Eng Across", &wheelEngAcross, 0.01f, 1.0f)) {
-        if (wheelEngAcrossChangedCallback) {
-            wheelEngAcrossChangedCallback(wheelEngAcross);
-        }
-    }
-
-    if (ImGui::InputFloat("Wheel Eng Along", &wheelEngAlong, 0.01f, 1.0f)) {
-        if (wheelEngAlongChangedCallback) {
-            wheelEngAlongChangedCallback(wheelEngAlong);
-        }
-    }
-
-    if (ImGui::InputFloat("Vert Along", &vertAlong, 0.01f, 1.0f)) {
-        if (wheelVertChangedCallback) {
-            wheelVertChangedCallback(vertAlong);
-        }
-    }
+    wheelSteerAcrossInput.draw();
+    wheelSteerAlongInput.draw();
+    wheelEngAcrossInput.draw();
+    wheelEngAlongInput.draw();
+    wheelVertInput.draw();
 
     // Emulate button
     {
@@ -109,9 +72,9 @@ void ConfigurationWidget::resizeTextureArray(size_t newSize) {
             auto& addedWidget = skinsWidgets.emplace_back(std::format("SkinFileDlgId %d", i));
             addedWidget.setFileExtensions(".tga,.dds");
             addedWidget.setDefaultTitle("Choose texture");
-            addedWidget.setFilePickedCallback([this, i](const std::filesystem::path& filePath) {
+            addedWidget.getReact().setCallback([this, i](const std::filesystem::path& path) {
                 if (skinChangedCallback) {
-                    skinChangedCallback(i, filePath);
+                    skinChangedCallback(i, path);
                 }
             });
         }
@@ -125,10 +88,14 @@ void ConfigurationWidget::setTexture(size_t index, const std::filesystem::path& 
         return;
     }
 
-    skinsWidgets[index].setPickedPath(newPath);
+    skinsWidgets[index].getReact() = newPath;
 }
 
-void ConfigurationWidget::setMeshChangedCallback(
-    const MeshChangedCallbackType& callback) {
-    meshChangedCallback = callback;
+void ConfigurationWidget::load(const json& json) {
+}
+
+json ConfigurationWidget::save() const {
+    json result;
+
+    return result;
 }

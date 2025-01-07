@@ -1,6 +1,7 @@
 #include "widgets/file_picker_widget.h"
 #include "imgui.h"
 #include <ImGuiFileDialog.h>
+#include <filesystem>
 
 FilePickerWidget::FilePickerWidget(const std::string& uniqueId)
     : id(uniqueId) {
@@ -8,7 +9,7 @@ FilePickerWidget::FilePickerWidget(const std::string& uniqueId)
 }
 
 void FilePickerWidget::draw() {
-    if (ImGui::Button(!pickedPath.empty() ? pickedPath.string().c_str() : defaultTitle.c_str())) {
+    if (ImGui::Button(!pathReact.getValue().string().empty() ? pathReact.getValue().string().c_str() : defaultTitle.c_str())) {
         ImGuiFileDialog::Instance()->OpenDialog(id.c_str(),
                                                 dialogTitle.c_str(),
                                                 fileExtensions.c_str(),
@@ -17,10 +18,7 @@ void FilePickerWidget::draw() {
 
     if (ImGuiFileDialog::Instance()->Display(id.c_str())) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
-            pickedPath = ImGuiFileDialog::Instance()->GetFilePathName();
-            if (filePickedCallback) {
-                filePickedCallback(pickedPath);
-            }
+            pathReact = std::filesystem::path{ImGuiFileDialog::Instance()->GetFilePathName()};
 
             if (saveLastPath) {
                 config.path = ImGuiFileDialog::Instance()->GetCurrentPath();
