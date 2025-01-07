@@ -1,208 +1,134 @@
 #include "widgets/configuration_widget.h"
-#include "widgets/event_data/float.h"
-#include "widgets/event_data/indexed_texture.h"
-#include "widgets/pgproperties/texture_array_pgproperty.h"
-#include "widgets/pgproperties/vec3f_pgproperty.h"
-#include "wx/arrstr.h"
-#include "wx/filepicker.h"
-#include "wx/log.h"
-#include "wx/msw/button.h"
-#include "wx/propgrid/propgriddefs.h"
-#include "wx/spinctrl.h"
-#include "wx/string.h"
+#include "imgui.h"
+#include <filesystem>
+#include <format>
+#include <iterator>
 #include <limits>
-#include <wx/propgrid/advprops.h>
-#include <wx/propgrid/propgrid.h>
 
-wxDEFINE_EVENT(MESH_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(COLLISION_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(TIRE_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(WHEEL_STEER_ACROSS_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(WHEEL_STEER_ALONG_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(WHEEL_ENG_ACROSS_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(WHEEL_ENG_ALONG_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(WHEEL_VERT_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(SKIN_CHANGED, wxCommandEvent);
-#ifdef WITH_PHYSICS
-wxDEFINE_EVENT(EMULATE_BUTTON_CLICKED, wxCommandEvent);
-#endif
+ConfigurationWidget::ConfigurationWidget() {
+    meshFilePicker.setFileExtensions(".psk");
+    meshFilePicker.setDefaultTitle("Select Mesh");
+    meshFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
+        if (meshChangedCallback) {
+            meshChangedCallback(filePath);
+        }
+    });
 
-ConfigurationWidget::ConfigurationWidget(wxWindow* parent)
-    : wxWindow(parent, wxID_ANY) {
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-    // sizer->SetSizeHints(this);
-    SetSizer(sizer);
+    collisionFilePicker.setFileExtensions(".psk"); // ase
+    collisionFilePicker.setDefaultTitle("Select Collision");
+    collisionFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
+        if (collisionChangedCallback) {
+            collisionChangedCallback(filePath);
+        }
+    });
 
-    auto grid = new wxPropertyGrid(this);
-    sizer->Add(grid, 1, wxEXPAND, 0);
+    tireCollisionFilePicker.setFileExtensions(".psk"); // ase
+    tireCollisionFilePicker.setDefaultTitle("Select Tire Collision");
+    tireCollisionFilePicker.setFilePickedCallback([this](const std::filesystem::path& filePath) {
+        if (tireCollisionChangedCallback) {
+            tireCollisionChangedCallback(filePath);
+        }
+    });
+}
 
-    auto meshPicker = grid->Append(new wxFileProperty("Mesh"));
-    auto wildcard = wxVariant(wxString("PSK (*.psk)|*.psk"));
-    meshPicker->DoSetAttribute("Wildcard", wildcard);
-    auto showFullPath = wxVariant(1);
-    meshPicker->DoSetAttribute("ShowFullPath", showFullPath);
-    grid->Bind(
-        wxEVT_PG_CHANGED, [this, meshPicker](wxPropertyGridEvent& event) {
-            if (event.GetProperty() == meshPicker) {
-                wxCommandEvent meshEvent(MESH_CHANGED);
-                meshEvent.SetString(event.GetPropertyValue().GetString());
-                wxPostEvent(this, meshEvent);
+void ConfigurationWidget::draw() {
+    meshFilePicker.draw();
+
+    // Skins
+    {
+        if (ImGui::CollapsingHeader("Skins")) {
+            ImGui::BeginTable("Skins", 2);
+
+            for (auto i = 0; i < skinsWidgets.size(); ++i) {
+                ImGui::PushID(i);
+
+                ImGui::TableNextColumn();
+                ImGui::Text("%d", i);
+
+                ImGui::TableNextColumn();
+                skinsWidgets[i].draw();
+
+                ImGui::PopID();
             }
-        });
 
-    textureArrayProperty = grid->Append(new TextureArrayPGProperty("Skins"));
-    grid->Bind(wxEVT_PG_CHANGED, [this](wxPropertyGridEvent& event) {
-        if (event.GetMainParent() != textureArrayProperty) {
-            event.Skip();
-            return;
+            ImGui::EndTable();
         }
-        auto data = new IndexedTextureData();
-        data->index = event.GetProperty()->GetAttribute("index").GetInteger();
-        data->path = event.GetValue().GetString().ToStdString();
-        wxCommandEvent newEvent(SKIN_CHANGED);
-        newEvent.SetClientObject(data);
-        wxPostEvent(this, newEvent);
-    });
+    }
 
-    // textureArrayWidget = new TextureArrayWidget(this);
-    // sizer->Add(textureArrayWidget, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // textureArrayWidget->Bind(TEXTURE_CHANGED,
-    //                  [this](const wxCommandEvent& event) {
-    //                      wxPostEvent(this, event);
-    //                  });
+    collisionFilePicker.draw();
+    tireCollisionFilePicker.draw();
 
-    auto vec3Property = grid->Append(new Vec3fPGProperty("Coords"));
-    grid->Bind(wxEVT_PG_CHANGED, [vec3Property](wxPropertyGridEvent& event) {
-        if (event.GetMainParent() != vec3Property) {
-            event.Skip();
-            return;
+    if (ImGui::InputFloat("Wheel Steer Across", &wheelSteerAcross, 0.01f, 1.0f)) {
+        if (wheelSteerAcrossChangedCallback) {
+            wheelSteerAcrossChangedCallback(wheelSteerAcross);
         }
-    });
+    }
 
-    // auto collisionPicker = new wxFilePickerCtrl(
-    //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
-    //     // (*.ase)|*.ase");
-    //     this, wxID_ANY, wxEmptyString, "Select collision", "PSK
-    //     (*.psk)|*.psk");
-    // collisionPicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
-    //                                     wxFLP_FILE_MUST_EXIST);
-    // sizer->Add(collisionPicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // collisionPicker->Bind(wxEVT_FILEPICKER_CHANGED,
-    //                       [this](const wxFileDirPickerEvent& event) {
-    //                           wxCommandEvent
-    //                           collisionEvent(COLLISION_CHANGED);
-    //                           collisionEvent.SetString(event.GetPath());
-    //                           wxPostEvent(this, collisionEvent);
-    //                       });
+    if (ImGui::InputFloat("Wheel Steer Along", &wheelSteerAlong, 0.01f, 1.0f)) {
+        if (wheelSteerAlongChangedCallback) {
+            wheelSteerAlongChangedCallback(wheelSteerAlong);
+        }
+    }
 
-    // auto tirePicker = new wxFilePickerCtrl(
-    //     // this, wxID_ANY, wxEmptyString, "Select collision", "ASE
-    //     // (*.ase)|*.ase");
-    //     this, wxID_ANY, wxEmptyString, "Select tire", "PSK (*.psk)|*.psk");
-    // tirePicker->SetWindowStyleFlag(wxFLP_DEFAULT_STYLE | wxFLP_OPEN |
-    //                                wxFLP_FILE_MUST_EXIST);
-    // sizer->Add(tirePicker, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // tirePicker->Bind(wxEVT_FILEPICKER_CHANGED,
-    //                  [this](const wxFileDirPickerEvent& event) {
-    //                      wxCommandEvent collisionEvent(TIRE_CHANGED);
-    //                      collisionEvent.SetString(event.GetPath());
-    //                      wxPostEvent(this, collisionEvent);
-    //                  });
+    if (ImGui::InputFloat("Wheel Eng Across", &wheelEngAcross, 0.01f, 1.0f)) {
+        if (wheelEngAcrossChangedCallback) {
+            wheelEngAcrossChangedCallback(wheelEngAcross);
+        }
+    }
 
-    // auto wheelSteerAcrossCtrl = new wxSpinCtrlDouble(this);
-    // sizer->Add(wheelSteerAcrossCtrl, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // wheelSteerAcrossCtrl->SetRange(std::numeric_limits<float>::lowest(),
-    //                                std::numeric_limits<float>::max());
-    // wheelSteerAcrossCtrl->SetValue(0.0);
-    // wheelSteerAcrossCtrl->Bind(
-    //     wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event) {
-    //         auto data = new FloatData();
-    //         data->value = static_cast<float>(event.GetValue());
-    //         wxCommandEvent newEvent(WHEEL_STEER_ACROSS_CHANGED);
-    //         newEvent.SetClientObject(data);
-    //         wxPostEvent(this, newEvent);
-    //     });
+    if (ImGui::InputFloat("Wheel Eng Along", &wheelEngAlong, 0.01f, 1.0f)) {
+        if (wheelEngAlongChangedCallback) {
+            wheelEngAlongChangedCallback(wheelEngAlong);
+        }
+    }
 
-    // auto wheelSteerAlongCtrl = new wxSpinCtrlDouble(this);
-    // sizer->Add(wheelSteerAlongCtrl, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // wheelSteerAlongCtrl->SetRange(std::numeric_limits<float>::lowest(),
-    //                               std::numeric_limits<float>::max());
-    // wheelSteerAlongCtrl->SetValue(0.0);
-    // wheelSteerAlongCtrl->Bind(
-    //     wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event) {
-    //         auto data = new FloatData();
-    //         data->value = static_cast<float>(event.GetValue());
-    //         wxCommandEvent newEvent(WHEEL_STEER_ALONG_CHANGED);
-    //         newEvent.SetClientObject(data);
-    //         wxPostEvent(this, newEvent);
-    //     });
+    if (ImGui::InputFloat("Vert Along", &vertAlong, 0.01f, 1.0f)) {
+        if (wheelVertChangedCallback) {
+            wheelVertChangedCallback(vertAlong);
+        }
+    }
 
-    // auto wheelEngAcrossCtrl = new wxSpinCtrlDouble(this);
-    // sizer->Add(wheelEngAcrossCtrl, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // wheelEngAcrossCtrl->SetRange(std::numeric_limits<float>::lowest(),
-    //                              std::numeric_limits<float>::max());
-    // wheelEngAcrossCtrl->SetValue(0.0);
-    // wheelEngAcrossCtrl->Bind(
-    //     wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event) {
-    //         auto data = new FloatData();
-    //         data->value = static_cast<float>(event.GetValue());
-    //         wxCommandEvent newEvent(WHEEL_ENG_ACROSS_CHANGED);
-    //         newEvent.SetClientObject(data);
-    //         wxPostEvent(this, newEvent);
-    //     });
-
-    // auto wheelEngAlongCtrl = new wxSpinCtrlDouble(this);
-    // sizer->Add(wheelEngAlongCtrl, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // wheelEngAlongCtrl->SetRange(std::numeric_limits<float>::lowest(),
-    //                             std::numeric_limits<float>::max());
-    // wheelEngAlongCtrl->SetValue(0.0);
-    // wheelEngAlongCtrl->Bind(
-    //     wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event) {
-    //         auto data = new FloatData();
-    //         data->value = static_cast<float>(event.GetValue());
-    //         wxCommandEvent newEvent(WHEEL_ENG_ALONG_CHANGED);
-    //         newEvent.SetClientObject(data);
-    //         wxPostEvent(this, newEvent);
-    //     });
-
-    // auto wheelVertCtrl = new wxSpinCtrlDouble(this);
-    // sizer->Add(wheelVertCtrl, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-    // wheelVertCtrl->SetRange(std::numeric_limits<float>::lowest(),
-    //                         std::numeric_limits<float>::max());
-    // wheelVertCtrl->SetValue(0.0);
-    // wheelVertCtrl->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent&
-    // event) {
-    //     auto data = new FloatData();
-    //     data->value = static_cast<float>(event.GetValue());
-    //     wxCommandEvent newEvent(WHEEL_VERT_CHANGED);
-    //     newEvent.SetClientObject(data);
-    //     wxPostEvent(this, newEvent);
-    // });
-
+    // Emulate button
+    {
 #ifdef WITH_PHYSICS
-    auto emulateButton = new wxButton(this, wxID_ANY);
-    emulateButton->SetLabel("Emulate");
-    sizer->Add(emulateButton, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
-
-    emulateButton->Bind(wxEVT_BUTTON, [this](const auto& event) {
-        wxCommandEvent collisionEvent(EMULATE_BUTTON_CLICKED);
-        wxPostEvent(this, collisionEvent);
-    });
+        if (ImGui::Button("Emulate")) {
+            if (emulateButtonPressedCallback) {
+                emulateButtonPressedCallback();
+            }
+        }
 #endif
+    }
 }
 
 void ConfigurationWidget::resizeTextureArray(size_t newSize) {
-    if (textureArrayProperty) {
-        wxArrayString value;
-        value.resize(newSize);
-        textureArrayProperty->SetValue(value);
+    if (newSize > skinsWidgets.size()) {
+        const auto oldSize = skinsWidgets.size();
+        skinsWidgets.reserve(oldSize);
+
+        for (auto i = oldSize; i < newSize; ++i) {
+            auto& addedWidget = skinsWidgets.emplace_back(std::format("SkinFileDlgId %d", i));
+            addedWidget.setFileExtensions(".tga,.dds");
+            addedWidget.setDefaultTitle("Choose texture");
+            addedWidget.setFilePickedCallback([this, i](const std::filesystem::path& filePath) {
+                if (skinChangedCallback) {
+                    skinChangedCallback(i, filePath);
+                }
+            });
+        }
+    } else {
+        skinsWidgets.erase(std::next(std::begin(skinsWidgets), newSize), std::end(skinsWidgets));
     }
 }
 
-void ConfigurationWidget::setTexture(size_t index, const std::string& newPath) {
-    if (textureArrayProperty) {
-        wxArrayString value = textureArrayProperty->GetValue();
-        value[index] = newPath;
-        textureArrayProperty->SetValue(value);
+void ConfigurationWidget::setTexture(size_t index, const std::filesystem::path& newPath) {
+    if (index >= skinsWidgets.size()) {
+        return;
     }
+
+    skinsWidgets[index].setPickedPath(newPath);
+}
+
+void ConfigurationWidget::setMeshChangedCallback(
+    const MeshChangedCallbackType& callback) {
+    meshChangedCallback = callback;
 }

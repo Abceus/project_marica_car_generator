@@ -2,7 +2,6 @@
 #include "utils/math/quaternion.h"
 #include "utils/math/rot3.h"
 #include "utils/math/vec3.h"
-#include "wx/log.h"
 #include <memory>
 
 PhysObject::PhysObject(const std::shared_ptr<SceneNode>& node,

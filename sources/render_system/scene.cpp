@@ -43,7 +43,7 @@ void Scene::draw() {
 
 void Scene::resizeScreen(int w, int h) {
     // Calculate aspect ratio
-    const float aspect = static_cast<float>(w) / h;
+    const float aspect = h == 0 ? 0 : static_cast<float>(w) / h;
     const float zNear = 1.0f, zFar = 10000.f, fov = 90.f;
 
     // Reset projection
@@ -94,12 +94,13 @@ void Scene::drawNode(const std::shared_ptr<SceneNode>& node) {
     }
 }
 
-void Scene::drawNodeRecurse(const std::shared_ptr<SceneNode>& node,
-                     std::list<std::shared_ptr<SceneNode>>& overlayList) {
+void Scene::drawNodeRecurse(
+    const std::shared_ptr<SceneNode>& node,
+    std::list<std::shared_ptr<SceneNode>>& overlayList) {
     drawNode(node);
 
     for (const auto& childNode : *node) {
-        if(childNode->isOverlay()) {
+        if (childNode->isOverlay()) {
             overlayList.emplace_back(childNode);
         } else {
             drawNodeRecurse(childNode, overlayList);

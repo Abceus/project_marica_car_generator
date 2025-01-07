@@ -36,3 +36,8 @@ TODO
 .vscode
 build
 3rd_party/glew/glew-2.2.0
+3rd_party/imgui/imgui-1.91.6
+3rd_party/imgui/imgui-1.91.6-docking
+imgui.ini
+3rd_party/imgui-file-dialog/ImGuiFileDialog-0.6.7
+3rd_party/stb/stb_image.h

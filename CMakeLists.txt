@@ -1,30 +1,33 @@
-cmake_minimum_required( VERSION 3.9 )
+cmake_minimum_required( VERSION 3.31 )
 
 project( ProjectMaricaCarGenerator )
 
 set( CMAKE_CXX_STANDARD 20 )
 
 set(BUILD_SHARED_LIBS OFF)
-set(wxUSE_STL ON)
-set(_CRT_SECURE_NO_WARNINGS ON)
-if(CMAKE_BUILD_TYPE STREQUAL  "Debug")
-        set(wxUSE_EXCEPTIONS OFF)
-else()
-        set(wxUSE_EXCEPTIONS ON)
-endif()
-add_subdirectory(3rd_party/wxWidgets)
+
+include(FetchContent)
+
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        3.4
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(glfw)
+
+add_subdirectory(3rd_party/imgui)
+add_subdirectory(3rd_party/imgui-file-dialog)
+add_subdirectory(3rd_party/stb)
 
 set(SOURCES sources/main.cpp
 
+        sources/widgets/opengl_glfw_window.cpp
         sources/widgets/app.cpp
         sources/widgets/mainwindow.cpp
         sources/widgets/openglview.cpp
         sources/widgets/configuration_widget.cpp
-
-        sources/widgets/pgproperties/texture_array_pgproperty.cpp
-        sources/widgets/pgproperties/vec3f_pgproperty.cpp
-
-        sources/widgets/variants/vec3f.cpp
+        sources/widgets/file_picker_widget.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp
@@ -41,8 +44,6 @@ set(SOURCES sources/main.cpp
         sources/render_system/camera_manager.cpp
         sources/render_system/scene.cpp
         sources/render_system/scene_node.cpp
-        sources/render_system/renderer.cpp
-        sources/render_system/garbage_collector.cpp
         sources/render_system/color.cpp
         sources/render_system/transform.cpp
 
@@ -54,6 +55,7 @@ set(SOURCES sources/main.cpp
         sources/resources/resource_manager.cpp
         sources/resources/skeletal.cpp
         sources/resources/dds_info.cpp
+        sources/resources/image_info.cpp
 
         sources/resources/ase_reader/ase_reader_node.cpp
         sources/resources/ase_reader/ase_reader_node_analyzer.cpp
@@ -87,20 +89,24 @@ if(WITH_PHYSICS)
         set(SOURCES ${SOURCES} ${PHYSIC_SOURCES})
 endif()
 
-if(WIN32)
-        add_executable( ProjectMaricaCarGenerator WIN32
-                ${SOURCES})
-else()
-        add_executable( ProjectMaricaCarGenerator
-                ${SOURCES})
-endif()
+add_executable( ProjectMaricaCarGenerator
+        ${SOURCES})
 
 find_package(OpenGL REQUIRED)
 
 set(GLEW_USE_STATIC_LIBS TRUE)
-add_subdirectory(3rd_party/glew)
+find_package(GLEW QUIET)
+if(NOT GLEW_FOUND)
+        add_subdirectory(3rd_party/glew)
+endif()
 
-add_subdirectory(3rd_party/glm)
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG        bf71a834948186f4097caa076cd2663c69a10e1e
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(glm)
 
 if(WITH_PHYSICS)
         set(USE_GRAPHICAL_BENCHMARK OFF CACHE BOOL "Use Graphical Benchmark" FORCE)
@@ -118,7 +124,14 @@ if(WITH_PHYSICS)
         set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC Runtime Library DLL (/MD or /MDd)" FORCE)
         set(USE_MSVC_RELEASE_RUNTIME_ALWAYS OFF CACHE BOOL "Use MSVC Release Runtime Library even in Debug" FORCE)
         set(BUILD_BULLET3 OFF CACHE BOOL "Set when you want to build Bullet 3" FORCE)
-        add_subdirectory(3rd_party/bullet-physics)
+
+        FetchContent_Declare(
+                Bullet
+                GIT_REPOSITORY https://github.com/bulletphysics/bullet3.git
+                GIT_TAG        7dee3436e747958e7088dfdcea0e4ae031ce619e
+                FIND_PACKAGE_ARGS
+        )
+        FetchContent_MakeAvailable(Bullet)
 
         target_include_directories( ProjectMaricaCarGenerator
                 PRIVATE ${BULLET_PHYSICS_SOURCE_DIR}/src)
@@ -129,9 +142,19 @@ if(WITH_PHYSICS)
 endif()
 
 target_include_directories( ProjectMaricaCarGenerator
-        PRIVATE includes)
+        PRIVATE includes
+        PRIVATE ${GLEW_INCLUDE_DIRS})
 
-target_link_libraries(ProjectMaricaCarGenerator wx::core wx::base wx::gl wx::propgrid glew_s glm::glm OpenGL::GL)
+target_link_libraries(ProjectMaricaCarGenerator 
+        glew_s 
+        glm::glm 
+        OpenGL::GL 
+        imgui::core 
+        imgui::glfw 
+        imgui::opengl3 
+        glfw
+        imgui::file-dialog
+        stb::image)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

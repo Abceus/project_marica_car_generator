@@ -1,7 +1,16 @@
 #pragma once
-#include <wx/app.h>
 
-class Application : public wxApp {
+#include "widgets/opengl_glfw_window.h"
+#include <memory>
+
+class Application {
 public:
-    virtual bool OnInit();
+    void run();
+
+private:
+    bool init();
+    void mainLoop();
+    void deinit();
+
+    std::unique_ptr<OpenglGlfwWindow> mainWindow;
 };

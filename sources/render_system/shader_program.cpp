@@ -1,4 +1,5 @@
 #include "render_system/shader_program.h"
+#include <fstream>
 #include <memory>
 
 void ShaderProgram::init(const std::string& vertexShaderText,
@@ -23,6 +24,20 @@ void ShaderProgram::init(const std::string& vertexShaderText,
     glDetachShader(programIndex, vertexShader->getIndex());
     glDetachShader(programIndex, fragmentShader->getIndex());
 }
+
+void ShaderProgram::init(const std::filesystem::path& vertexShaderPath,
+                         const std::filesystem::path& fragmentShaderPath) {
+    std::ifstream vertexShaderStream(vertexShaderPath);
+    std::stringstream vertexShaderBuffer;
+    vertexShaderBuffer << vertexShaderStream.rdbuf();
+
+    std::ifstream fragmentShaderStream(fragmentShaderPath);
+    std::stringstream fragmentShaderBuffer;
+    fragmentShaderBuffer << fragmentShaderStream.rdbuf();
+
+    init(vertexShaderBuffer.str(), fragmentShaderBuffer.str());
+}
+
 void ShaderProgram::destroy() {
     if (vertexShader) {
         vertexShader->destroy();

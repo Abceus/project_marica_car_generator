@@ -8,7 +8,7 @@
 #include "resources/ase_reader/ase_reader.h"
 #include "utils/math/quaternion.h"
 
-Model Model::readPSK(const std::string& filename) {
+Model Model::readPSK(const std::filesystem::path& filename) {
     auto newModel = Model();
 
     VChunkHeader GeneralHeader;
@@ -96,8 +96,8 @@ Model Model::readPSK(const std::string& filename) {
         //                                      data.BonePos.Position.Y,
         //                                      data.BonePos.Position.Z});
         newBone->getOrigin().setLocation({data.BonePos.Position.X,
-                                             data.BonePos.Position.Y,
-                                             data.BonePos.Position.Z});
+                                          data.BonePos.Position.Y,
+                                          data.BonePos.Position.Z});
 
         newBone->getOrigin().setRotation(
             Quaternion(data.BonePos.Orientation.X, data.BonePos.Orientation.Y,
@@ -117,24 +117,24 @@ Model Model::readPSK(const std::string& filename) {
         }
     }
 
-    for(size_t i = 0; i < static_cast<unsigned>(InfluencesHeader.DataCount); ++i) {
+    for (size_t i = 0; i < static_cast<unsigned>(InfluencesHeader.DataCount); ++i) {
         auto data = InfluencesData[i];
         auto vertexIndexs = plinks[data.PointIndex];
-        for(const auto& vertexIndex: vertexIndexs) {
+        for (const auto& vertexIndex : vertexIndexs) {
             auto foundVertex = newModel.vlinks.find(vertexIndex);
-            if(foundVertex == std::end(newModel.vlinks)) {
+            if (foundVertex == std::end(newModel.vlinks)) {
                 newModel.vlinks.emplace(static_cast<size_t>(vertexIndex), std::set<std::string>());
                 foundVertex = newModel.vlinks.find(vertexIndex);
             }
             foundVertex->second.insert(boneNames[data.BoneIndex]);
         }
-        
+
         auto foundBone = newModel.blinks.find(boneNames[data.BoneIndex]);
-        if(foundBone == std::end(newModel.blinks)) {
+        if (foundBone == std::end(newModel.blinks)) {
             newModel.blinks.emplace(boneNames[data.BoneIndex], std::vector<std::pair<size_t, float>>());
             foundBone = newModel.blinks.find(boneNames[data.BoneIndex]);
         }
-        for(const auto& vertexIndex: vertexIndexs) {
+        for (const auto& vertexIndex : vertexIndexs) {
             foundBone->second.push_back({vertexIndex, data.Weight});
         }
     }
@@ -142,7 +142,7 @@ Model Model::readPSK(const std::string& filename) {
     return newModel;
 }
 
-std::vector<Model> Model::readASE(const std::string& filename) {
+std::vector<Model> Model::readASE(const std::filesystem::path& filename) {
     ASEReader reader;
     reader.init(filename);
 

@@ -5,11 +5,10 @@
 #include "render_system/element_buffer.h"
 #include "render_system/triangle_array.h"
 #include "render_system/vertex_buffer.h"
+#include "resources/image_info.h"
 #include "resources/skeletal.h"
 #include "utils/math/matrix.h"
 #include "utils/math/quaternion.h"
-
-#include <wx/filefn.h>
 
 void Mesh::init(const Model& m) {
     model = m;
@@ -47,14 +46,12 @@ void Mesh::init(const Model& m) {
         vertexArray->init(vertexBuffer, newElementBuffer);
 
         auto texture = std::make_shared<Texture>();
-        wxImage image;
-        if (wxFileExists(model.materials[i])) {
-            image = wxImage(model.materials[i]);
-        } else {
-            image = wxImage(
-                "D:\\Documents\\gits\\project_marica_car_"
-                "generator\\example\\MaricaFlatoutTex\\Texture\\common.tga");
-        }
+        ImageInfo image;
+        // if (wxFileExists(model.materials[i])) {
+        // image = wxImage(model.materials[i]);
+        // } else {
+        image = ImageInfo(".\\resources\\textures\\test.jpg");
+        // }
         texture->init(image);
 
         batches.emplace_back(std::make_unique<Batch>(vertexArray, texture));
