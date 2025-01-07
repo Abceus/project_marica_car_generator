@@ -63,8 +63,8 @@ public:
         return wheelVertInput.getReact();
     }
 
-    void load(const json& json);
-    json save() const;
+    void fromJson(const json& json);
+    json toJson() const;
 
 private:
     SkinChangedCallbackType skinChangedCallback;

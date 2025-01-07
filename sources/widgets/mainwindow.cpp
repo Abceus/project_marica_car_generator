@@ -188,7 +188,7 @@ void MainWindow::onDraw() {
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("DockSpace Demo", &open, window_flags);
+    ImGui::Begin("Main Docker", &open, window_flags);
     ImGui::PopStyleVar();
 
     ImGui::PopStyleVar(2);
@@ -209,6 +209,30 @@ void MainWindow::onDraw() {
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), 0);
+
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Options")) {
+            if (ImGui::MenuItem("Preferences")) {
+            }
+
+            if (ImGui::MenuItem("Save")) {
+                auto json = configurationWidget->toJson();
+                std::ofstream o("./project.json");
+                o << std::setw(4) << json << std::endl;
+            }
+
+            if (ImGui::MenuItem("Load")) {
+                std::ifstream i("./project.json");
+                nlohmann::json json;
+                i >> json;
+                configurationWidget->fromJson(json);
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
     ImGui::End();
 
     ImGui::Begin("Main Viewport", &open, 0);
@@ -232,16 +256,6 @@ void MainWindow::onDraw() {
         simulateWidget = nullptr;
     }
 #endif
-
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Options")) {
-            if (ImGui::MenuItem("Preferences", "")) {
-            }
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMenuBar();
-    }
 }
 
 void MainWindow::setMainModel(const Model& model) {

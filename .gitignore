@@ -41,3 +41,4 @@ build
 imgui.ini
 3rd_party/imgui-file-dialog/ImGuiFileDialog-0.6.7
 3rd_party/stb/stb_image.h
+project.json

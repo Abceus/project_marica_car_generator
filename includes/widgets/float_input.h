@@ -21,6 +21,10 @@ public:
         return react;
     }
 
+    const ReactType& getReact() const {
+        return react;
+    }
+
     void setCallback(const ReactType::ValueChangedCallbackType& callback) {
         react.setCallback(callback);
     }

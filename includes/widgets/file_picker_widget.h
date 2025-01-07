@@ -39,6 +39,10 @@ public:
         return pathReact;
     }
 
+    const ReactType& getReact() const {
+        return pathReact;
+    }
+
 private:
     std::string id;
     std::string defaultTitle;
