@@ -7,4 +7,5 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: Yes
 AccessModifierOffset: -4
 ColumnLimit: 0
+SeparateDefinitionBlocks: Always
 ...
