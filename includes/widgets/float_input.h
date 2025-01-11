@@ -25,10 +25,6 @@ public:
         return react;
     }
 
-    void setCallback(const ReactType::ValueChangedCallbackType& callback) {
-        react.setCallback(callback);
-    }
-
 private:
     std::string label;
     ReactType react;

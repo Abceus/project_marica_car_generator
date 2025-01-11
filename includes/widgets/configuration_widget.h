@@ -1,7 +1,9 @@
 #pragma once
 
+#include "sound/sound.h"
 #include "widgets/file_picker_widget.h"
 #include "widgets/float_input.h"
+#include "widgets/sound_player.h"
 #include <filesystem>
 #include <functional>
 #include <nlohmann/json.hpp>
@@ -81,4 +83,7 @@ private:
     FilePickerWidget meshFilePicker{"MeshFilePicker"};
     FilePickerWidget collisionFilePicker{"CollisionFilePicker"};
     FilePickerWidget tireCollisionFilePicker{"TireCollisionFilePicker"};
+
+    FilePickerWidget engineSoundFilePicker{"EngineSoundFilePicker"};
+    SoundPlayer engineSoundPlayer;
 };
