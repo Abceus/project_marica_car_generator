@@ -22,6 +22,9 @@ ConfigurationWidget::ConfigurationWidget() {
 
     engineSoundFilePicker.setFileExtensions(".wav");
     engineSoundFilePicker.setDefaultTitle("Select Engine Sound");
+    engineSoundFilePicker.getReact().getCallbacks().Add([this](const std::filesystem::path& path) {
+        engineSoundPlayer.getReact().move(std::make_unique<Sound>(engineSoundFilePicker.getReact().getValue()));
+    });
 }
 
 void ConfigurationWidget::draw() {
@@ -81,7 +84,7 @@ void ConfigurationWidget::resizeTextureArray(size_t newSize) {
             auto& addedWidget = skinsWidgets.emplace_back(std::format("SkinFileDlgId {}", i));
             addedWidget.setFileExtensions(".tga,.dds");
             addedWidget.setDefaultTitle("Choose texture");
-            addedWidget.getReact().setCallback([this, i](const std::filesystem::path& path) {
+            addedWidget.getReact().getCallbacks().Add([this, i](const std::filesystem::path& path) {
                 if (skinChangedCallback) {
                     skinChangedCallback(i, path);
                 }
@@ -127,7 +130,6 @@ void ConfigurationWidget::fromJson(const json& json) {
 
     if (json.contains(ENGINE_SOUND_PATH_KEY)) {
         engineSoundFilePicker.getReact() = std::filesystem::path{json.at(ENGINE_SOUND_PATH_KEY).get<std::string>()};
-        engineSoundPlayer.getReact().move(std::make_unique<Sound>(engineSoundFilePicker.getReact().getValue()));
     }
 
     if (json.contains(SKINS_PATH_KEY)) {

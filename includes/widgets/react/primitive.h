@@ -1,11 +1,13 @@
 #pragma once
 
+#include "utils/callback_collection.h"
 #include <functional>
+
 
 template <typename T>
 class ReactPrimitive {
 public:
-    using ValueChangedCallbackType = std::function<void(const T&)>;
+    using CallbackCollectionType = CallbackCollection<const T&>;
 
 public:
     ReactPrimitive() = default;
@@ -13,15 +15,13 @@ public:
     ReactPrimitive(const T& val)
         : value(val) {}
 
-    void setCallback(const ValueChangedCallbackType& val) {
-        callback = val;
+    CallbackCollectionType& getCallbacks() {
+        return callbacks;
     }
 
     ReactPrimitive<T>& operator=(const T& val) {
         value = val;
-        if (callback) {
-            callback(value);
-        }
+        callbacks.Call(val);
         return *this;
     }
 
@@ -34,6 +34,6 @@ public:
     }
 
 private:
-    ValueChangedCallbackType callback;
+    CallbackCollectionType callbacks;
     T value;
 };
