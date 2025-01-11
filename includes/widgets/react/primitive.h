@@ -8,6 +8,8 @@ public:
     using ValueChangedCallbackType = std::function<void(const T&)>;
 
 public:
+    ReactPrimitive() = default;
+
     ReactPrimitive(const T& val)
         : value(val) {}
 
@@ -25,6 +27,10 @@ public:
 
     const T& getValue() const {
         return value;
+    }
+
+    void move(T&& val) {
+        value = std::move(val);
     }
 
 private:

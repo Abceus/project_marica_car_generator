@@ -1,9 +1,12 @@
 #include "widgets/configuration_widget.h"
 #include "imgui.h"
+#include "sound/sound.h"
+#include "widgets/sound_player.h"
 #include <filesystem>
 #include <format>
 #include <iterator>
 #include <limits>
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -16,6 +19,9 @@ ConfigurationWidget::ConfigurationWidget() {
 
     tireCollisionFilePicker.setFileExtensions(".psk"); // ase
     tireCollisionFilePicker.setDefaultTitle("Select Tire Collision");
+
+    engineSoundFilePicker.setFileExtensions(".wav");
+    engineSoundFilePicker.setDefaultTitle("Select Engine Sound");
 }
 
 void ConfigurationWidget::draw() {
@@ -50,6 +56,9 @@ void ConfigurationWidget::draw() {
     wheelEngAcrossInput.draw();
     wheelEngAlongInput.draw();
     wheelVertInput.draw();
+
+    engineSoundFilePicker.draw();
+    engineSoundPlayer.draw();
 
     // Emulate button
     {
@@ -95,6 +104,7 @@ constexpr auto MESH_PATH_KEY = "meshPath";
 constexpr auto COLLISION_PATH_KEY = "collisionPath";
 constexpr auto TIRE_COLLISION_PATH_KEY = "tireCollisionPath";
 constexpr auto SKINS_PATH_KEY = "skinsPath";
+constexpr auto ENGINE_SOUND_PATH_KEY = "engineSoundPath";
 
 constexpr auto WHEEL_STEER_ACROSS_KEY = "wheelSteerAcross";
 constexpr auto WHEEL_STEER_ALONG_KEY = "wheelSteerAlong";
@@ -103,21 +113,50 @@ constexpr auto WHEEL_ENG_ALONG_KEY = "wheelEngAlong";
 constexpr auto VERT_KEY = "wheelVert";
 
 void ConfigurationWidget::fromJson(const json& json) {
-    meshFilePicker.getReact() = std::filesystem::path{json.at(MESH_PATH_KEY).get<std::string>()};
-    collisionFilePicker.getReact() = std::filesystem::path{json.at(COLLISION_PATH_KEY).get<std::string>()};
-    tireCollisionFilePicker.getReact() = std::filesystem::path{json.at(TIRE_COLLISION_PATH_KEY).get<std::string>()};
-
-    const auto skinsArray = json.at(SKINS_PATH_KEY);
-    resizeTextureArray(skinsArray.size());
-    for (auto i = 0; i < skinsArray.size(); ++i) {
-        setTexture(i, std::filesystem::path{skinsArray[i].get<std::string>()});
+    if (json.contains(MESH_PATH_KEY)) {
+        meshFilePicker.getReact() = std::filesystem::path{json.at(MESH_PATH_KEY).get<std::string>()};
     }
 
-    wheelSteerAcrossInput.getReact() = json.at(WHEEL_STEER_ACROSS_KEY).get<float>();
-    wheelSteerAlongInput.getReact() = json.at(WHEEL_STEER_ALONG_KEY).get<float>();
-    wheelEngAcrossInput.getReact() = json.at(WHEEL_ENG_ACROSS_KEY).get<float>();
-    wheelEngAlongInput.getReact() = json.at(WHEEL_ENG_ALONG_KEY).get<float>();
-    wheelVertInput.getReact() = json.at(VERT_KEY).get<float>();
+    if (json.contains(COLLISION_PATH_KEY)) {
+        collisionFilePicker.getReact() = std::filesystem::path{json.at(COLLISION_PATH_KEY).get<std::string>()};
+    }
+
+    if (json.contains(TIRE_COLLISION_PATH_KEY)) {
+        tireCollisionFilePicker.getReact() = std::filesystem::path{json.at(TIRE_COLLISION_PATH_KEY).get<std::string>()};
+    }
+
+    if (json.contains(ENGINE_SOUND_PATH_KEY)) {
+        engineSoundFilePicker.getReact() = std::filesystem::path{json.at(ENGINE_SOUND_PATH_KEY).get<std::string>()};
+        engineSoundPlayer.getReact().move(std::make_unique<Sound>(engineSoundFilePicker.getReact().getValue()));
+    }
+
+    if (json.contains(SKINS_PATH_KEY)) {
+        const auto skinsArray = json.at(SKINS_PATH_KEY);
+        resizeTextureArray(skinsArray.size());
+        for (auto i = 0; i < skinsArray.size(); ++i) {
+            setTexture(i, std::filesystem::path{skinsArray[i].get<std::string>()});
+        }
+    }
+
+    if (json.contains(WHEEL_STEER_ACROSS_KEY)) {
+        wheelSteerAcrossInput.getReact() = json.at(WHEEL_STEER_ACROSS_KEY).get<float>();
+    }
+
+    if (json.contains(WHEEL_STEER_ALONG_KEY)) {
+        wheelSteerAlongInput.getReact() = json.at(WHEEL_STEER_ALONG_KEY).get<float>();
+    }
+
+    if (json.contains(WHEEL_ENG_ACROSS_KEY)) {
+        wheelEngAcrossInput.getReact() = json.at(WHEEL_ENG_ACROSS_KEY).get<float>();
+    }
+
+    if (json.contains(WHEEL_ENG_ALONG_KEY)) {
+        wheelEngAlongInput.getReact() = json.at(WHEEL_ENG_ALONG_KEY).get<float>();
+    }
+
+    if (json.contains(VERT_KEY)) {
+        wheelVertInput.getReact() = json.at(VERT_KEY).get<float>();
+    }
 }
 
 json ConfigurationWidget::toJson() const {
@@ -126,6 +165,7 @@ json ConfigurationWidget::toJson() const {
     result[MESH_PATH_KEY] = meshFilePicker.getReact().getValue();
     result[COLLISION_PATH_KEY] = collisionFilePicker.getReact().getValue();
     result[TIRE_COLLISION_PATH_KEY] = tireCollisionFilePicker.getReact().getValue();
+    result[ENGINE_SOUND_PATH_KEY] = engineSoundFilePicker.getReact().getValue();
 
     auto skinsArray = json::array();
     for (const auto& skinWidget : skinsWidgets) {

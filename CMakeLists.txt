@@ -20,6 +20,23 @@ add_subdirectory(3rd_party/imgui)
 add_subdirectory(3rd_party/imgui-file-dialog)
 add_subdirectory(3rd_party/stb)
 
+set(LIBTYPE STATIC) #OpenAL
+FetchContent_Declare(
+        OpenAL
+        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+        GIT_TAG        1.24.2
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(OpenAL)
+
+FetchContent_Declare(
+        SndFile
+        GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
+        GIT_TAG        1.2.2
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(SndFile)
+
 set(SOURCES sources/main.cpp
 
         sources/widgets/opengl_glfw_window.cpp
@@ -29,6 +46,10 @@ set(SOURCES sources/main.cpp
         sources/widgets/configuration_widget.cpp
         sources/widgets/file_picker_widget.cpp
         sources/widgets/float_input.cpp
+        sources/widgets/sound_player.cpp
+
+        sources/sound/context.cpp
+        sources/sound/sound.cpp
 
         sources/render_system/texture.cpp
         sources/render_system/batch.cpp
@@ -164,7 +185,9 @@ target_link_libraries(ProjectMaricaCarGenerator
         glfw
         imgui::file-dialog
         stb::image
-        nlohmann_json::nlohmann_json)
+        nlohmann_json::nlohmann_json
+        OpenAL
+        sndfile)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )
 # install( DIRECTORY resources DESTINATION ${INSTALL_PATH} )

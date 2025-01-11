@@ -13,6 +13,7 @@
 #include "resources/ase_reader/rules/string.h"
 #include "resources/ase_reader/rules/value.h"
 #include "resources/dds_info.h"
+#include "sound/context.h"
 #include "utils/math/matrix.h"
 #include "widgets/mainwindow.h"
 #include <memory>
@@ -283,6 +284,9 @@ bool Application::init() {
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsLight();
 
+    openalContext = std::make_unique<OpenALContext>();
+    openalContext->init();
+
     mainWindow = std::make_unique<MainWindow>();
 
     mainWindow->init();
@@ -325,4 +329,6 @@ void Application::deinit() {
     ImGui::DestroyContext();
 
     glfwTerminate();
+
+    openalContext->deinit();
 }
