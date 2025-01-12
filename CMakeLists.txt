@@ -21,6 +21,7 @@ add_subdirectory(3rd_party/imgui-file-dialog)
 add_subdirectory(3rd_party/stb)
 
 set(LIBTYPE STATIC) #OpenAL
+set(ALSOFT_UTILS OFF CACHE BOOL "Build utility programs" FORCE)
 FetchContent_Declare(
         OpenAL
         GIT_REPOSITORY https://github.com/kcat/openal-soft.git
@@ -47,6 +48,7 @@ set(SOURCES sources/main.cpp
         sources/widgets/file_picker_widget.cpp
         sources/widgets/float_input.cpp
         sources/widgets/sound_player.cpp
+        sources/widgets/bone_selector_widget.cpp
 
         sources/sound/context.cpp
         sources/sound/sound.cpp
@@ -113,6 +115,11 @@ endif()
 
 add_executable( ProjectMaricaCarGenerator
         ${SOURCES})
+
+# set(ALSOFT_STD_VERSION_PROPS
+#     # Require C++17.
+#     CXX_STANDARD 17
+#     CXX_STANDARD_REQUIRED TRUE
 
 find_package(OpenGL REQUIRED)
 
@@ -186,7 +193,7 @@ target_link_libraries(ProjectMaricaCarGenerator
         imgui::file-dialog
         stb::image
         nlohmann_json::nlohmann_json
-        OpenAL
+        OpenAL::OpenAL
         sndfile)
 
 # set( INSTALL_PATH ${PROJECT_BINARY_DIR}/install )

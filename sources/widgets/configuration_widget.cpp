@@ -7,12 +7,19 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <vector>
 
 using json = nlohmann::json;
 
 ConfigurationWidget::ConfigurationWidget() {
     meshFilePicker.setFileExtensions(".psk");
     meshFilePicker.setDefaultTitle("Select Mesh");
+    meshFilePicker.getReact().getCallbacks().Add([this](const std::filesystem::path& path) {
+        const auto mainModel = Model::readPSK(path);
+        const auto bones = mainModel.skeletal.getBoneNames();
+        std::vector<std::string> choices(std::begin(bones), std::end(bones));
+        steerWheelBone.setChoices(choices);
+    });
 
     collisionFilePicker.setFileExtensions(".psk"); // ase
     collisionFilePicker.setDefaultTitle("Select Collision");
@@ -62,6 +69,8 @@ void ConfigurationWidget::draw() {
 
     engineSoundFilePicker.draw();
     engineSoundPlayer.draw();
+
+    steerWheelBone.draw();
 
     // Emulate button
     {
@@ -115,6 +124,8 @@ constexpr auto WHEEL_ENG_ACROSS_KEY = "wheelEngAcross";
 constexpr auto WHEEL_ENG_ALONG_KEY = "wheelEngAlong";
 constexpr auto VERT_KEY = "wheelVert";
 
+constexpr auto STEER_WHEEL_BONE_NAME_KEY = "steerWheelBone";
+
 void ConfigurationWidget::fromJson(const json& json) {
     if (json.contains(MESH_PATH_KEY)) {
         meshFilePicker.getReact() = std::filesystem::path{json.at(MESH_PATH_KEY).get<std::string>()};
@@ -159,6 +170,10 @@ void ConfigurationWidget::fromJson(const json& json) {
     if (json.contains(VERT_KEY)) {
         wheelVertInput.getReact() = json.at(VERT_KEY).get<float>();
     }
+
+    if (json.contains(STEER_WHEEL_BONE_NAME_KEY)) {
+        steerWheelBone.getReact() = json.at(STEER_WHEEL_BONE_NAME_KEY).get<std::string>();
+    }
 }
 
 json ConfigurationWidget::toJson() const {
@@ -180,6 +195,8 @@ json ConfigurationWidget::toJson() const {
     result[WHEEL_ENG_ACROSS_KEY] = wheelEngAcrossInput.getReact().getValue();
     result[WHEEL_ENG_ALONG_KEY] = wheelEngAlongInput.getReact().getValue();
     result[VERT_KEY] = wheelVertInput.getReact().getValue();
+
+    result[STEER_WHEEL_BONE_NAME_KEY] = steerWheelBone.getReact().getValue();
 
     return result;
 }

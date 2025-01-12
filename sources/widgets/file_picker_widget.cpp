@@ -9,6 +9,7 @@ FilePickerWidget::FilePickerWidget(const std::string& uniqueId)
 }
 
 void FilePickerWidget::draw() {
+    ImGui::PushID(id.c_str());
     if (ImGui::Button(!pathReact.getValue().string().empty() ? pathReact.getValue().string().c_str() : defaultTitle.c_str())) {
         ImGuiFileDialog::Instance()->OpenDialog(id.c_str(),
                                                 dialogTitle.c_str(),
@@ -27,4 +28,5 @@ void FilePickerWidget::draw() {
 
         ImGuiFileDialog::Instance()->Close();
     }
+    ImGui::PopID();
 }

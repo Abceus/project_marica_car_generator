@@ -1,6 +1,8 @@
 #pragma once
 
+#include "resources/model.h"
 #include "sound/sound.h"
+#include "widgets/bone_selector_widget.h"
 #include "widgets/file_picker_widget.h"
 #include "widgets/float_input.h"
 #include "widgets/sound_player.h"
@@ -86,4 +88,6 @@ private:
 
     FilePickerWidget engineSoundFilePicker{"EngineSoundFilePicker"};
     SoundPlayer engineSoundPlayer;
+
+    BoneSelectorWidget steerWheelBone{"SteerWheelBone"};
 };
