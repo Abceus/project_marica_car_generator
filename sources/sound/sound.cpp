@@ -256,9 +256,9 @@ bool Sound::isPlaying() const {
     return sourceState == AL_PLAYING;
 }
 
-std::chrono::seconds Sound::getDuration() const {
+std::chrono::milliseconds Sound::getDuration() const {
     if (bufferId == 0) {
-        return std::chrono::seconds{};
+        return std::chrono::milliseconds{};
     }
 
     ALint sizeInBytes;
@@ -273,23 +273,23 @@ std::chrono::seconds Sound::getDuration() const {
     ALint frequency;
     alGetBufferi(bufferId, AL_FREQUENCY, &frequency);
 
-    return std::chrono::seconds{lengthInSamples / frequency};
+    return std::chrono::milliseconds{lengthInSamples * 1000 / frequency};
 }
 
-void Sound::setTime(const std::chrono::seconds& seconds) {
+void Sound::setTime(const std::chrono::milliseconds& milliseconds) {
     if (sourceId == 0) {
         return;
     }
 
-    alSourcef(sourceId, AL_SEC_OFFSET, seconds.count());
+    alSourcef(sourceId, AL_SEC_OFFSET, milliseconds.count() / 1000.f);
 }
 
-std::chrono::seconds Sound::getTime() const {
+std::chrono::milliseconds Sound::getTime() const {
     if (sourceId == 0) {
-        return std::chrono::seconds{};
+        return std::chrono::milliseconds{};
     }
 
     float time;
     alGetSourcef(sourceId, AL_SEC_OFFSET, &time);
-    return std::chrono::seconds{static_cast<int>(time)};
+    return std::chrono::milliseconds{static_cast<int>(time * 1000)};
 }

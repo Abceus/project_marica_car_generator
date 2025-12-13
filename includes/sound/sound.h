@@ -14,9 +14,9 @@ public:
 
     bool isPlaying() const;
 
-    std::chrono::seconds getDuration() const;
-    void setTime(const std::chrono::seconds& seconds);
-    std::chrono::seconds getTime() const;
+    std::chrono::milliseconds getDuration() const;
+    void setTime(const std::chrono::milliseconds& milliseconds);
+    std::chrono::milliseconds getTime() const;
 
 private:
     ALuint bufferId = 0;

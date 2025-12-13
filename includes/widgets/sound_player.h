@@ -2,8 +2,8 @@
 
 #include "sound/sound.h"
 #include "widgets/react/primitive.h"
-#include <filesystem>
 #include <memory>
+#include <string>
 
 class SoundPlayer {
 public:
@@ -26,8 +26,13 @@ public:
         return react;
     }
 
+    void setFormat(const std::string& newFormat) {
+        format = newFormat;
+    }
+
 private:
     ReactType react;
 
     bool isPlaying = false;
+    std::string format = "{:%T/%T}";
 };
