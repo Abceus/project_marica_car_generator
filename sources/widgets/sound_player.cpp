@@ -8,7 +8,7 @@ void SoundPlayer::draw() {
 
     if (react.getValue()->isPlaying()) {
         if (ImGui::Button("Pause")) {
-            react.getValue()->play();
+            react.getValue()->pause();
         }
     } else {
         if (ImGui::Button("Play")) {
@@ -24,13 +24,13 @@ void SoundPlayer::draw() {
 
     ImGui::SameLine();
 
-    int value = react.getValue()->getTime().count();
-    const auto duration = react.getValue()->getDuration().count();
-    if (ImGui::SliderInt("Timeline", &value, 0, duration)) {
-        react.getValue()->setTime(std::chrono::seconds{value});
+    const auto value = react.getValue()->getTime();
+    int valueInt = value.count();
+    const auto duration = react.getValue()->getDuration();
+    int durationInt = duration.count();
+
+    std::string result = std::vformat(format.c_str(), std::make_format_args(value, duration));
+    if (ImGui::SliderInt("Timeline", &valueInt, 0, durationInt, result.c_str())) {
+        react.getValue()->setTime(std::chrono::milliseconds{valueInt});
     }
-
-    ImGui::SameLine();
-
-    ImGui::LabelText("Time", "%d:%d", value, duration);
 }

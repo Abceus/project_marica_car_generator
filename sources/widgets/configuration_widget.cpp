@@ -32,6 +32,8 @@ ConfigurationWidget::ConfigurationWidget() {
     engineSoundFilePicker.getReact().getCallbacks().Add([this](const std::filesystem::path& path) {
         engineSoundPlayer.getReact().move(std::make_unique<Sound>(engineSoundFilePicker.getReact().getValue()));
     });
+
+    engineSoundPlayer.setFormat("{:%M:%S} / {:%M:%S}");
 }
 
 void ConfigurationWidget::draw() {
