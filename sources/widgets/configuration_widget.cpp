@@ -1,5 +1,7 @@
 #include "widgets/configuration_widget.h"
 #include "imgui.h"
+#include "script_system/class_manager.h"
+#include "script_system/value.h"
 #include "sound/sound.h"
 #include "widgets/sound_player.h"
 #include <filesystem>
@@ -34,6 +36,8 @@ ConfigurationWidget::ConfigurationWidget() {
     });
 
     engineSoundPlayer.setFormat("{:%M:%S} / {:%M:%S}");
+
+    kParamObjectWidget.setValue(scripting::Value::makeObject(*"KarmaParamsCollision"_class));
 }
 
 void ConfigurationWidget::draw() {
@@ -73,6 +77,8 @@ void ConfigurationWidget::draw() {
     engineSoundPlayer.draw();
 
     steerWheelBone.draw();
+
+    kParamObjectWidget.draw();
 
     // Emulate button
     {

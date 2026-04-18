@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resources/model.h"
+#include "script_object_widget.h"
 #include "sound/sound.h"
 #include "widgets/bone_selector_widget.h"
 #include "widgets/file_picker_widget.h"
@@ -90,4 +91,6 @@ private:
     SoundPlayer engineSoundPlayer;
 
     BoneSelectorWidget steerWheelBone{"SteerWheelBone"};
+
+    ScriptObjectWidget kParamObjectWidget{"KParamsObjectWidget"};
 };

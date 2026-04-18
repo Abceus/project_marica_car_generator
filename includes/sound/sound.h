@@ -2,6 +2,7 @@
 
 #include "utils/openal.h"
 #include <filesystem>
+#include <chrono>
 
 class Sound {
 public:

@@ -32,6 +32,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(OpenAL)
 
+set(BUILD_TESTING OFF CACHE BOOL "build tests" FORCE)
 FetchContent_Declare(
         SndFile
         GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
@@ -49,8 +50,11 @@ set(SOURCES sources/main.cpp
         sources/widgets/configuration_widget.cpp
         sources/widgets/file_picker_widget.cpp
         sources/widgets/float_input.cpp
+        sources/widgets/int_input.cpp
+        sources/widgets/string_input.cpp
         sources/widgets/sound_player.cpp
         sources/widgets/bone_selector_widget.cpp
+        sources/widgets/script_object_widget.cpp
 
         sources/sound/context.cpp
         sources/sound/sound.cpp
@@ -94,6 +98,12 @@ set(SOURCES sources/main.cpp
         sources/resources/ase_reader/rules/float.cpp
         sources/resources/ase_reader/rules/set.cpp
         sources/resources/ase_reader/rules/value.cpp
+
+        sources/script_system/class.cpp
+        sources/script_system/class_manager.cpp
+        sources/script_system/type_info.cpp
+        sources/script_system/value.cpp
+        sources/script_system/loader.cpp
         
         sources/utils/math/angle.cpp
         sources/utils/math/rot3.cpp
@@ -189,6 +199,7 @@ target_link_libraries(ProjectMaricaCarGenerator
         glm::glm 
         OpenGL::GL 
         imgui::core 
+        imgui::std 
         imgui::glfw 
         imgui::opengl3 
         glfw

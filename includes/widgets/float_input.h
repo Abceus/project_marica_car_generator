@@ -1,9 +1,10 @@
 #pragma once
 
 #include "widgets/react/primitive.h"
+#include "widgets/drawable.h"
 #include <string>
 
-class FloatInput {
+class FloatInput : public IDrawable {
 public:
     using ReactType = ReactPrimitive<float>;
 
@@ -11,7 +12,7 @@ public:
     FloatInput(const std::string& label, float val)
         : label(label), react(val) {}
 
-    void draw();
+    void draw() override;
 
     void setLabel(const std::string& value) {
         label = value;

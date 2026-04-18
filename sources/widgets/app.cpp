@@ -13,6 +13,12 @@
 #include "resources/ase_reader/rules/string.h"
 #include "resources/ase_reader/rules/value.h"
 #include "resources/dds_info.h"
+#include "script_system/class_manager.h"
+#include "script_system/field.h"
+#include "script_system/type_info.h"
+#include "script_system/type_kind.h"
+#include "script_system/value.h"
+#include "script_system/value_construtors/value_new_object_contructor.h"
 #include "sound/context.h"
 #include "utils/math/matrix.h"
 #include "widgets/mainwindow.h"
@@ -45,8 +51,7 @@ bool Application::init() {
     ASEReaderNodeAnalyzer::Instance().addRule(
         "COMMENT", std::make_shared<StringASEReaderNodeRule>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "SCENE", std::make_shared<DictASEReaderNodeRule>());
+    ASEReaderNodeAnalyzer::Instance().addRule("SCENE", std::make_shared<DictASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "SCENE_FILENAME", std::make_shared<StringASEReaderNodeRule>());
@@ -63,15 +68,11 @@ bool Application::init() {
     ASEReaderNodeAnalyzer::Instance().addRule(
         "SCENE_TICKSPERFRAME", std::make_shared<IntASEReaderNodeRule>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "SCENE_BACKGROUND_STATIC",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+    ASEReaderNodeAnalyzer::Instance().addRule("SCENE_BACKGROUND_STATIC",
+                                              std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "SCENE_AMBIENT_STATIC",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+    ASEReaderNodeAnalyzer::Instance().addRule("SCENE_AMBIENT_STATIC",
+                                              std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "MATERIAL_LIST", std::make_shared<DictASEReaderNodeRule>());
@@ -85,69 +86,48 @@ bool Application::init() {
     ASEReaderNodeAnalyzer::Instance().addRule(
         "NODE_NAME", std::make_shared<StringASEReaderNodeRule>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "NODE_TM", std::make_shared<DictASEReaderNodeRule>());
+    ASEReaderNodeAnalyzer::Instance().addRule("NODE_TM", std::make_shared<DictASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "INHERIT_POS",
-        std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
+        "INHERIT_POS", std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "INHERIT_ROT",
-        std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
+        "INHERIT_ROT", std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "INHERIT_SCL",
-        std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
+        "INHERIT_SCL", std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_ROW0",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_ROW0", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_ROW1",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_ROW1", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_ROW2",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_ROW2", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_ROW3",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_ROW3", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_POS",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_POS", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_ROTAXIS",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_ROTAXIS", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "TM_ROTANGLE", std::make_shared<FloatASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_SCALE",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_SCALE", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "TM_SCALEAXIS",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "TM_SCALEAXIS", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "TM_SCALEAXISANG", std::make_shared<FloatASEReaderNodeRule>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH", std::make_shared<DictASEReaderNodeRule>());
+    ASEReaderNodeAnalyzer::Instance().addRule("MESH", std::make_shared<DictASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "TIMEVALUE", std::make_shared<IntASEReaderNodeRule>());
@@ -159,26 +139,21 @@ bool Application::init() {
         "MESH_NUMFACES", std::make_shared<IntASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_VERTEX_LIST",
-        std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
+        "MESH_VERTEX_LIST", std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "MESH_NUMTVERTEX", std::make_shared<IntASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_VERTEX",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "MESH_VERTEX", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_FACE_LIST",
-        std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
+        "MESH_FACE_LIST", std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_FACE", std::make_shared<ArrayASEReaderNodeRule<
-                         PairASEReaderNodeRule<StringASEReaderNodeRule,
-                                               IntASEReaderNodeRule>,
-                         6>>());
+    ASEReaderNodeAnalyzer::Instance().addRule("MESH_FACE",
+                                              std::make_shared<ArrayASEReaderNodeRule<
+                                                  PairASEReaderNodeRule<StringASEReaderNodeRule, IntASEReaderNodeRule>,
+                                                  6>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "MESH_SMOOTHING", std::make_shared<IntASEReaderNodeRule>());
@@ -190,40 +165,30 @@ bool Application::init() {
         "MESH_NUMTVERTEX", std::make_shared<IntASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_TVERTLIST",
-        std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
+        "MESH_TVERTLIST", std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_TVERT",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "MESH_TVERT", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "MESH_NUMTVFACES", std::make_shared<IntASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_TFACELIST",
-        std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
+        "MESH_TFACELIST", std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_TFACE",
-        std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
+        "MESH_TFACE", std::make_shared<ArrayASEReaderNodeRule<IntASEReaderNodeRule, 3>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_NORMALS",
-        std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
+        "MESH_NORMALS", std::make_shared<NumArrayASEReaderNodeRule<SetASEReaderNodeRule>>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_FACENORMAL",
-        std::make_shared<PairASEReaderNodeRule<
-            ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>,
-            ArrayASEReaderNodeRule<ValueASEReaderNodeRule, 3>>>());
+    ASEReaderNodeAnalyzer::Instance().addRule("MESH_FACENORMAL",
+                                              std::make_shared<PairASEReaderNodeRule<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>,
+                                                                                     ArrayASEReaderNodeRule<ValueASEReaderNodeRule, 3>>>());
 
-    ASEReaderNodeAnalyzer::Instance().addRule(
-        "MESH_VERTEXNORMAL",
-        std::make_shared<PairASEReaderNodeRule<
-            IntASEReaderNodeRule,
-            ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>>());
+    ASEReaderNodeAnalyzer::Instance().addRule("MESH_VERTEXNORMAL",
+                                              std::make_shared<PairASEReaderNodeRule<IntASEReaderNodeRule,
+                                                                                     ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
         "PROP_MOTIONBLUR", std::make_shared<IntASEReaderNodeRule>());
@@ -235,15 +200,31 @@ bool Application::init() {
         "PROP_RECVSHADOW", std::make_shared<IntASEReaderNodeRule>());
 
     ASEReaderNodeAnalyzer::Instance().addRule(
-        "WIREFRAME_COLOR",
-        std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule,
-                                                3>>());
+        "WIREFRAME_COLOR", std::make_shared<ArrayASEReaderNodeRule<FloatASEReaderNodeRule, 3>>());
+
+    {
+        using namespace scripting::builders;
+
+        // TODO выделить описание классов и полей в отдельный класс для загрузки.
+        // нужна топологическая сортировка
+        scripting::ClassManager::Instance()
+            .registryClass("KarmaParamsCollision")
+            .registryFields(
+                {field("KScale", scripting::TypeKind::FLOAT).setDefaultValue(1.0f),
+                 field("KParamTest", "TestClass"_class).setDefaultValueContructor(std::make_shared<scripting::valueNewObjectContructor>("TestClass"))});
+
+        scripting::ClassManager::Instance()
+            .registryClass("TestClass")
+            .registryFields(
+                {field("TestField", scripting::TypeKind::FLOAT).setDefaultValue(1.0f),
+                 field("KParamTest2", "KarmaParamsCollision"_class)});
+    }
 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return false;
 
-        // Decide GL+GLSL versions
+    // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
     // GL ES 2.0 + GLSL 100 (WebGL 1.0)
     const char* glsl_version = "#version 100";

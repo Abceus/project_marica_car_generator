@@ -17,6 +17,11 @@ add_library(imgui-core
 add_library(imgui::core ALIAS imgui-core)
 target_include_directories(imgui-core PUBLIC ${IMGUI_ROOT})
 
+add_library(imgui-std
+    ${IMGUI_ROOT}/misc/cpp/imgui_stdlib.cpp)
+add_library(imgui::std ALIAS imgui-std)
+target_link_libraries(imgui-std imgui-core)
+
 add_library(imgui-glfw ${IMGUI_ROOT}/backends/imgui_impl_glfw.cpp)
 add_library(imgui::glfw ALIAS imgui-glfw)
 target_link_libraries(imgui-glfw imgui-core glfw)
